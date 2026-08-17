@@ -1248,70 +1248,76 @@ html, body {
    ============================================ */
 .enter-cover {
   position: fixed; inset: 0;
-  /* 单张完整宣纸黑：整幅明暗过渡，无平铺、无格子 */
+  /* 国风绘本背景：用户提供的 entry-background + 青绿/米白柔光叠加 */
   background:
-    radial-gradient(ellipse 130% 90% at 22% 18%, #3A352D 0%, #2B2721 30%, #1E1B17 55%, #15120F 78%, #0C0A08 100%);
+    linear-gradient(158deg, rgba(217,228,218,0.22), rgba(206,214,202,0.16) 55%, rgba(236,230,212,0.2)),
+    url('images/entry-background.png') center / cover no-repeat;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 34px;
+  gap: 30px;
   z-index: 1000;
   transition: opacity 0.9s ease;
+}
+/* 旧纸颗粒：极轻的纸质噪点（无缝高频），不产生格子感 */
+.enter-cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.46 0 0 0 0 0.42 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  opacity: 0.06;
+  mix-blend-mode: multiply;
 }
 .enter-cover.hidden {
   opacity: 0; pointer-events: none;
 }
 .enter-cover .cover-title {
-  font-size: clamp(30px, 4.5vw, 52px);
+  font-size: clamp(22px, 3.2vw, 38px);   /* 标题缩小：留出更多留白 */
   font-weight: 400;
   letter-spacing: 5px;
-  color: #C0C0C8;   /* 银色标题 */
+  color: #A6614A;   /* 陶土红砖色：纯色、柔和、无渐变无发光 */
   text-align: center;
-  text-shadow: 0 1px 14px rgba(200,200,215,0.25);
 }
 .enter-cover .enter-btn {
   margin-top: 12px;
-  padding: 14px 48px;
-  background: rgba(225,228,235,0.32);   /* 半透明银色 */
-  color: rgba(26,24,21,0.92);
-  border: 1px solid rgba(220,224,232,0.55);
-  border-radius: 30px;                 /* 珍珠圆润感 */
+  padding: 13px 46px;
+  background: rgba(243,241,230,0.4);   /* 半透明米白磨砂 */
+  backdrop-filter: blur(6px);
+  color: #8A4B31;                       /* 深陶土红文字 */
+  border: 1px solid rgba(196,172,128,0.6);   /* 细浅金色边框 */
+  border-radius: 30px;
   font-size: 16px;
   letter-spacing: 6px;
   cursor: pointer;
-  /* 银色珍珠高光 + 外部柔阴影 */
-  background-image: linear-gradient(180deg, rgba(245,247,252,0.6), rgba(210,215,225,0.1) 45%, rgba(175,182,195,0.3));
   box-shadow:
-    inset 0 1px 3px rgba(255,255,255,0.95),
-    inset 0 -2px 6px rgba(140,148,165,0.5),
-    0 0 0 0 rgba(192,198,210,0.45);
-  text-shadow: 0 1px 2px rgba(255,255,255,0.7);
+    inset 0 0 0 1px rgba(255,255,255,0.35),
+    0 0 0 0 rgba(196,180,140,0.30);
   transition: all 0.3s ease;
-  /* 呼吸光环：始终脉动 */
+  /* 呼吸光圈：浅金/青绿柔和脉动 */
   animation: btnBreathe 2.6s ease-in-out infinite;
 }
 @keyframes btnBreathe {
   0%, 100% {
     box-shadow:
-      inset 0 1px 3px rgba(255,255,255,0.95),
-      inset 0 -2px 6px rgba(140,148,165,0.5),
-      0 0 0 0 rgba(192,198,210,0.35),
-      0 0 18px 2px rgba(192,198,210,0.18);
+      inset 0 0 0 1px rgba(255,255,255,0.4),
+      0 0 0 0 rgba(196,180,140,0.22),
+      0 0 14px 2px rgba(176,196,170,0.12);
   }
   50% {
     box-shadow:
-      inset 0 1px 3px rgba(255,255,255,0.95),
-      inset 0 -2px 6px rgba(140,148,165,0.5),
-      0 0 0 14px rgba(192,198,210,0),
-      0 0 30px 8px rgba(192,198,210,0.42);
+      inset 0 0 0 1px rgba(255,255,255,0.5),
+      0 0 0 12px rgba(196,180,140,0),
+      0 0 24px 7px rgba(176,196,170,0.3);
   }
 }
 .enter-cover .enter-btn:hover {
   transform: translateY(-2px);
-  background-image: linear-gradient(180deg, rgba(250,252,255,0.75), rgba(220,225,235,0.18) 45%, rgba(190,197,210,0.4));
+  background: rgba(246,244,234,0.55);
+  border-color: rgba(196,172,128,0.8);
   box-shadow:
-    inset 0 1px 4px rgba(255,255,255,1),
-    inset 0 -2px 8px rgba(150,158,175,0.6),
-    0 12px 30px rgba(0,0,0,0.45);
+    inset 0 0 0 1px rgba(255,255,255,0.55),
+    0 10px 26px rgba(120,140,130,0.22);
 }
 
 /* 珠帘 canvas（进入页背景装饰层，置于页面顶层不透明显示） */
@@ -1334,8 +1340,8 @@ html, body {
   transform: translateX(-50%);
   font-size: 12px;
   letter-spacing: 3px;
-  color: rgba(192,192,200,0.85);   /* 银色小字，适配炭黑背景 */
-  background: rgba(26,24,21,0.55);
+  color: rgba(166,97,74,0.85);   /* 浅陶土红小字 */
+  background: rgba(250,247,238,0.6);
   padding: 8px 18px;
   border-radius: 24px;
   z-index: 1002;
@@ -1362,7 +1368,7 @@ html, body {
     <button class="enter-btn" id="enterBtn">进入</button>
     <div class="bead-curtain" id="beadCurtain"></div>
     <!-- 声音解锁提示：点击任意处唤起风铃 -->
-    <div class="chime-tip" id="chimeTip">点一下 · 唤起风铃的声音</div>
+    <div class="chime-tip" id="chimeTip">点一下珠帘，唤起风铃的声音</div>
   </div>
 
   <script src="vendor/three.min.js"></script>
@@ -2328,13 +2334,13 @@ function makeBeadTexture(size, color) {
 
   const cx = px / 2, cy = px / 2, r = px * 0.42;
 
-  // 珍珠本体（米白珍珠色：中心亮、边缘略深带暖调）
+  // 珍珠本体（低饱和浅米赭：中心米白、边缘赭褐，国风珠帘质感）
   const body = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.1, cx, cy, r);
-  body.addColorStop(0, 'rgba(255,255,255,0.95)');
-  body.addColorStop(0.3, 'rgba(247,242,232,0.9)');
-  body.addColorStop(0.65, 'rgba(233,222,205,0.85)');
-  body.addColorStop(0.88, 'rgba(205,190,168,0.8)');
-  body.addColorStop(1, 'rgba(180,160,135,0.75)');
+  body.addColorStop(0, 'rgba(251,247,238,0.96)');
+  body.addColorStop(0.3, 'rgba(241,231,212,0.92)');
+  body.addColorStop(0.65, 'rgba(225,210,185,0.86)');
+  body.addColorStop(0.88, 'rgba(208,190,162,0.82)');
+  body.addColorStop(1, 'rgba(192,172,142,0.76)');
   ctx.fillStyle = body;
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -2350,10 +2356,10 @@ function makeBeadTexture(size, color) {
   ctx.arc(cx - r * 0.42, cy - r * 0.42, r * 0.5, 0, Math.PI * 2);
   ctx.fill();
 
-  // 底部阴影：右下暖褐容积感
+  // 底部阴影：右下赭褐容积感
   const sh = ctx.createRadialGradient(cx + r * 0.3, cy + r * 0.35, r * 0.15, cx + r * 0.25, cy + r * 0.3, r * 0.75);
-  sh.addColorStop(0, 'rgba(150,125,95,0.5)');
-  sh.addColorStop(1, 'rgba(150,125,95,0)');
+  sh.addColorStop(0, 'rgba(150,126,98,0.5)');
+  sh.addColorStop(1, 'rgba(150,126,98,0)');
   ctx.fillStyle = sh;
   ctx.beginPath();
   ctx.arc(cx + r * 0.2, cy + r * 0.25, r * 0.7, 0, Math.PI * 2);
@@ -2428,7 +2434,7 @@ function buildCurtain() {
   lines = lines.map((l, i) => l.length >= 10 ? l : (l + (all[(i + count) % all.length] || '')));
   crownLines = lines.slice();
 
-  const fontSize = Math.min(11, Math.max(7, W / 85));  // 字号缩小：W/85，上限11
+  const fontSize = Math.min(9, Math.max(6, W / 100));  // 字号缩小：W/100，上限9
   const step = fontSize * 1.55;   // 字间更宽松（1.35 → ×1.15）
 
   // 一列可容纳的字数（纵向从顶端到底部）
@@ -2448,11 +2454,12 @@ function buildCurtain() {
     const side = si % 2 === 0 ? -1 : 1;
     const nLeft = Math.ceil(segCount / 2);
     const colIdx = side === -1 ? Math.floor(si / 2) : Math.floor((si - 1) / 2);
-    const gap = W * 0.05;   // 珠帘间距扩大：两侧留白加宽
-    const inner = W * 0.20;   // 中央留空（标题区宽40%，标题/按钮足够居中）
+    const gap = W * 0.05;   // 两侧留白
+    const inner = W * 0.26;   // 中央留空：整块帘向两侧平移，间距保持不缩
     const span = (W / 2 - gap) - inner;
     const nCol = Math.max(1, nLeft - 1);
-    const spacing = span / nCol;   // 列间距：宽屏≈0.0139W（原线上≈0.0106W，约1.32倍）
+    // 列距不低于 16px（保持宽松间距，不再随留白缩小）
+    const spacing = Math.max(16, span / nCol);
     return side * (inner + spacing * colIdx);
   });
   // 频率映射已不再需要（风铃声效使用真实音频文件），统一给每列固定基频占位
@@ -2468,12 +2475,15 @@ function buildCurtain() {
     const side = si % 2 === 0 ? -1 : 1;
     const nLeft = Math.ceil(segCount / 2);
     const colIdx = side === -1 ? Math.floor(si / 2) : Math.floor((si - 1) / 2);
-    const gap = W * 0.05;   // 珠帘间距扩大：两侧留白加宽
-    const inner = W * 0.20;   // 中央留空（标题区宽40%）
+    const gap = W * 0.05;   // 两侧留白
+    const inner = W * 0.26;   // 中央留空：整块帘向两侧平移
     const span = (W / 2 - gap) - inner;
     const nCol = Math.max(1, nLeft - 1);
-    const spacing = span / nCol;   // 列间距：宽屏≈0.0139W（原线上≈0.0106W，约1.32倍）
+    // 列距最低 16px（保持宽松）
+    const spacing = Math.max(16, span / nCol);
     const x = side * (inner + spacing * colIdx);
+    // 放不下的列（超出外侧留白）直接裁掉，不堆挤
+    if (Math.abs(x) > W / 2 - gap + 1) return;
 
     const chars = Array.from(seg.text);
     const li = si;
@@ -2482,19 +2492,20 @@ function buildCurtain() {
     // 本列音高：按屏幕 x 从左到右五声音阶升高
     const freq = freqByX[x];
 
-    // 珠帘文字：全部孔雀绿；「我」珍珠白
-    const textCol = 'rgba(30,170,150,1)';    // 孔雀绿
-    const textColMe = 'rgba(244,240,232,1)'; // 珍珠白
-    // 顶部装饰珠：珍珠白（保持珍珠质感）
-    const beadCol = 'rgba(240,235,225,0.9)';
+    // 珠帘文字：左侧陶土红调，右侧深青绿（自上而下渐隐保持不变）
+    const isLeft = x < 0;
+    const textCol = isLeft ? 'rgba(152,96,74,1)' : 'rgba(56,92,78,1)';   // 左:陶土红 / 右:深青绿
+    // 顶部装饰珠：浅米白偏淡青（轻微珠帘意象，不过亮）
+    const beadCol = 'rgba(214,226,214,0.72)';
 
-    // 帘顶装饰圆珠数量：按屏幕从左到右的排名循环 7、5、4、6、3、6、7
+    // 帘顶装饰圆珠：左右两侧每列都保留（中间标题区本无列，自然干净）
     const beadPattern = [7, 5, 4, 6, 3, 6, 7];
     const beadCount = beadPattern[rankByX[x] % beadPattern.length];
     let beadIdx = 0;
     for (; beadIdx < beadCount; beadIdx++) {
       const beadTex = makeBeadTexture(fontSize * 0.72, beadCol);
       const beadMat = new THREE.SpriteMaterial({ map: beadTex, transparent: true, depthTest: false, alphaTest: 0.08 });
+      // 珠帘统一珍珠白拟真效果（无左右色差）
       const bead = new THREE.Sprite(beadMat);
       const bs = fontSize * 0.9;
       bead.scale.set(bs, bs, 1);
@@ -2511,10 +2522,14 @@ function buildCurtain() {
     }
 
     chars.forEach((ch, ci) => {
-      // 「我」「生活」「自由」「勇敢」「自己」用银白色（珍珠白），其余孔雀绿
-      const useColor = ('我生活自由勇敢自己'.indexOf(ch) > -1) ? textColMe : textCol;
-      const tex = makeCharTexture(ch, fontSize, useColor);
+      // 保留关键词的放大层次；颜色统一深青绿（顶部清晰，向下渐隐）
+      const tex = makeCharTexture(ch, fontSize, textCol);
       const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, alphaTest: 0.08 });
+      // 从上到下平滑透明化：首字清晰(opacity≈0.9)，向下渐低融入纸面(≈0.28)
+      let fade = 0.9 - 0.62 * (ci / Math.max(1, chars.length - 1));
+      // 「我」「生活」「自己」的字透明度额外调高（更清晰）
+      if ('我生活自己'.indexOf(ch) > -1) fade = Math.min(0.97, fade + 0.22);
+      mat.opacity = fade;
       const sprite = new THREE.Sprite(mat);
       // 「我」「生活」「勇气」「自由」放大 1.4 倍；「世界」「语言」放大 1.2 倍
       let wordScale = 1;
