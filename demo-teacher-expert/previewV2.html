@@ -273,7 +273,7 @@
                     </div>
                     <div style="margin-bottom:16px;" id="extract-source-hr"><label style="display:block;margin-bottom:6px;font-weight:500;">抽取来源</label><div class="alert-info" style="margin-bottom:0;">人事处总库（全量教师数据，约30万人）— 支持多维度筛选，从全量数据中按条件抽取</div></div>
                     <div style="margin-bottom:16px;" id="extract-source-dept" class="hidden"><label style="display:block;margin-bottom:6px;font-weight:500;">选择子库</label><select id="extract-subpool" style="width:100%;"><option value="">请选择处室子库</option></select></div>
-                    <div class="alert-info">提示：根据31号通知，评审专家数量应为<b>奇数</b>且<b>不少于3人</b>，入库专家与评审专家比例<b>不低于4:1</b>。</div>
+                    <div class="alert-info">提示：根据相关通知，评审专家数量应为<b>奇数</b>且<b>不少于3人</b>，入库专家与评审专家比例<b>不低于4:1</b>。</div>
                     <button class="btn btn-primary" style="width:100%;" onclick="nextToStep2()">下一步：配置条件</button>
                 </div>
                 <div id="extract-step-2" class="hidden">
@@ -622,7 +622,7 @@ function hrExportExcel() {
     hrCurrentExperts.forEach(e => { csv += [e.id, e.name, e.gender, getAge(e.birthYear), e.district, e.school, e.title, e.titleYears||0, e.major, e.education||'', e.educationType||'', e.postLevel||'', (e.talentProjects||[]).join(';'), e.seniority, e.rating.toFixed(1), e.expertType, e.idType||'身份证', e.idNumber||'', e.phone||'', e.tags.join(';'), e.status].join(',') + '\n'; });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `专家库筛选结果_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
-    alert(`已导出 ${hrCurrentExperts.length} 条专家数据（CSV格式，可用Excel打开）。\n\n提示：根据31号通知要求，筛选结果仅线下分发，不做系统间推送。`);
+    alert(`已导出 ${hrCurrentExperts.length} 条专家数据（CSV格式，可用Excel打开）。\n\n提示：根据相关通知要求，筛选结果仅线下分发，不做系统间推送。`);
 }
 
 // === 组长专家库 ===
@@ -976,8 +976,8 @@ function extractLeader() {
     document.getElementById('btn-extract-leader').textContent = '重新抽取组长';
     document.getElementById('btn-extract-leader').style.background = '#ff9800';
 }
-function updateExtractActionButtons(status) { const bc = document.getElementById('btn-confirm-list'), bb = document.getElementById('btn-back-to-step2'), lc = document.getElementById('label-confirmed'), h = document.getElementById('extraction-hint'), la = document.getElementById('extract-leader-area'), li = document.getElementById('extract-leader-info'), bl = document.getElementById('btn-extract-leader'); bc.classList.add('hidden'); bb.classList.remove('hidden'); lc.classList.add('hidden'); if (status === 'pending') { bc.classList.remove('hidden'); la.classList.remove('hidden'); li.innerHTML = '请从组长专家库中抽取1名组长'; bl.textContent = '从组长专家库抽取1名组长'; bl.style.background = '#7b1fa2'; h.innerHTML = '提示：确认无误后点击"确认名单"，名单确认后将进入<b>线下备案流程</b>。'; } else if (status === 'confirmed') { lc.classList.remove('hidden'); bb.classList.add('hidden'); la.classList.add('hidden'); h.innerHTML = '提示：名单已确认。根据31号通知，最终评审名单及备案流程须<b>线下完成</b>。'; } }
-function confirmList() { if (!currentExtractionRecord) return; currentExtractionRecord.status = 'confirmed'; currentExtractionRecord.selectedExperts.forEach(e => { const exp = mockData.find(m => m.id === e.id); if (exp) { if (!exp.participationHistory) exp.participationHistory = []; exp.participationHistory.push({ recordId: currentExtractionRecord.id, date: new Date().toISOString() }); } }); renderExtractionResults(); updateExtractActionButtons('confirmed'); alert('名单已确认。根据31号通知要求，最终评审名单及备案流程须线下完成，系统仅作为辅助工具。'); }
+function updateExtractActionButtons(status) { const bc = document.getElementById('btn-confirm-list'), bb = document.getElementById('btn-back-to-step2'), lc = document.getElementById('label-confirmed'), h = document.getElementById('extraction-hint'), la = document.getElementById('extract-leader-area'), li = document.getElementById('extract-leader-info'), bl = document.getElementById('btn-extract-leader'); bc.classList.add('hidden'); bb.classList.remove('hidden'); lc.classList.add('hidden'); if (status === 'pending') { bc.classList.remove('hidden'); la.classList.remove('hidden'); li.innerHTML = '请从组长专家库中抽取1名组长'; bl.textContent = '从组长专家库抽取1名组长'; bl.style.background = '#7b1fa2'; h.innerHTML = '提示：确认无误后点击"确认名单"，名单确认后将进入<b>线下备案流程</b>。'; } else if (status === 'confirmed') { lc.classList.remove('hidden'); bb.classList.add('hidden'); la.classList.add('hidden'); h.innerHTML = '提示：名单已确认。根据相关通知，最终评审名单及备案流程须<b>线下完成</b>。'; } }
+function confirmList() { if (!currentExtractionRecord) return; currentExtractionRecord.status = 'confirmed'; currentExtractionRecord.selectedExperts.forEach(e => { const exp = mockData.find(m => m.id === e.id); if (exp) { if (!exp.participationHistory) exp.participationHistory = []; exp.participationHistory.push({ recordId: currentExtractionRecord.id, date: new Date().toISOString() }); } }); renderExtractionResults(); updateExtractActionButtons('confirmed'); alert('名单已确认。根据相关通知要求，最终评审名单及备案流程须线下完成，系统仅作为辅助工具。'); }
 
 // === 服务评价 ===
 function showEvalRecordSelector() { document.getElementById('eval-record-selector-view').classList.remove('hidden'); document.getElementById('eval-expert-list-view').classList.add('hidden'); }
