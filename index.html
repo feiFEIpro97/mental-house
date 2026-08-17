@@ -2079,7 +2079,7 @@ const musicTitle = document.getElementById('musicTitle');
 
 const playlist = [
   { src: 'music/luv-yourself.mp3', title: 'luv yourself' },
-  { src: 'music/luv-myself-rnb.m4a', title: 'Luv myself RnB' }
+  { src: 'music/luv-myself-rnb.mp3', title: 'Luv myself RnB' }
 ];
 let trackIndex = 0;
 let nextAudio = null;
@@ -2134,13 +2134,20 @@ musicSwitch.addEventListener('click', () => {
 
 // 一首播完自动顺序播放下一首（播完最后一首自动回到第一首）
 musicAudio.addEventListener('ended', () => {
-  loadTrack(trackIndex + 1);
-  musicAudio.play().then(() => {
-    musicToggle.classList.add('playing');
-    musicToggle.setAttribute('aria-label', '暂停音乐');
-  }).catch(() => {
-    // 自动播放被打断（如浏览器限制）则静默，等待用户手动播放
-  });
+  const playNext = () => {
+    loadTrack(trackIndex + 1);
+    musicAudio.play().then(() => {
+      musicToggle.classList.add('playing');
+      musicToggle.setAttribute('aria-label', '暂停音乐');
+    }).catch(() => {});
+  };
+  // 下一首已预加载好再切换；等待超时 3s 兜底（避免慢网下开局即卡）
+  const spin = (attempt) => {
+    if (nextAudio.readyState >= 3) { playNext(); return; }
+    if (attempt > 40) { playNext(); return; }
+    setTimeout(() => spin(attempt + 1), 75);
+  };
+  spin(0);
 });
 
 // 曲目结束后自动切下一首（循环）
