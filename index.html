@@ -2511,38 +2511,6 @@ function buildCurtain() {
     });
   });
 
-  // 标题上方顶部：珍珠白颗粒簇
-  // 中央区 37 列，列距 22px，数量按 22 个循环
-  const topCol = 'rgba(240,235,225,0.95)';
-  const topPattern = [7, 5, 4, 6, 3, 6, 7, 4, 3, 6, 8, 3, 5, 2, 7, 5, 3, 8, 4, 6, 8, 5];
-  const topBeadTex = makeBeadTexture(fontSize * 0.72, topCol);
-  // 中央 37 列：保持 22px 列距，从中心向两侧排；超出有效区（左右帘内侧）的列直接丢弃
-  const topClusters = 37;
-  const topSpacing = 22;
-  const topLimit = W * 0.20 - 22;      // 有效区半宽（左右帘内侧外留一列距）
-  const topStart = H * 0.5 - fontSize * 0.3;   // 与左右帘顶对齐
-  for (let c = 0; c < topClusters; c++) {
-    const count = topPattern[c % topPattern.length];
-    const cx = (c - (topClusters - 1) / 2) * topSpacing;
-    if (Math.abs(cx) > topLimit) continue;   // 超出有效区，丢弃该列
-    for (let k = 0; k < count; k++) {
-      const beadMat = new THREE.SpriteMaterial({ map: topBeadTex, transparent: true, depthTest: false, alphaTest: 0.08 });
-      const bead = new THREE.Sprite(beadMat);
-      const bs = fontSize * 0.95;
-      bead.scale.set(bs, bs, 1);
-      bead.position.set(cx, topStart - k * step, 0);   // 垂直间隔与左右一致
-      beadScene.add(bead);
-      beadSprites.push({
-        sprite: bead,
-        baseX: cx,
-        baseY: topStart - k * step,
-        offx: 0, offy: 0, targetX: 0, targetY: 0,
-        phase: Math.random() * Math.PI * 2,
-        amp: 0, li: -1, freq: -1
-      });
-    }
-  }
-
   beadRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   beadRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   beadRenderer.setSize(W, H);
