@@ -2399,7 +2399,7 @@ function buildCurtain() {
   lines = lines.map((l, i) => l.length >= 10 ? l : (l + (all[(i + count) % all.length] || '')));
   crownLines = lines.slice();
 
-  const fontSize = Math.min(13, Math.max(9, W / 70));  // 字号：W/70
+  const fontSize = Math.min(11, Math.max(7, W / 85));  // 字号缩小：W/85，上限11
   const step = fontSize * 1.55;   // 字间更宽松（1.35 → ×1.15）
 
   // 一列可容纳的字数（纵向从顶端到底部）
@@ -2420,7 +2420,7 @@ function buildCurtain() {
     const nLeft = Math.ceil(segCount / 2);
     const colIdx = side === -1 ? Math.floor(si / 2) : Math.floor((si - 1) / 2);
     const gap = W * 0.03;
-    const inner = W * 0.20;
+    const inner = W * 0.28;   // 中央留空加大：两侧珠帘外移，不挡标题
     const span = (W / 2 - gap) - inner;
     const nCol = Math.max(1, nLeft - 1);
     const spacing = span / nCol;
@@ -2440,7 +2440,7 @@ function buildCurtain() {
     const nLeft = Math.ceil(segCount / 2);
     const colIdx = side === -1 ? Math.floor(si / 2) : Math.floor((si - 1) / 2);
     const gap = W * 0.03;
-    const inner = W * 0.20;
+    const inner = W * 0.28;   // 中央留空：两侧珠帘外移
     const span = (W / 2 - gap) - inner;
     const nCol = Math.max(1, nLeft - 1);
     const spacing = span / nCol;
