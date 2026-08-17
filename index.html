@@ -2079,15 +2079,24 @@ const musicTitle = document.getElementById('musicTitle');
 
 const playlist = [
   { src: 'music/luv-yourself.mp3', title: 'luv yourself' },
-  { src: 'music/game-starts.mp3', title: 'game starts' },
+  { src: 'music/game-starts.m4a', title: 'game starts' },
   { src: 'music/luv-myself-rnb.m4a', title: 'Luv myself RnB' }
 ];
 let trackIndex = 0;
+let nextAudio = null;
+
+function preloadNextTrack() {
+  const ni = (trackIndex + 1) % playlist.length;
+  if (!nextAudio) nextAudio = new Audio();
+  nextAudio.preload = 'auto';
+  nextAudio.src = playlist[ni].src;
+}
 
 function loadTrack(i) {
   trackIndex = (i + playlist.length) % playlist.length;
   musicAudio.src = playlist[trackIndex].src;
   musicTitle.textContent = playlist[trackIndex].title;
+  preloadNextTrack();
 }
 
 function startMusic() {
