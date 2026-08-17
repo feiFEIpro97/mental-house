@@ -2233,14 +2233,16 @@ function chimeRing(strength) {
   resumeCtx();
   const src = chimeCtx.createBufferSource();
   src.buffer = chimeBuffer;
+  src.playbackRate.value = 0.85;   // 放慢至 0.85 倍速（更悠长）
   const gain = chimeCtx.createGain();
   gain.gain.value = Math.min(1, 0.55 + strength * 0.45);
-  // 只播前 2.5s，末尾快速淡出避免硬切
+  // 只播前 2.5s（按 0.85 倍速折算为墙钟时长），末尾快速淡出避免硬切
   src.connect(gain).connect(chimeCtx.destination);
   src.start(0);
-  gain.gain.setValueAtTime(gain.gain.value, chimeCtx.currentTime + 2.1);
-  gain.gain.linearRampToValueAtTime(0.0001, chimeCtx.currentTime + 2.5);
-  src.stop(chimeCtx.currentTime + 2.55);
+  const fadeStart = chimeCtx.currentTime + 2.1 / 0.85;
+  gain.gain.setValueAtTime(gain.gain.value, fadeStart);
+  gain.gain.linearRampToValueAtTime(0.0001, chimeCtx.currentTime + 2.5 / 0.85);
+  src.stop(chimeCtx.currentTime + 2.55 / 0.85);
   src.onended = () => { src.disconnect(); gain.disconnect(); };
 }
 
@@ -2258,6 +2260,7 @@ function unlockChime() {
       window.__tipRang = true;
       const src = chimeCtx.createBufferSource();
       src.buffer = chimeBuffer;
+      src.playbackRate.value = 0.85;   // 解锁确认音同样放慢至 0.85 倍速
       const g = chimeCtx.createGain();
       g.gain.value = 0.55;
       src.connect(g).connect(chimeCtx.destination);
