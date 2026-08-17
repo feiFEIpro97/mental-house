@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>渝慧学-教辅监管平台 Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei",Arial,sans-serif;background:linear-gradient(135deg,#1a3c6e,#2d5a9e);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{text-align:center;color:#fff}
+.container h1{font-size:32px;margin-bottom:8px}
+.container p{font-size:16px;opacity:.8;margin-bottom:40px}
+.cards{display:flex;gap:32px}
+.card-link{display:block;width:280px;background:#fff;border-radius:12px;padding:32px 24px;text-decoration:none;color:#333;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.card-link:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.card-link .icon{font-size:48px;margin-bottom:16px}
+.card-link h2{font-size:20px;margin-bottom:8px;color:#1a3c6e}
+.card-link p{font-size:13px;color:#999;margin:0}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>渝慧学 - 教辅监管平台</h1>
+  <p>全市基础教育教辅监管 Demo</p>
+  <div class="cards">
+    <a class="card-link" href="管理端.html">
+      <div class="icon">&#128421;</div>
+      <h2>管理端（PC）</h2>
+      <p>市/区县/学校三级管理<br>驾驶舱、教辅目录、征订管理、意见反馈、满意度</p>
+    </a>
+    <a class="card-link" href="家长端.html">
+      <div class="icon">&#128241;</div>
+      <h2>家长端（APP）</h2>
+      <p>教辅订购、意见反馈<br>确认收货与书籍评价</p>
+    </a>
+  </div>
+</div>
+</body>
+</html>

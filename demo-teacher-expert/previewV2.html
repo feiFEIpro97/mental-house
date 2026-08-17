@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专家库管理系统 V2 - 双库模式</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+        body { background-color: #f0f2f5; color: #333; min-width: 1200px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+        .page-header { background: linear-gradient(135deg, #1976d2, #2196f3); color: #fff; padding: 24px 32px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3); display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 24px; font-weight: bold; }
+        .page-desc { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        .role-switch { display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.15); padding: 6px; border-radius: 10px; }
+        .role-btn { padding: 8px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; border: none; color: rgba(255,255,255,0.8); background: transparent; transition: all 0.3s; white-space: nowrap; }
+        .role-btn:hover { background: rgba(255,255,255,0.15); }
+        .role-btn.active { background: #fff; color: #1976d2; font-weight: bold; }
+        .role-badge { font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; margin-left: 4px; }
+
+        .tabs { display: flex; background: #fff; border-radius: 10px; padding: 6px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .tab { flex: 1; padding: 12px 20px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 15px; color: #666; transition: all 0.3s; }
+        .tab:hover { background: #f5f7fa; }
+        .tab.active { background: #1976d2; color: #fff; font-weight: 500; }
+
+        .card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .card-title { font-size: 17px; font-weight: bold; color: #1976d2; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #e3f2fd; display: flex; justify-content: space-between; align-items: center; }
+        .card-subtitle { font-size: 13px; color: #999; font-weight: normal; margin-left: 8px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+
+        .stat-card { background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 10px; padding: 18px; text-align: center; }
+        .stat-number { font-size: 28px; font-weight: bold; color: #1976d2; }
+        .stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+        .stat-card.warn { background: linear-gradient(135deg, #fff3e0, #ffe0b2); }
+        .stat-card.warn .stat-number { color: #ef6c00; }
+        .stat-card.success { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); }
+        .stat-card.success .stat-number { color: #2e7d32; }
+
+        table { width: 100%; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 6px 5px; text-align: left; border-bottom: 1px solid #eee; vertical-align: top; font-size: 12px; line-height: 1.5; word-break: break-all; }
+        th { background: #f8f9fa; font-weight: 600; color: #444; font-size: 11px; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+        tr:hover { background: #f5f7fa; }
+        td { max-width: 140px; }
+        .table-wrap { overflow-x: auto; max-width: 100%; }
+
+        .btn-sm { padding: 3px 8px; border: 1px solid #1976d2; border-radius: 4px; background: transparent; color: #1976d2; font-size: 11px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .btn-sm:hover { background: #e3f2fd; }
+        .btn-sm.danger { border-color: #f44336; color: #f44336; }
+        .btn-sm.danger:hover { background: #ffebee; }
+        .btn-sm.warning { border-color: #ff9800; color: #ff9800; }
+        .btn-sm.warning:hover { background: #fff3e0; }
+        .btn-sm.success { border-color: #4caf50; color: #4caf50; }
+        .btn-sm.success:hover { background: #e8f5e9; }
+
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; margin: 1px; }
+        .tag-primary { background: #e3f2fd; color: #1976d2; }
+        .tag-success { background: #e8f5e9; color: #4caf50; }
+        .tag-warning { background: #fff3e0; color: #ff9800; }
+        .tag-danger { background: #ffebee; color: #f44336; }
+        .tag-purple { background: #f3e5f5; color: #7b1fa2; }
+
+        .filter-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-item { display: flex; align-items: center; gap: 6px; }
+        .filter-item label { font-size: 13px; color: #666; white-space: nowrap; }
+        select, input { padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; }
+        select:focus, input:focus { border-color: #1976d2; }
+
+        .btn { padding: 8px 20px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: #1976d2; color: #fff; }
+        .btn-primary:hover { background: #1565c0; }
+        .btn-outline { background: transparent; border: 1px solid #1976d2; color: #1976d2; }
+        .btn-outline:hover { background: #e3f2fd; }
+        .btn-sync { background: #ff9800; color: #fff; padding: 8px 16px; font-size: 13px; }
+        .btn-sync:hover { background: #f57c00; }
+        .btn-export { background: #4caf50; color: #fff; padding: 8px 16px; font-size: 13px; }
+        .btn-export:hover { background: #388e3c; }
+
+        .expert-card { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+        .expert-name { font-size: 15px; font-weight: bold; color: #333; margin-bottom: 6px; }
+        .expert-info { font-size: 12px; color: #666; line-height: 1.6; }
+
+        .eval-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .eval-high { background: #e8f5e9; color: #2e7d32; }
+        .eval-mid { background: #fff3e0; color: #ef6c00; }
+        .eval-low { background: #ffebee; color: #c62828; }
+
+        .hidden { display: none; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #fff; border-radius: 12px; padding: 24px; width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .modal-title { font-size: 17px; font-weight: bold; }
+        .close-btn { cursor: pointer; font-size: 20px; color: #999; }
+
+        .tag-pool { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; }
+        .tag-item { padding: 4px 10px; background: #fff; border: 1px solid #ddd; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+        .tag-item:hover { border-color: #1976d2; color: #1976d2; }
+        .tag-item.active { background: #1976d2; color: #fff; border-color: #1976d2; }
+        .tag-remove { margin-left: 4px; cursor: pointer; opacity: 0.6; }
+        .tag-remove:hover { opacity: 1; }
+
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 4px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #eee; }
+        .pagination button { padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+        .pagination button:hover:not(:disabled) { border-color: #1976d2; color: #1976d2; }
+        .pagination button.active { background: #1976d2; color: #fff; border-color: #1976d2; }
+        .pagination button:disabled { color: #ccc; cursor: not-allowed; }
+        .pagination .page-info { font-size: 12px; color: #666; margin: 0 6px; }
+
+        .step-header { display: flex; gap: 20px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .step-item { font-size: 13px; color: #999; display: flex; align-items: center; gap: 6px; }
+        .step-item.active { color: #1976d2; font-weight: bold; }
+        .step-num { width: 22px; height: 22px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+        .step-item.active .step-num { background: #1976d2; color: #fff; }
+
+        .history-item { border-left: 4px solid #1976d2; padding: 12px; background: #f8f9fa; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+        .status-pending { background: #fff3e0; color: #ef6c00; }
+        .status-confirmed { background: #e8f5e9; color: #2e7d32; }
+        .status-pushed { background: #e3f2fd; color: #1976d2; }
+
+        .multi-select { position: relative; width: 100%; }
+        .multi-select-trigger { width: 100%; padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer; background: #fff; text-align: left; min-height: 34px; display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+        .multi-select-placeholder { color: #999; }
+        .multi-select-chip { display: inline-flex; align-items: center; gap: 2px; padding: 2px 6px; background: #e3f2fd; color: #1976d2; border-radius: 12px; font-size: 11px; }
+        .multi-select-chip-remove { cursor: pointer; font-weight: bold; margin-left: 1px; }
+        .multi-select-chip-remove:hover { color: #f44336; }
+        .multi-select-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 6px; max-height: 240px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; }
+        .multi-select-dropdown.show { display: block; }
+        .multi-select-dropdown label { display: flex; align-items: center; gap: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+        .multi-select-dropdown label:hover { background: #f5f7fa; }
+        .multi-select-dropdown label input[type="checkbox"] { margin: 0; }
+
+        .alert-info { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #1565c0; margin-bottom: 16px; }
+        .alert-warn { background: #fff3e0; border: 1px solid #ffcc80; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #e65100; margin-bottom: 16px; }
+        .alert-success { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #2e7d32; margin-bottom: 16px; }
+
+        .subpool-card { border: 2px solid #e3f2fd; border-radius: 10px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s; background: #fff; }
+        .subpool-card:hover { border-color: #1976d2; box-shadow: 0 2px 8px rgba(25,118,210,0.1); }
+        .subpool-card.selected { border-color: #1976d2; background: #f0f7ff; }
+        .subpool-card .pool-name { font-size: 16px; font-weight: bold; color: #333; }
+        .subpool-card .pool-meta { font-size: 12px; color: #999; margin-top: 4px; }
+
+        .batch-bar { background: #fffbe6; border: 1px solid #ffe58f; padding: 10px 20px; border-radius: 8px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+        .batch-info { font-size: 13px; color: #856404; }
+        .batch-actions { display: flex; gap: 10px; }
+
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .loading-spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #ff9800; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div id="sync-loading" class="loading-overlay"><div class="loading-spinner"></div><div style="font-size:18px;font-weight:bold;color:#ff9800;margin-bottom:6px;">正在同步教师数据...</div><div style="color:#666;">系统正在从全国教师管理信息系统拉取全量教师信息，请稍候</div></div>
+
+<div class="container">
+    <div class="page-header">
+        <div><div class="page-title">重庆市教育系统评审专家库管理系统</div><div class="page-desc">渝教人函〔2021〕31号 · 人事处总库管控 + 处室子库独立自用 · 双层权限隔离</div></div>
+        <div class="role-switch"><span class="role-badge">当前角色：</span><button class="role-btn active" onclick="switchRole('hr')">人事处管理员</button><button class="role-btn" onclick="switchRole('dept')">处室管理员</button><select id="dept-selector" class="hidden" onchange="onDeptSelectChange()" style="padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;margin-left:4px;"><option value="">选择所属处室</option><option value="基教处">基教处</option><option value="师范处">师范处</option><option value="职成教处">职成教处</option><option value="体卫艺处">体卫艺处</option><option value="基建后勤处">基建后勤处</option></select></div>
+    </div>
+
+    <div class="tabs" id="main-tabs">
+        <div class="tab active" onclick="showTab('pool')">一般专家库</div>
+        <div class="tab" onclick="showTab('leader')">组长专家库</div>
+        <div class="tab" onclick="showTab('extract')">专家抽取</div>
+        <div class="tab" onclick="showTab('evaluate')">服务评价</div>
+        <div class="tab" onclick="showTab('blacklist')">黑名单管理</div>
+        <div class="tab" onclick="showTab('tags')">标签管理</div>
+    </div>
+
+    <!-- ===== 专家池 ===== -->
+    <div id="tab-pool" class="tab-content">
+        <div id="hr-pool-view">
+            <div class="grid-5" style="margin-bottom:16px;">
+                <div class="stat-card"><div class="stat-number" id="hr-total">25</div><div class="stat-label">全量教师总数</div></div>
+                <div class="stat-card success"><div class="stat-number" id="hr-natural">8</div><div class="stat-label">自然候选人</div></div>
+                <div class="stat-card"><div class="stat-number" id="hr-available">23</div><div class="stat-label">可用专家</div></div>
+                <div class="stat-card warn"><div class="stat-number" id="hr-blacklist">0</div><div class="stat-label">黑名单</div></div>
+                <div class="stat-card"><div class="stat-number" id="hr-senior">15</div><div class="stat-label">高级及以上</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">多维度筛选<span class="card-subtitle">组合筛选，结果仅导出Excel线下分发</span></div>
+                <div class="filter-row">
+                    <div class="filter-item"><label>专业:</label><select id="hr-filter-major"><option value="">全部</option></select></div>
+                    <div class="filter-item"><label>职称:</label><select id="hr-filter-title"><option value="">全部</option><option value="正高级">正高级</option><option value="高级">高级</option><option value="一级">一级</option><option value="二级">二级</option></select></div>
+                    <div class="filter-item"><label>学历:</label><select id="hr-filter-edu"><option value="">全部</option><option value="博士">博士</option><option value="硕士">硕士</option><option value="本科">本科</option></select></div>
+                    <div class="filter-item"><label>学历类型:</label><select id="hr-filter-eduType"><option value="">全部</option><option value="全日制">全日制</option><option value="在职">在职</option></select></div>
+                    <div class="filter-item"><label>人才项目:</label><select id="hr-filter-talent"><option value="">全部</option><option value="国家级人才">国家级人才</option><option value="省部级人才">省部级人才</option><option value="万人计划">万人计划</option><option value="重庆英才">重庆英才</option></select></div>
+                    <div class="filter-item"><label>岗位等级:</label><select id="hr-filter-post"><option value="">全部</option><option value="专技二级">专技二级</option><option value="专技三级">专技三级</option><option value="专技四级">专技四级</option><option value="专技五级">专技五级</option><option value="专技六级">专技六级</option><option value="专技七级">专技七级</option></select></div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-item"><label>年龄:</label><input type="number" id="hr-filter-ageMin" placeholder="最小" style="width:70px;"> - <input type="number" id="hr-filter-ageMax" placeholder="最大" style="width:70px;"></div>
+                    <div class="filter-item"><label>教龄:</label><input type="number" id="hr-filter-senMin" placeholder="最小" style="width:70px;"> - <input type="number" id="hr-filter-senMax" placeholder="最大" style="width:70px;"></div>
+                    <div class="filter-item"><label>区县:</label><select id="hr-filter-district"><option value="">全部</option></select></div>
+                    <div class="filter-item"><label>搜索:</label><input type="text" id="hr-filter-search" placeholder="编号/姓名/学校" style="width:160px;" oninput="hrFilterExperts()"></div>
+                    <button class="btn btn-primary" onclick="hrFilterExperts()">筛选</button>
+                    <button class="btn btn-outline" onclick="hrResetFilter()">重置</button>
+                    <button class="btn btn-export" onclick="hrExportExcel()">导出Excel</button>
+                </div>
+                </div>
+            <div class="card">
+                <div class="card-title"><span>专家列表（全量数据）</span><div><button class="btn btn-outline" onclick="openHRImportModal()" style="margin-right:8px;">批量导入</button><button class="btn btn-primary" onclick="openHRManualAddModal()" style="margin-right:8px;">手动添加</button><button class="btn btn-sync" onclick="syncData()">同步教师数据</button></div></div>
+                <div id="hr-batch-bar" class="batch-bar hidden">
+                    <div class="batch-info">已选择 <strong id="hr-selected-count">0</strong> 名专家</div>
+                    <div class="batch-actions"><select id="hr-batch-tag-select" style="padding:4px 8px;font-size:12px;"><option value="">选择标签</option></select><button class="btn btn-primary" style="padding:4px 10px;font-size:12px;" onclick="hrBatchTag()">批量打标</button><button class="btn btn-outline" style="padding:4px 10px;font-size:12px;border-color:#4caf50;color:#4caf50;" onclick="hrBatchAddToLeader()">批量加入组长库</button><button class="btn btn-outline" style="padding:4px 10px;font-size:12px;" onclick="hrClearSelection()">取消</button></div>
+                </div>
+                <div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="hr-select-all" onclick="hrToggleSelectAll()"></th><th>编号</th><th>姓名</th><th>性别/年龄</th><th>区县/学校</th><th>职称/正高年限</th><th>专业</th><th>学历</th><th>岗位等级</th><th>教龄</th><th>评分</th><th>专家类别</th><th>标签</th><th>状态</th><th>操作</th></tr></thead><tbody id="hr-expert-table"></tbody></table></div>
+                <div id="hr-pagination" class="pagination"></div>
+            </div>
+        </div>
+
+        <div id="dept-pool-view" class="hidden">
+            <div class="grid-2" style="margin-bottom:16px;">
+                <div class="card" style="margin-bottom:0;"><div class="card-title">我的子库<span class="card-subtitle">选择要管理的处室子库</span></div><div id="dept-subpool-list"></div><div style="margin-top:12px;"><button class="btn btn-primary" onclick="openCreateSubpoolModal()">新建子库</button></div></div>
+                <div class="card" style="margin-bottom:0;"><div class="card-title">子库合规检查<span class="card-subtitle">对标渝教人函〔2021〕31号</span></div><div id="dept-compliance-check"></div></div>
+            </div>
+            <div id="dept-pool-detail" class="hidden">
+                <div class="grid-4" style="margin-bottom:16px;">
+                    <div class="stat-card"><div class="stat-number" id="dept-pool-total">0</div><div class="stat-label">子库专家总数</div></div>
+                    <div class="stat-card success"><div class="stat-number" id="dept-pool-natural">0</div><div class="stat-label">自然候选人</div></div>
+                    <div class="stat-card"><div class="stat-number" id="dept-pool-self">0</div><div class="stat-label">自主候选人</div></div>
+                    <div class="stat-card warn"><div class="stat-number" id="dept-pool-expire">-</div><div class="stat-label">有效期至</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span>处室专家子库<span class="card-subtitle" id="dept-pool-name-label"></span></span></div>
+                    <div class="filter-row">
+                        <div class="filter-item"><label>专业:</label><select id="dept-filter-major"><option value="">全部</option></select></div>
+                        <div class="filter-item"><label>职称:</label><select id="dept-filter-title"><option value="">全部</option><option value="正高级">正高级</option><option value="高级">高级</option><option value="一级">一级</option><option value="二级">二级</option></select></div>
+                        <div class="filter-item"><label>年龄:</label><input type="number" id="dept-filter-ageMin" placeholder="最小" style="width:60px;"> - <input type="number" id="dept-filter-ageMax" placeholder="最大" style="width:60px;"></div>
+                        <div class="filter-item"><label>搜索:</label><input type="text" id="dept-filter-search" placeholder="编号/姓名/学校" style="width:140px;" oninput="deptFilterExperts()"></div>
+                        <button class="btn btn-primary" onclick="deptFilterExperts()">筛选</button>
+                        <button class="btn btn-outline" onclick="deptResetFilter()">重置</button>
+                        <button class="btn btn-export" onclick="deptExportExcel()">导出Excel</button>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-bottom:16px;"><button class="btn btn-outline" onclick="openDeptImportModal()">批量导入</button><button class="btn btn-primary" onclick="openDeptManualAddModal()">手动添加</button></div>
+                    <table><thead><tr><th>编号</th><th>姓名</th><th>区县</th><th>学校</th><th>职称</th><th>专业</th><th>学历</th><th>教龄</th><th>评分</th><th>参与次数</th><th>专家类别</th><th>标签</th><th>状态</th><th>操作</th></tr></thead><tbody id="dept-expert-table"></tbody></table>
+                    <div id="dept-pagination" class="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 组长专家库 ===== -->
+    <div id="tab-leader" class="tab-content hidden">
+        <div class="alert-info" style="margin-bottom:16px;">组长专家库在一般专家库基础上组建，收录正高级职称且评分≥4.8的资深专家，作为评审组长候选人。</div>
+        <div class="grid-3" style="margin-bottom:16px;">
+            <div class="stat-card"><div class="stat-number" id="leader-total">0</div><div class="stat-label">组长候选人数</div></div>
+            <div class="stat-card success"><div class="stat-number" id="leader-avg-rating">-</div><div class="stat-label">平均评分</div></div>
+            <div class="stat-card"><div class="stat-number" id="leader-avg-seniority">-</div><div class="stat-label">平均教龄</div></div>
+        </div>
+        <div class="card">
+            <div class="card-title"><span>组长专家列表</span><button class="btn btn-export" onclick="leaderExportExcel()">导出Excel</button></div>
+            <div class="table-wrap"><table><thead><tr><th>编号</th><th>姓名</th><th>性别/年龄</th><th>区县/学校</th><th>职称/正高年限</th><th>专业</th><th>学历</th><th>教龄</th><th>评分</th><th>参与次数</th><th>标签</th><th>来源</th><th>状态</th><th>操作</th></tr></thead><tbody id="leader-expert-table"></tbody></table></div>
+            <div id="leader-pagination" class="pagination"></div>
+        </div>
+    </div>
+
+    <!-- ===== 专家抽取 ===== -->
+    <div id="tab-extract" class="tab-content hidden">
+        <div id="extract-history-view"><div class="card"><div class="card-title"><span>抽取历史记录</span><button class="btn btn-primary" onclick="showNewExtraction()">新增专家抽取</button></div><div id="extract-history-list"></div></div></div>
+        <div id="extract-new-view" class="hidden">
+            <div class="card">
+                <div class="card-title"><span>新建专家抽取</span><button class="btn btn-outline" onclick="showExtractHistory()">返回历史</button></div>
+                <div class="step-header"><div class="step-item active" id="step-1-indicator"><span class="step-num">1</span>填写信息</div><div class="step-item" id="step-2-indicator"><span class="step-num">2</span>配置条件</div><div class="step-item" id="step-3-indicator"><span class="step-num">3</span>确认结果</div></div>
+                <div id="extract-step-1">
+                    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-weight:500;">抽取用途/任务名称</label><input type="text" id="extract-purpose" placeholder="例如：2026年特级教师评审专家抽取" style="width:100%;"></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div><label style="display:block;margin-bottom:6px;font-weight:500;">评审类别 *</label><select id="extract-category" style="width:100%;"><option value="">请选择评审类别</option><option value="特级教师评审">特级教师评审</option><option value="市政府教学成果评审">市政府教学成果评审</option><option value="中小学骨干校长评审">中小学骨干校长评审</option><option value="骨干教师评审">骨干教师评审</option><option value="学科带头人评审">学科带头人评审</option><option value="名师评审">名师评审</option><option value="职称评审">职称评审</option><option value="课题评审">课题评审</option><option value="其他评审">其他评审</option></select></div>
+                        <div><label style="display:block;margin-bottom:6px;font-weight:500;">评审层次 *</label><select id="extract-level" style="width:100%;"><option value="">请选择评审层次</option><option value="市级">市级</option><option value="区县级">区县级</option><option value="校级">校级</option></select></div>
+                    </div>
+                    <div style="margin-bottom:16px;" id="extract-source-hr"><label style="display:block;margin-bottom:6px;font-weight:500;">抽取来源</label><div class="alert-info" style="margin-bottom:0;">人事处总库（全量教师数据，约30万人）— 支持多维度筛选，从全量数据中按条件抽取</div></div>
+                    <div style="margin-bottom:16px;" id="extract-source-dept" class="hidden"><label style="display:block;margin-bottom:6px;font-weight:500;">选择子库</label><select id="extract-subpool" style="width:100%;"><option value="">请选择处室子库</option></select></div>
+                    <div class="alert-info">提示：根据31号通知，评审专家数量应为<b>奇数</b>且<b>不少于3人</b>，入库专家与评审专家比例<b>不低于4:1</b>。</div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="nextToStep2()">下一步：配置条件</button>
+                </div>
+                <div id="extract-step-2" class="hidden">
+                    <div class="grid-2">
+                        <div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">评审专家数量（奇数，≥3）</label><input type="number" id="extract-count" value="5" min="3" step="2" style="width:100%;"></div>
+                        <div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">冗余系数</label><select id="extract-redundancy" style="width:100%;"><option value="4">4.0x (标准4:1比例)</option><option value="5">5.0x (宽裕)</option><option value="3">3.0x (紧凑)</option></select></div>
+                        <div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">专业方向</label><select id="extract-major" style="width:100%;"><option value="">全部专业</option></select></div>
+                        <div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">轮换策略</label><select id="extract-rotation" style="width:100%;"><option value="recent">优先近N次未参与者</option><option value="random">随机抽取</option><option value="score">按评分高低</option></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">回避区县</label><div class="multi-select" id="extract-avoid-container"><div class="multi-select-trigger" onclick="toggleMultiSelect('extract-avoid')"><span class="multi-select-placeholder">点击选择...</span></div><div class="multi-select-dropdown" id="extract-avoid-dropdown"></div></div></div>
+                        <div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">回避单位</label><input type="text" id="extract-avoid-units" placeholder="多个单位用逗号分隔" style="width:100%;"></div>
+                    </div>
+                    <div id="extract-compliance-hint" class="hidden" style="margin-bottom:14px;"></div>
+                    <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn btn-outline" style="flex:1;" onclick="backToStep1()">上一步</button><button class="btn btn-primary" style="flex:2;" onclick="runExtraction()">执行抽取</button></div>
+                </div>
+                <div id="extract-step-3" class="hidden">
+                    <div id="extraction-result-list"></div>
+                    <div style="margin-top:24px;padding:16px;background:#f0f7ff;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+                        <div id="extraction-hint" style="color:#666;font-size:13px;"></div>
+                        <div style="display:flex;gap:10px;align-items:center;"><button id="btn-back-to-step2" class="btn btn-outline" onclick="backToStep2()">上一步</button><button id="btn-confirm-list" class="btn btn-primary" onclick="confirmList()">确认名单</button><button id="btn-export-extract" class="btn btn-export" onclick="exportExtractionResult()">导出Excel</button><span id="label-confirmed" class="tag tag-success hidden" style="padding:8px 14px;font-size:13px;font-weight:bold;">已确认（线下备案）</span></div>
+                    </div>
+                    <div id="extract-leader-area" style="margin-top:16px;padding:14px;background:#f0f7ff;border:1px solid #bbdefb;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+                        <div id="extract-leader-info" style="font-size:13px;color:#666;"></div>
+                        <button id="btn-extract-leader" class="btn btn-primary" onclick="extractLeader()" style="background:#7b1fa2;">从组长专家库抽取1名组长</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 服务评价 ===== -->
+    <div id="tab-evaluate" class="tab-content hidden">
+        <div id="eval-record-selector-view"><div class="card"><div class="card-title">选择评价任务</div><p style="color:#666;margin-bottom:16px;">请选择已确认的抽取任务，对参与服务的专家进行评价。</p><div id="eval-record-list"></div></div></div>
+        <div id="eval-expert-list-view" class="hidden"><div class="card"><div class="card-title"><span id="eval-task-name"></span><button class="btn btn-outline" onclick="showEvalRecordSelector()">返回</button></div><div id="eval-experts-container"></div></div></div>
+    </div>
+    <div id="eval-modal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">专家服务评价 - <span id="eval-modal-expert-name"></span></div><div class="close-btn" onclick="closeEvalModal()">×</div></div><div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;">评分 (1-5分)</label><input type="number" id="eval-score" value="5.0" min="1" max="5" step="0.1" style="width:100%;"></div><div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;">评价内容</label><textarea id="eval-comment" rows="3" placeholder="请输入专家在本次服务中的表现..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;resize:none;"></textarea></div><div style="text-align:right;"><button class="btn btn-primary" onclick="submitEvaluation()">提交评价</button></div></div></div>
+
+    <!-- ===== 黑名单 ===== -->
+    <div id="tab-blacklist" class="tab-content hidden"><div class="card"><div class="card-title"><span>黑名单教师列表</span><button class="btn btn-sync" style="background:#f44336;" onclick="openManualBlacklistModal()">手动添加黑名单</button></div><p style="color:#666;margin-bottom:16px;">黑名单中的教师将<b>永远不会</b>被系统自动抽取。评分低于3.0分自动转入黑名单。</p><table><thead><tr><th>编号</th><th>姓名</th><th>区县/学校</th><th>评分</th><th>拉黑原因</th><th>拉黑日期</th><th>操作</th></tr></thead><tbody id="blacklistTable"></tbody></table></div></div>
+    <div id="blacklist-manual-modal" class="modal"><div class="modal-content" style="width:600px;"><div class="modal-header"><div class="modal-title">手动添加黑名单</div><div class="close-btn" onclick="closeManualBlacklistModal()">×</div></div><div style="margin-bottom:16px;"><input type="text" id="blacklist-search-input" placeholder="输入教师姓名或学校进行搜索..." style="width:100%;margin-bottom:8px;" oninput="searchExpertsForBlacklist()"><div id="blacklist-search-results" style="max-height:300px;overflow-y:auto;border:1px solid #eee;border-radius:6px;"></div></div><div id="blacklist-reason-area" class="hidden"><label style="display:block;margin-bottom:6px;font-weight:500;">拉黑原因</label><textarea id="blacklist-manual-reason" rows="2" placeholder="请输入拉黑原因..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:12px;"></textarea><div style="text-align:right;"><button class="btn btn-outline" onclick="cancelManualBlacklist()">取消</button><button class="btn btn-primary" style="background:#f44336;" onclick="confirmManualBlacklist()">确认拉黑</button></div></div></div></div>
+
+    <!-- ===== 标签管理 ===== -->
+    <div id="tab-tags" class="tab-content hidden">
+        <div class="grid-2" style="margin-bottom:20px;"><div class="card" style="margin-bottom:0;"><div class="card-title">标签库管理</div><div class="filter-row"><input type="text" id="new-global-tag" placeholder="输入新标签名称" style="flex:1;"><button class="btn btn-primary" onclick="addGlobalTag()">新增标签</button></div><div id="tag-cloud" style="line-height:2.5;"></div></div><div class="card" style="margin-bottom:0;"><div class="card-title">标签使用统计</div><div id="tag-stats" style="display:flex;flex-wrap:wrap;gap:10px;"></div></div></div>
+        <div class="card"><div class="card-title">自动化打标规则</div><p style="color:#666;margin-bottom:16px;">基于教师属性自动识别并打标，支持一键批量执行。</p><div class="grid-2"><div class="expert-card" style="margin-bottom:0;"><div class="expert-name">自然候选人识别</div><div class="expert-info">条件: 职称 = "正高级" → 自动标记"自然候选人"</div><button class="btn btn-primary" style="margin-top:10px;width:100%;" onclick="runRule('title','正高级','equals','自然候选人')">执行</button></div><div class="expert-card" style="margin-bottom:0;"><div class="expert-name">中青年专家识别</div><div class="expert-info">条件: 年龄 ≤ 45 → 自动标记"中青年专家"</div><button class="btn btn-primary" style="margin-top:10px;width:100%;" onclick="runAgeRule()">执行</button></div></div></div>
+    </div>
+
+    <!-- 标签弹窗 -->
+    <div id="tag-modal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">专家打标 - <span id="modal-expert-name"></span></div><div class="close-btn" onclick="closeTagModal()">×</div></div><div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-size:13px;color:#666;">当前标签:</label><div id="modal-expert-tags"></div></div><div><label style="display:block;margin-bottom:6px;font-size:13px;color:#666;">从标签库中选择:</label><div id="modal-tag-pool" class="tag-pool"></div></div><div style="margin-top:16px;text-align:right;"><button class="btn btn-outline" onclick="closeTagModal()">完成</button></div></div></div>
+
+    <!-- 专家详情弹窗 -->
+    <div id="expert-detail-modal" class="modal"><div class="modal-content" style="width:640px;max-height:80vh;overflow-y:auto;"><div class="modal-header"><div class="modal-title">专家详细信息</div><div class="close-btn" onclick="closeExpertDetailModal()">×</div></div><div id="expert-detail-content"></div><div style="margin-top:16px;text-align:right;"><button class="btn btn-primary" onclick="closeExpertDetailModal()">关闭</button></div></div></div>
+
+    <!-- 处室批量导入弹窗 -->
+    <div id="dept-import-modal" class="modal"><div class="modal-content" style="width:600px;"><div class="modal-header"><div class="modal-title">批量导入专家到子库</div><div class="close-btn" onclick="closeDeptImportModal()">×</div></div>
+        <div class="alert-info">请上传CSV文件（UTF-8编码），表头行将被自动跳过。<button class="btn btn-outline" style="margin-left:12px;padding:4px 12px;font-size:12px;" onclick="downloadImportTemplate()">下载模板</button></div>
+        <div style="margin-bottom:14px;"><input type="file" id="dept-import-file" accept=".csv" onchange="previewImportFile()" style="width:100%;padding:8px;border:1px dashed #ddd;border-radius:6px;"></div>
+        <div id="dept-import-preview" style="max-height:250px;overflow-y:auto;border:1px solid #eee;border-radius:6px;margin-bottom:14px;font-size:12px;"></div>
+        <div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeptImportModal()">取消</button><button class="btn btn-primary" id="btn-confirm-import" disabled onclick="confirmDeptImport()">确认导入</button></div></div></div>
+
+    <!-- 处室手动添加专家弹窗 -->
+    <div id="dept-manual-add-modal" class="modal"><div class="modal-content" style="width:580px;max-height:80vh;overflow-y:auto;"><div class="modal-header"><div class="modal-title">手动添加专家到子库</div><div class="close-btn" onclick="closeDeptManualAddModal()">×</div></div>
+        <div class="grid-2">
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">姓名 *</label><input type="text" id="dept-add-name" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">性别</label><select id="dept-add-gender" style="width:100%;"><option value="男">男</option><option value="女">女</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">出生年份</label><input type="number" id="dept-add-birthYear" value="1980" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">区县</label><select id="dept-add-district" style="width:100%;"><option value="">请选择</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">学校 *</label><input type="text" id="dept-add-school" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">职称 *</label><select id="dept-add-title" style="width:100%;"><option value="正高级">正高级</option><option value="高级">高级</option><option value="一级">一级</option><option value="二级">二级</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">正高年限</label><input type="number" id="dept-add-titleYears" value="5" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">专业</label><input type="text" id="dept-add-major" placeholder="如：数学、语文" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">学历</label><select id="dept-add-edu" style="width:100%;"><option value="本科">本科</option><option value="硕士">硕士</option><option value="博士">博士</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">学历类型</label><select id="dept-add-eduType" style="width:100%;"><option value="全日制">全日制</option><option value="在职">在职</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">岗位等级</label><select id="dept-add-postLevel" style="width:100%;"><option value="">不填</option><option value="专技二级">专技二级</option><option value="专技三级">专技三级</option><option value="专技四级">专技四级</option><option value="专技五级">专技五级</option><option value="专技六级">专技六级</option><option value="专技七级">专技七级</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">教龄</label><input type="number" id="dept-add-seniority" value="15" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">专家类别</label><select id="dept-add-expertType" style="width:100%;"><option value="自主候选人">自主候选人</option><option value="自然候选人">自然候选人</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">人才项目</label><input type="text" id="dept-add-talent" placeholder="多个用逗号分隔" style="width:100%;"></div>
+        </div>
+        <div style="text-align:right;margin-top:8px;"><button class="btn btn-outline" onclick="closeDeptManualAddModal()">取消</button><button class="btn btn-primary" onclick="confirmDeptManualAdd()">添加专家</button></div></div></div>
+
+    <!-- 人事处总库批量导入弹窗 -->
+    <div id="hr-import-modal" class="modal"><div class="modal-content" style="width:600px;"><div class="modal-header"><div class="modal-title">批量导入专家到总库</div><div class="close-btn" onclick="closeHRImportModal()">×</div></div>
+        <div class="alert-info">支持导入市外专家、其他行业专家。请上传CSV文件（UTF-8编码），表头行将被自动跳过。<button class="btn btn-outline" style="margin-left:12px;padding:4px 12px;font-size:12px;" onclick="downloadHRImportTemplate()">下载模板</button></div>
+        <div style="margin-bottom:14px;"><input type="file" id="hr-import-file" accept=".csv" onchange="previewHRImportFile()" style="width:100%;padding:8px;border:1px dashed #ddd;border-radius:6px;"></div>
+        <div id="hr-import-preview" style="max-height:250px;overflow-y:auto;border:1px solid #eee;border-radius:6px;margin-bottom:14px;font-size:12px;"></div>
+        <div style="text-align:right;"><button class="btn btn-outline" onclick="closeHRImportModal()">取消</button><button class="btn btn-primary" id="btn-hr-confirm-import" disabled onclick="confirmHRImport()">确认导入</button></div></div></div>
+
+    <!-- 人事处总库手动添加专家弹窗 -->
+    <div id="hr-manual-add-modal" class="modal"><div class="modal-content" style="width:580px;max-height:80vh;overflow-y:auto;"><div class="modal-header"><div class="modal-title">手动添加专家到总库</div><div class="close-btn" onclick="closeHRManualAddModal()">×</div></div>
+        <div class="grid-2">
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">姓名 *</label><input type="text" id="hr-add-name" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">性别</label><select id="hr-add-gender" style="width:100%;"><option value="男">男</option><option value="女">女</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">出生年份</label><input type="number" id="hr-add-birthYear" value="1980" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">区县/地区</label><select id="hr-add-district" style="width:100%;"><option value="">请选择</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">单位/学校 *</label><input type="text" id="hr-add-school" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">职称 *</label><select id="hr-add-title" style="width:100%;"><option value="正高级">正高级</option><option value="高级">高级</option><option value="一级">一级</option><option value="二级">二级</option><option value="其他">其他（行业专家）</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">正高年限</label><input type="number" id="hr-add-titleYears" value="5" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">专业/领域</label><input type="text" id="hr-add-major" placeholder="如：数学、基建工程" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">学历</label><select id="hr-add-edu" style="width:100%;"><option value="本科">本科</option><option value="硕士">硕士</option><option value="博士">博士</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">学历类型</label><select id="hr-add-eduType" style="width:100%;"><option value="全日制">全日制</option><option value="在职">在职</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">岗位等级</label><select id="hr-add-postLevel" style="width:100%;"><option value="">不填</option><option value="专技二级">专技二级</option><option value="专技三级">专技三级</option><option value="专技四级">专技四级</option><option value="专技五级">专技五级</option><option value="专技六级">专技六级</option><option value="专技七级">专技七级</option><option value="其他">其他</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">教龄/从业年限</label><input type="number" id="hr-add-seniority" value="15" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">专家类别 *</label><select id="hr-add-expertType" style="width:100%;"><option value="自然候选人">自然候选人（正高级）</option><option value="自主候选人">自主候选人</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">证件类型</label><select id="hr-add-idType" style="width:100%;"><option value="身份证">身份证</option><option value="护照">护照</option><option value="港澳通行证">港澳通行证</option></select></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">证件号码</label><input type="text" id="hr-add-idNumber" placeholder="请输入证件号码" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">手机号</label><input type="text" id="hr-add-phone" placeholder="请输入手机号" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">人才项目</label><input type="text" id="hr-add-talent" placeholder="多个用逗号分隔" style="width:100%;"></div>
+            <div style="margin-bottom:12px;"><label style="display:block;margin-bottom:4px;font-size:13px;">荣誉证书</label><input type="text" id="hr-add-certificates" placeholder="多个用逗号分隔" style="width:100%;"></div>
+        </div>
+        <div style="text-align:right;margin-top:8px;"><button class="btn btn-outline" onclick="closeHRManualAddModal()">取消</button><button class="btn btn-primary" onclick="confirmHRManualAdd()">添加专家</button></div></div></div>
+
+    <!-- 新建子库弹窗 -->
+    <div id="create-subpool-modal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">新建子库 - <span id="create-subpool-dept-label"></span></div><div class="close-btn" onclick="closeCreateSubpoolModal()">×</div></div><div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">子库主题标签</label><input type="text" id="new-subpool-tag" placeholder="如：中考评卷、教学成果评审" style="width:100%;"></div><div style="margin-bottom:14px;"><label style="display:block;margin-bottom:6px;font-weight:500;">有效期（年）</label><select id="new-subpool-validity" style="width:100%;"><option value="1">1年</option><option value="2">2年</option><option value="3" selected>3年</option></select></div><div style="text-align:right;"><button class="btn btn-outline" onclick="closeCreateSubpoolModal()">取消</button><button class="btn btn-primary" onclick="createSubpool()">创建子库</button></div></div></div>
+
+    </div>
+</div>
+
+<script>
+let currentRole = 'hr';
+let currentDept = ''; // 处室管理员当前所属处室
+let currentTab = 'pool';
+
+const mockData = [
+    { id:'T001',name:'张伟',gender:'男',birthYear:1971,district:'渝北区',school:'渝北中学',title:'正高级',titleYears:8,major:'数学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['重庆英才'],certificates:['特级教师','学科带头人'],seniority:25,rating:4.9,serviceCount:12,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T002',name:'王芳',gender:'女',birthYear:1981,district:'沙坪坝区',school:'沙坪坝实验小学',title:'高级',titleYears:5,major:'语文',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:15,rating:4.7,serviceCount:8,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[{recordId:'REC_DEMO_1',date:'2026-04-20'}] },
+    { id:'T003',name:'李强',gender:'男',birthYear:1988,district:'九龙坡区',school:'九龙坡育才中学',title:'一级',titleYears:3,major:'英语',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:8,rating:4.5,serviceCount:3,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T004',name:'赵静',gender:'女',birthYear:1978,district:'渝北区',school:'南岸实验小学',title:'高级',titleYears:6,major:'数学',education:'硕士',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['学科带头人'],seniority:18,rating:4.8,serviceCount:15,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家','优质专家'],manualTags:[],tags:[],participationHistory:[{recordId:'REC_DEMO_1',date:'2026-04-20'}] },
+    { id:'T005',name:'孙博',gender:'男',birthYear:1974,district:'江北区',school:'重庆二中',title:'正高级',titleYears:10,major:'物理',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划','国家级人才'],certificates:['特级教师'],seniority:22,rating:5.0,serviceCount:20,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T006',name:'周梅',gender:'女',birthYear:1984,district:'巴南区',school:'巴南中学',title:'高级',titleYears:4,major:'化学',education:'硕士',educationType:'全日制',postLevel:'专技六级',talentProjects:[],certificates:[],seniority:12,rating:4.6,serviceCount:5,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T007',name:'吴刚',gender:'男',birthYear:1986,district:'沙坪坝区',school:'重庆八中',title:'一级',titleYears:2,major:'语文',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:['市级骨干'],seniority:10,rating:4.4,serviceCount:4,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T008',name:'郑红',gender:'女',birthYear:1968,district:'渝北区',school:'重庆一中',title:'正高级',titleYears:12,major:'数学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['重庆英才','国家级人才'],certificates:['学科带头人'],seniority:28,rating:4.9,serviceCount:18,status:'available',expertType:'自然候选人',autoTags:['高层次人才','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T009',name:'马超',gender:'男',birthYear:1976,district:'渝中区',school:'巴蜀中学',title:'高级',titleYears:7,major:'历史',education:'硕士',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['市级名师'],seniority:20,rating:4.8,serviceCount:10,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T010',name:'林燕',gender:'女',birthYear:1970,district:'南岸区',school:'南开中学',title:'正高级',titleYears:9,major:'政治',education:'硕士',educationType:'在职',postLevel:'专技三级',talentProjects:['万人计划'],certificates:['特级教师','学科带头人'],seniority:26,rating:4.9,serviceCount:16,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T011',name:'何涛',gender:'男',birthYear:1989,district:'江北区',school:'重庆十八中',title:'一级',titleYears:2,major:'地理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:7,rating:4.3,serviceCount:2,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T012',name:'陈琳',gender:'女',birthYear:1982,district:'涪陵区',school:'涪陵五中',title:'高级',titleYears:5,major:'生物',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:14,rating:4.6,serviceCount:6,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T013',name:'刘波',gender:'男',birthYear:1977,district:'万州区',school:'万州二中',title:'高级',titleYears:6,major:'物理',education:'本科',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['学科带头人'],seniority:19,rating:4.7,serviceCount:11,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T014',name:'胡敏',gender:'女',birthYear:1987,district:'永川区',school:'永川中学',title:'一级',titleYears:3,major:'英语',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:9,rating:4.4,serviceCount:4,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T015',name:'朱伟',gender:'男',birthYear:1972,district:'合川区',school:'合川中学',title:'正高级',titleYears:8,major:'信息技术',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['重庆英才'],certificates:['特级教师'],seniority:24,rating:4.8,serviceCount:14,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T016',name:'罗丽',gender:'女',birthYear:1980,district:'江津区',school:'江津中学',title:'高级',titleYears:5,major:'音乐',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['市级名师'],seniority:16,rating:4.5,serviceCount:7,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T017',name:'唐勇',gender:'男',birthYear:1990,district:'大渡口区',school:'重庆三十七中',title:'一级',titleYears:1,major:'体育',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:6,rating:4.2,serviceCount:2,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T018',name:'彭丽',gender:'女',birthYear:1969,district:'北碚区',school:'西南大学附中',title:'正高级',titleYears:11,major:'化学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划','国家级人才'],certificates:['特级教师','学科带头人'],seniority:27,rating:5.0,serviceCount:19,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T019',name:'蒋峰',gender:'男',birthYear:1983,district:'綦江区',school:'綦江中学',title:'高级',titleYears:4,major:'数学',education:'硕士',educationType:'在职',postLevel:'专技六级',talentProjects:[],certificates:['骨干教师'],seniority:13,rating:4.6,serviceCount:5,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T020',name:'沈洁',gender:'女',birthYear:1979,district:'渝中区',school:'重庆二十九中',title:'高级',titleYears:6,major:'美术',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['学科带头人'],seniority:17,rating:4.7,serviceCount:9,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T021',name:'韩磊',gender:'男',birthYear:1991,district:'璧山区',school:'璧山中学',title:'一级',titleYears:1,major:'语文',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:5,rating:4.1,serviceCount:1,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T022',name:'曹芳',gender:'女',birthYear:1975,district:'长寿区',school:'长寿中学',title:'高级',titleYears:8,major:'英语',education:'硕士',educationType:'在职',postLevel:'专技三级',talentProjects:['重庆英才'],certificates:['市级名师'],seniority:21,rating:4.8,serviceCount:13,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T023',name:'秦莉',gender:'女',birthYear:1973,district:'南岸区',school:'重庆十一中',title:'正高级',titleYears:7,major:'政治',education:'博士',educationType:'在职',postLevel:'专技三级',talentProjects:['万人计划'],certificates:['特级教师'],seniority:23,rating:4.9,serviceCount:17,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T024',name:'丁浩',gender:'男',birthYear:1985,district:'黔江区',school:'黔江中学',title:'一级',titleYears:3,major:'地理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:11,rating:3.8,serviceCount:3,status:'suspended',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T025',name:'贺敏',gender:'女',birthYear:1981,district:'开州区',school:'开州中学',title:'高级',titleYears:5,major:'生物',education:'硕士',educationType:'全日制',postLevel:'专技六级',talentProjects:[],certificates:['骨干教师'],seniority:15,rating:4.5,serviceCount:6,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] }
+];
+// 批量生成额外专家数据，使总数达到45人
+// 批量生成额外专家数据，使总数达到45人（含市外专家和行业专家）
+const extraNames = [
+    ['杨明','男',1972,'万州区',['正高级','自然候选人'],'数学','博士','专技二级',['特级教师']],
+    ['黄丽','女',1983,'涪陵区',['高级','自主候选人'],'语文','硕士','专技五级',['骨干教师']],
+    ['许刚','男',1979,'渝中区',['高级','自主候选人'],'英语','硕士','专技四级',['学科带头人']],
+    ['程静','女',1986,'江北区',['一级','自主候选人'],'生物','本科','专技七级',[]],
+    ['段涛','男',1974,'沙坪坝区',['正高级','自然候选人'],'物理','博士','专技二级',['特级教师','重庆英才']],
+    ['蔡琳','女',1982,'九龙坡区',['高级','自主候选人'],'化学','硕士','专技五级',['市级名师']],
+    ['范超','男',1988,'南岸区',['一级','自主候选人'],'地理','本科','专技七级',[]],
+    ['谭芳','女',1976,'北碚区',['高级','自主候选人'],'历史','硕士','专技四级',['学科带头人']],
+    ['龙伟','男',1971,'渝北区',['正高级','自然候选人'],'政治','博士','专技二级',['特级教师','万人计划']],
+    ['夏敏','女',1984,'巴南区',['高级','自主候选人'],'信息技术','硕士','专技六级',['骨干教师']],
+    ['聂磊','男',1989,'大渡口区',['一级','自主候选人'],'体育','本科','专技七级',[]],
+    ['余芳','女',1978,'綦江区',['高级','自主候选人'],'音乐','硕士','专技五级',['市级名师']],
+    ['熊刚','男',1973,'江津区',['正高级','自然候选人'],'美术','博士','专技三级',['特级教师']],
+    ['康丽','女',1985,'合川区',['高级','自主候选人'],'数学','硕士','专技六级',['骨干教师']],
+    ['雷洋','男',1987,'永川区',['一级','自主候选人'],'语文','本科','专技七级',[]],
+    ['代洁','女',1977,'长寿区',['高级','自主候选人'],'英语','硕士','专技四级',['学科带头人']],
+    ['田峰','男',1970,'璧山区',['正高级','自然候选人'],'物理','博士','专技二级',['特级教师','重庆英才']],
+    ['兰敏','女',1983,'铜梁区',['高级','自主候选人'],'化学','硕士','专技五级',['骨干教师']],
+    ['袁坤','男',1988,'潼南区',['一级','自主候选人'],'生物','本科','专技七级',[]],
+    ['崔芳','女',1975,'荣昌区',['高级','自主候选人'],'地理','硕士','专技四级',['市级名师']]
+];
+extraNames.forEach(([name,gender,birthYear,district,titleTypePair,major,edu,postLevel,certs],i) => {
+    const id = 'T0' + (26 + i);
+    const [title, expertType] = titleTypePair;
+    const autoTags = [];
+    if (title === '正高级') autoTags.push('高层次人才','自然候选人','资深专家');
+    if (certs && certs.length > 0) autoTags.push('名师');
+    mockData.push({
+        id, name, gender, birthYear, district, school: district.replace('区','') + '中学', title,
+        titleYears: title === '正高级' ? 5 + Math.floor(Math.random() * 8) : title === '高级' ? 2 + Math.floor(Math.random() * 6) : 1 + Math.floor(Math.random() * 3),
+        major, education: edu, educationType: i % 3 === 0 ? '在职' : '全日制',
+        postLevel, talentProjects: (certs||[]).filter(c => ['万人计划','重庆英才','国家级人才'].includes(c)),
+        certificates: (certs||[]).filter(c => !['万人计划','重庆英才','国家级人才'].includes(c)),
+        seniority: 5 + Math.floor(Math.random() * 25), rating: 4.0 + Math.random() * 1.0,
+        serviceCount: Math.floor(Math.random() * 15), status: 'available',
+        expertType, autoTags, manualTags: [], tags: [], participationHistory: []
+    });
+});
+// 追加市外专家和行业专家示例数据
+const specialExperts = [
+    { id:'T046',name:'赵建国',gender:'男',birthYear:1968,district:'市外',school:'四川大学',title:'正高级',titleYears:15,major:'教育学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['国务院特殊津贴'],seniority:30,rating:4.9,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'510000196801011234',phone:'13900001111' },
+    { id:'T047',name:'钱美华',gender:'女',birthYear:1971,district:'市外',school:'北京师范大学',title:'正高级',titleYears:12,major:'心理学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划'],certificates:['特级教师'],seniority:28,rating:4.8,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'110000197101015678',phone:'13900002222' },
+    { id:'T048',name:'孙建国',gender:'男',birthYear:1965,district:'市外',school:'华东师范大学',title:'正高级',titleYears:18,major:'课程论',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['长江学者'],seniority:32,rating:5.0,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'310000196501019012',phone:'13900003333' },
+    { id:'T049',name:'周建华',gender:'男',birthYear:1972,district:'渝中区',school:'重庆市住建委',title:'其他',titleYears:10,major:'基建工程',education:'硕士',educationType:'在职',postLevel:'其他',talentProjects:[],certificates:['高级工程师'],seniority:20,rating:4.6,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'500000197201011234',phone:'13900004444' },
+    { id:'T050',name:'吴正',gender:'男',birthYear:1970,district:'渝北区',school:'重庆市财政局',title:'其他',titleYears:12,major:'财务审计',education:'硕士',educationType:'在职',postLevel:'其他',talentProjects:[],certificates:['高级会计师'],seniority:22,rating:4.7,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'500000197001015678',phone:'13900005555' }
+];
+specialExperts.forEach(e => {
+    e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags]));
+    mockData.push(e);
+});
+mockData.forEach(e => { e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); });
+// 为所有专家补充证件和联系方式字段
+mockData.forEach((e, i) => {
+    if (!e.idType) { e.idType = '身份证'; e.idNumber = '510000' + (1970 + i) + '0101' + i.toString().padStart(4,'0'); e.phone = '138' + (10000000 + i).toString().padStart(8,'0'); }
+});
+
+let subPools = [
+    { id:'SP001',deptName:'基教处',deptAdmin:'基教处管理员',expertIds:['T001','T002','T004','T005','T008','T009','T010','T012','T014','T016','T019','T022','T023','T026','T027','T028','T029','T030','T031','T032','T033','T034','T035','T036','T037','T038','T039','T040','T041','T042','T043','T044','T045','T046','T047','T048','T049','T050'],tags:['中考评卷'],validFrom:new Date('2025-01-01'),validTo:new Date('2028-01-01'),status:'active' },
+    { id:'SP004',deptName:'基教处',deptAdmin:'基教处管理员',expertIds:['T002','T005','T008','T010','T015','T018','T020','T023','T026','T028','T029','T030','T031','T032','T033','T034','T035','T036','T037','T038','T039','T040','T041','T042','T043','T044','T045','T046','T047','T048','T049','T050'],tags:['教学成果评审'],validFrom:new Date('2025-03-01'),validTo:new Date('2028-03-01'),status:'active' },
+    { id:'SP005',deptName:'基教处',deptAdmin:'基教处管理员',expertIds:['T001','T004','T006','T007','T009','T012','T019','T021','T022','T025','T027','T028','T030','T031','T032','T033','T034','T035','T036','T037','T038','T039','T040','T041','T042','T043','T044','T045','T046','T047','T048','T049','T050'],tags:['骨干教师评审'],validFrom:new Date('2025-06-01'),validTo:new Date('2028-06-01'),status:'active' },
+    { id:'SP002',deptName:'师范处',deptAdmin:'师范处管理员',expertIds:['T005','T008','T010','T015','T018','T023','T026','T029','T030','T032','T033','T034','T035','T036','T037','T038','T039','T040','T041','T042','T043','T044','T045','T046','T047','T048'],tags:['特级教师评审'],validFrom:new Date('2025-06-01'),validTo:new Date('2028-06-01'),status:'active' },
+    { id:'SP003',deptName:'职成教处',deptAdmin:'职成教处管理员',expertIds:['T012','T013','T016','T020','T025','T027','T028','T031','T032','T033','T034','T035','T036','T037','T038','T039','T040','T041','T042','T043','T044','T045','T049','T050'],tags:['职业教育评审'],validFrom:new Date('2024-09-01'),validTo:new Date('2027-09-01'),status:'active' }
+];
+let currentSubPoolId = null;
+let globalTags = ['高层次人才','名师','资深专家','骨干专家','优质专家','自然候选人','中青年专家','中考评卷','教学成果评审','特级教师评审','职业教育评审','竞赛教练'];
+let hrCurrentExperts = [...mockData], hrPage = 1; const hrPageSize = 10;
+let leaderPage = 1; const leaderPageSize = 10;
+let deptCurrentExperts = [], deptPage = 1; const deptPageSize = 10;
+let extractionRecords = [{ id:'REC_DEMO_1',sourceType:'dept',subPoolId:'SP001',purpose:'2026年重庆市数学中考命题专家抽取',category:'骨干教师评审',level:'市级',timestamp:new Date('2026-04-20'),status:'confirmed',selectedExperts:[{id:'T001',name:'张伟',school:'渝北中学',title:'正高级',major:'数学',district:'渝北区'},{id:'T004',name:'赵静',school:'南岸实验小学',title:'高级',major:'数学',district:'渝北区'},{id:'T008',name:'郑红',school:'重庆一中',title:'正高级',major:'数学',district:'渝北区'},{id:'T019',name:'蒋峰',school:'綦江中学',title:'高级',major:'数学',district:'綦江区'},{id:'T002',name:'王芳',school:'沙坪坝实验小学',title:'高级',major:'语文',district:'沙坪坝区'}] }];
+let currentExtractionRecord = null, currentTaggingExpert = null, currentEvaluatingExpert = null, currentEvaluatingRecord = null;
+let currentBlacklistTarget = null, evaluations = [];
+let leaderPoolIds = []; // 手动选择的组长专家ID列表
+
+function getAge(by) { return new Date().getFullYear() - by; }
+
+function onDeptSelectChange() {
+    currentDept = document.getElementById('dept-selector').value;
+    currentSubPoolId = null;
+    document.getElementById('dept-pool-detail').classList.add('hidden');
+    if (currentDept) {
+        renderSubPoolList();
+        document.getElementById('dept-compliance-check').innerHTML = '<p style="color:#999;">请选择左侧子库查看详情</p>';
+    } else {
+        document.getElementById('dept-subpool-list').innerHTML = '<p style="color:#999;text-align:center;padding:20px;">请选择所属处室</p>';
+        document.getElementById('dept-compliance-check').innerHTML = '<p style="color:#999;">请选择所属处室和子库</p>';
+    }
+}
+
+function switchRole(role) {
+    currentRole = role;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.role-btn[onclick="switchRole('${role}')"]`).classList.add('active');
+    const deptSel = document.getElementById('dept-selector');
+    if (role === 'dept') {
+        deptSel.classList.remove('hidden');
+        if (currentDept) deptSel.value = currentDept;
+    } else {
+        deptSel.classList.add('hidden');
+        deptSel.value = '';
+        currentDept = '';
+    }
+    document.getElementById('hr-pool-view').classList.toggle('hidden', role !== 'hr');
+    document.getElementById('dept-pool-view').classList.toggle('hidden', role !== 'dept');
+    // 处室角色隐藏组长专家库tab
+    const leaderTab = document.querySelector('.tab[onclick="showTab(\'leader\')"]');
+    if (leaderTab) leaderTab.style.display = role === 'hr' ? '' : 'none';
+    if (role === 'dept') {
+        if (currentDept) renderSubPoolList();
+        else document.getElementById('dept-subpool-list').innerHTML = '<p style="color:#999;text-align:center;padding:20px;">请先在顶部选择所属处室</p>';
+        document.getElementById('dept-pool-detail').classList.add('hidden');
+        document.getElementById('dept-compliance-check').innerHTML = '<p style="color:#999;">请选择所属处室和子库</p>';
+    }
+    if (currentTab === 'pool') { if (role === 'hr') { hrPage = 1; hrFilterExperts(); } else if (currentDept) deptRenderCurrentPool(); }
+}
+
+function showTab(tabId) {
+    currentTab = tabId;
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.remove('hidden');
+    if (event && event.target) event.target.classList.add('active');
+    else document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+    if (tabId === 'pool') { if (currentRole === 'hr') { hrPage = 1; hrFilterExperts(); } else renderSubPoolList(); }
+    if (tabId === 'leader') { leaderPage = 1; renderLeaderPool(); }
+    if (tabId === 'extract') { showExtractHistory(); }
+    if (tabId === 'evaluate') renderEvalRecordList();
+    if (tabId === 'blacklist') renderBlacklistTable();
+}
+
+// === HR总库 ===
+function hrFilterExperts() {
+    const major = document.getElementById('hr-filter-major').value, title = document.getElementById('hr-filter-title').value;
+    const edu = document.getElementById('hr-filter-edu').value, eduType = document.getElementById('hr-filter-eduType').value;
+    const talent = document.getElementById('hr-filter-talent').value, post = document.getElementById('hr-filter-post').value;
+    const ageMin = parseInt(document.getElementById('hr-filter-ageMin').value) || 0, ageMax = parseInt(document.getElementById('hr-filter-ageMax').value) || 999;
+    const senMin = parseInt(document.getElementById('hr-filter-senMin').value) || 0, senMax = parseInt(document.getElementById('hr-filter-senMax').value) || 999;
+    const district = document.getElementById('hr-filter-district').value, keyword = document.getElementById('hr-filter-search').value.trim().toLowerCase();
+    hrCurrentExperts = mockData.filter(e => {
+        if (major && e.major !== major) return false;
+        if (title && e.title !== title) return false;
+        if (edu && e.education !== edu) return false;
+        if (eduType && e.educationType !== eduType) return false;
+        if (talent && !(e.talentProjects || []).includes(talent)) return false;
+        if (post && e.postLevel !== post) return false;
+        const age = getAge(e.birthYear);
+        if (age < ageMin || age > ageMax) return false;
+        if (e.seniority < senMin || e.seniority > senMax) return false;
+        if (district && e.district !== district) return false;
+        if (keyword && !(e.id.toLowerCase().includes(keyword) || e.name.toLowerCase().includes(keyword) || e.school.toLowerCase().includes(keyword) || e.district.toLowerCase().includes(keyword))) return false;
+        return true;
+    });
+    hrPage = 1; hrRenderTable();
+}
+function hrResetFilter() {
+    ['hr-filter-major','hr-filter-title','hr-filter-edu','hr-filter-eduType','hr-filter-talent','hr-filter-post','hr-filter-district','hr-filter-search'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['hr-filter-ageMin','hr-filter-ageMax','hr-filter-senMin','hr-filter-senMax'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    hrCurrentExperts = [...mockData]; hrPage = 1; hrRenderTable();
+}
+function hrRenderTable() {
+    const tp = Math.ceil(hrCurrentExperts.length / hrPageSize); if (hrPage > tp) hrPage = Math.max(1, tp);
+    const start = (hrPage - 1) * hrPageSize, pageExperts = hrCurrentExperts.slice(start, start + hrPageSize);
+    document.getElementById('hr-expert-table').innerHTML = pageExperts.map(e => {
+        const age = getAge(e.birthYear), isSecret = (e.talentProjects || []).includes('国家级人才');
+        const dn = (currentRole === 'dept' && isSecret) ? e.name.charAt(0) + '*' : e.name;
+        const ds = (currentRole === 'dept' && isSecret) ? '***' : e.school;
+        return `<tr><td><input type="checkbox" class="hr-checkbox" value="${e.id}" onclick="hrUpdateBatchBar()"></td><td><code style="font-size:10px;color:#666;">${e.id}</code></td><td><strong style="font-size:12px;">${dn}</strong></td><td style="font-size:11px;">${e.gender}/${age}岁</td><td style="font-size:11px;max-width:100px;">${e.district}<br><span style="color:#999;">${ds}</span></td><td><span style="color:#1976d2;font-weight:500;">${e.title}</span><br><span style="font-size:10px;color:#999;">${e.titleYears||0}年</span></td><td>${e.major}</td><td style="font-size:11px;">${e.education||'-'}<br><span style="font-size:10px;color:#999;">${e.educationType||''}</span></td><td style="font-size:11px;">${e.postLevel||'-'}</td><td>${e.seniority}年</td><td style="text-align:center;"><span class="eval-badge ${e.rating>=4.8?'eval-high':e.rating>=4.0?'eval-mid':'eval-low'}">${e.rating.toFixed(1)}</span></td><td><span class="tag ${e.expertType==='自然候选人'?'tag-success':'tag-primary'}" style="font-size:10px;">${e.expertType}</span></td><td style="max-width:100px;line-height:1.6;">${e.tags.length>0?e.tags.map(t=>`<span class="tag tag-primary" style="font-size:10px;margin:1px;">${t}</span>`).join(''):'<span style="color:#999;font-size:10px;">无</span>'}</td><td style="text-align:center;"><span class="tag ${e.status==='available'?'tag-success':e.status==='blacklisted'?'tag-danger':e.status==='suspended'?'tag-danger':'tag-warning'}" style="font-size:10px;">${e.status==='available'?'可用':e.status==='blacklisted'?'黑名单':e.status==='suspended'?'已暂停':'使用中'}</span></td><td><div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;"><button class="btn-sm" onclick="viewExpertDetail('${e.id}')">详情</button><button class="btn-sm" onclick="openTagModal('${e.id}')">打标</button>${leaderPoolIds.includes(e.id)?`<button class="btn-sm warning" onclick="toggleLeaderPool('${e.id}')">移出组长</button>`:`<button class="btn-sm success" onclick="toggleLeaderPool('${e.id}')">加入组长</button>`}${e.status==='available'?`<button class="btn-sm warning" onclick="suspendExpert('${e.id}')">暂停</button><button class="btn-sm danger" onclick="manualBlacklist('${e.id}')">拉黑</button>`:e.status==='suspended'?`<button class="btn-sm success" onclick="resumeExpert('${e.id}')">恢复</button>`:e.status==='blacklisted'?`<button class="btn-sm" onclick="removeFromBlacklist('${e.id}')">移出黑名单</button>`:''}</div></td></tr>`;
+    }).join('');
+    document.getElementById('hr-senior').textContent = mockData.filter(e => ['正高级','高级'].includes(e.title)).length;
+    document.getElementById('hr-total').textContent = mockData.length;
+    document.getElementById('hr-natural').textContent = mockData.filter(e => e.expertType === '自然候选人').length;
+    document.getElementById('hr-available').textContent = mockData.filter(e => e.status === 'available').length;
+    document.getElementById('hr-blacklist').textContent = mockData.filter(e => e.status === 'blacklisted').length;
+    document.getElementById('hr-senior').textContent = mockData.filter(e => ['正高级','高级'].includes(e.title)).length;
+    hrRenderPagination(hrCurrentExperts.length, tp); hrUpdateBatchBar();
+}
+function hrRenderPagination(total, tp) { const c = document.getElementById('hr-pagination'); if (tp <= 1) { c.innerHTML = ''; return; } let h = `<button ${hrPage===1?'disabled':''} onclick="hrGoToPage(${hrPage-1})">上一页</button>`; for (let i = 1; i <= tp; i++) { if (tp <= 7 || i === 1 || i === tp || (i >= hrPage - 1 && i <= hrPage + 1)) h += `<button class="${i===hrPage?'active':''}" onclick="hrGoToPage(${i})">${i}</button>`; else if (i === hrPage - 2 || i === hrPage + 2) h += '<span class="page-info">...</span>'; } h += `<button ${hrPage===tp?'disabled':''} onclick="hrGoToPage(${hrPage+1})">下一页</button><span class="page-info">共${total}条</span>`; c.innerHTML = h; }
+function hrGoToPage(p) { hrPage = p; hrRenderTable(); }
+function toggleLeaderPool(id) {
+    if (leaderPoolIds.includes(id)) { leaderPoolIds = leaderPoolIds.filter(i => i !== id); }
+    else { leaderPoolIds.push(id); }
+    hrRenderTable();
+    if (currentTab === 'leader') renderLeaderPool();
+}
+function hrToggleSelectAll() { const sa = document.getElementById('hr-select-all'); document.querySelectorAll('.hr-checkbox').forEach(cb => cb.checked = sa.checked); hrUpdateBatchBar(); }
+function hrUpdateBatchBar() { const checked = document.querySelectorAll('.hr-checkbox:checked'), bar = document.getElementById('hr-batch-bar'); if (checked.length > 0) { bar.classList.remove('hidden'); document.getElementById('hr-selected-count').textContent = checked.length; } else { bar.classList.add('hidden'); document.getElementById('hr-select-all').checked = false; } }
+function hrClearSelection() { document.querySelectorAll('.hr-checkbox').forEach(cb => cb.checked = false); document.getElementById('hr-select-all').checked = false; hrUpdateBatchBar(); }
+function hrBatchTag() { const tag = document.getElementById('hr-batch-tag-select').value; if (!tag) { alert('请选择标签'); return; } const ids = Array.from(document.querySelectorAll('.hr-checkbox:checked')).map(cb => cb.value); mockData.forEach(e => { if (ids.includes(e.id)) { if (!e.manualTags.includes(tag)) { e.manualTags.push(tag); e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); } } }); alert(`成功为 ${ids.length} 名专家批量打标「${tag}」`); hrRenderTable(); hrClearSelection(); }
+function hrBatchAddToLeader() { const ids = Array.from(document.querySelectorAll('.hr-checkbox:checked')).map(cb => cb.value); if (ids.length === 0) { alert('请先勾选专家'); return; } let added = 0; ids.forEach(id => { if (!leaderPoolIds.includes(id)) { leaderPoolIds.push(id); added++; } }); alert(`已将 ${added} 名专家加入组长专家库（${ids.length - added} 名已存在）`); hrRenderTable(); hrClearSelection(); }
+function hrExportExcel() {
+    if (hrCurrentExperts.length === 0) { alert('没有可导出的数据'); return; }
+    const cols = ['编号','姓名','性别','年龄','区县','学校','职称','正高年限','专业','学历','学历类型','岗位等级','人才项目','教龄','评分','专家类别','证件类型','证件号码','手机号','标签','状态'];
+    let csv = '\uFEFF' + cols.join(',') + '\n';
+    hrCurrentExperts.forEach(e => { csv += [e.id, e.name, e.gender, getAge(e.birthYear), e.district, e.school, e.title, e.titleYears||0, e.major, e.education||'', e.educationType||'', e.postLevel||'', (e.talentProjects||[]).join(';'), e.seniority, e.rating.toFixed(1), e.expertType, e.idType||'身份证', e.idNumber||'', e.phone||'', e.tags.join(';'), e.status].join(',') + '\n'; });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `专家库筛选结果_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+    alert(`已导出 ${hrCurrentExperts.length} 条专家数据（CSV格式，可用Excel打开）。\n\n提示：根据31号通知要求，筛选结果仅线下分发，不做系统间推送。`);
+}
+
+// === 组长专家库 ===
+function getLeaderExperts() { const autoFiltered = mockData.filter(e => e.title === '正高级' && e.rating >= 4.8 && e.status !== 'blacklisted'); const manualSelected = leaderPoolIds.map(id => mockData.find(e => e.id === id)).filter(Boolean); const all = [...autoFiltered]; manualSelected.forEach(e => { if (!all.find(a => a.id === e.id)) all.push(e); }); return all; }
+function renderLeaderPool() {
+    const leaders = getLeaderExperts();
+    const tp = Math.ceil(leaders.length / leaderPageSize); if (leaderPage > tp) leaderPage = Math.max(1, tp);
+    const start = (leaderPage - 1) * leaderPageSize, pageLeaders = leaders.slice(start, start + leaderPageSize);
+    document.getElementById('leader-expert-table').innerHTML = pageLeaders.map(e => {
+        const age = getAge(e.birthYear), pc = (e.participationHistory||[]).length;
+        return `<tr><td><code style="font-size:10px;">${e.id}</code></td><td><strong style="font-size:12px;">${e.name}</strong></td><td style="font-size:11px;">${e.gender}/${age}岁</td><td style="font-size:11px;">${e.district}<br><span style="color:#999;">${e.school}</span></td><td><span style="color:#1976d2;font-weight:500;">${e.title}</span><br><span style="font-size:10px;color:#999;">${e.titleYears||0}年</span></td><td>${e.major}</td><td>${e.education||'-'}(${e.educationType||''})</td><td>${e.seniority}年</td><td style="text-align:center;"><span class="eval-badge eval-high">${e.rating.toFixed(1)}</span></td><td style="text-align:center;">${pc}</td><td>${e.tags.length>0?e.tags.map(t=>`<span class="tag tag-primary" style="font-size:10px;">${t}</span>`).join(''):'-'}</td><td><span class="tag ${e.title==='正高级'&&e.rating>=4.8?'tag-success':'tag-warning'}" style="font-size:10px;">${e.title==='正高级'&&e.rating>=4.8?'自动遴选':'手动选择'}</span></td><td style="text-align:center;"><span class="tag ${e.status==='available'?'tag-success':'tag-warning'}">${e.status==='available'?'可用':'暂停'}</span></td><td>${leaderPoolIds.includes(e.id)?`<button class="btn-sm danger" onclick="toggleLeaderPool('${e.id}')">移出</button>`:''}</td></tr>`;
+    }).join('');
+    document.getElementById('leader-total').textContent = leaders.length;
+    document.getElementById('leader-avg-rating').textContent = leaders.length > 0 ? (leaders.reduce((s,e)=>s+e.rating,0)/leaders.length).toFixed(1) : '-';
+    document.getElementById('leader-avg-seniority').textContent = leaders.length > 0 ? Math.round(leaders.reduce((s,e)=>s+e.seniority,0)/leaders.length) + '年' : '-';
+    const c = document.getElementById('leader-pagination');
+    if (tp <= 1) { c.innerHTML = ''; return; }
+    let h = `<button ${leaderPage===1?'disabled':''} onclick="leaderGoToPage(${leaderPage-1})">上一页</button>`;
+    for (let i = 1; i <= tp; i++) { if (tp <= 7 || i === 1 || i === tp || (i >= leaderPage - 1 && i <= leaderPage + 1)) h += `<button class="${i===leaderPage?'active':''}" onclick="leaderGoToPage(${i})">${i}</button>`; else if (i === leaderPage - 2 || i === leaderPage + 2) h += '<span class="page-info">...</span>'; }
+    h += `<button ${leaderPage===tp?'disabled':''} onclick="leaderGoToPage(${leaderPage+1})">下一页</button><span class="page-info">共${leaders.length}条</span>`; c.innerHTML = h;
+}
+function leaderGoToPage(p) { leaderPage = p; renderLeaderPool(); }
+function leaderExportExcel() {
+    const leaders = getLeaderExperts();
+    if (leaders.length === 0) { alert('没有可导出的数据'); return; }
+    const cols = ['编号','姓名','性别','年龄','区县','学校','职称','正高年限','专业','学历','岗位等级','教龄','评分','证件号码','手机号'];
+    let csv = '\uFEFF' + cols.join(',') + '\n';
+    leaders.forEach(e => { csv += [e.id, e.name, e.gender, getAge(e.birthYear), e.district, e.school, e.title, e.titleYears||0, e.major, e.education||'', e.postLevel||'', e.seniority, e.rating.toFixed(1), e.idNumber||'', e.phone||''].join(',') + '\n'; });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `组长专家库_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+    alert(`已导出 ${leaders.length} 名组长候选人数据。`);
+}
+
+// === 处室子库 ===
+function renderSubPoolList() {
+    const list = document.getElementById('dept-subpool-list');
+    if (!currentDept) { list.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">请先在顶部选择所属处室</p>'; return; }
+    const myPools = subPools.filter(sp => sp.deptName === currentDept);
+    if (myPools.length === 0) { list.innerHTML = `<p style="color:#999;text-align:center;padding:20px;">${currentDept}暂无子库，请新建</p>`; return; }
+    list.innerHTML = myPools.map(sp => { const daysLeft = Math.ceil((new Date(sp.validTo) - new Date()) / 86400000), isExpiring = daysLeft <= 30; return `<div class="subpool-card ${currentSubPoolId===sp.id?'selected':''}" onclick="selectSubPool('${sp.id}')"><div class="pool-name">${sp.tags.join(' / ') || '未命名子库'} <span class="tag tag-primary">${sp.expertIds.length}人</span></div><div class="pool-meta">有效期: ${sp.validFrom.toLocaleDateString()} ~ ${sp.validTo.toLocaleDateString()} ${isExpiring?'<span class="tag tag-warning" style="margin-left:4px;">即将到期</span>':''} | 状态: ${sp.status==='active'?'正常':'已过期'}</div></div>`; }).join('');
+}
+function selectSubPool(id) { currentSubPoolId = id; renderSubPoolList(); deptRenderCurrentPool(); }
+function deptRenderCurrentPool() {
+    if (!currentSubPoolId) { document.getElementById('dept-pool-detail').classList.add('hidden'); document.getElementById('dept-compliance-check').innerHTML = '<p style="color:#999;">请先选择或创建一个子库</p>'; return; }
+    document.getElementById('dept-pool-detail').classList.remove('hidden');
+    const sp = subPools.find(s => s.id === currentSubPoolId); if (!sp) return;
+    document.getElementById('dept-pool-name-label').textContent = sp.deptName + ' | ' + sp.tags.join(' / ');
+    const poolExperts = sp.expertIds.map(id => mockData.find(e => e.id === id)).filter(Boolean);
+    deptCurrentExperts = [...poolExperts]; deptPage = 1; deptRenderTable(poolExperts); deptRenderCompliance(poolExperts);
+}
+function deptRenderTable(experts) {
+    const tp = Math.ceil(experts.length / deptPageSize); if (deptPage > tp) deptPage = Math.max(1, tp);
+    const start = (deptPage - 1) * deptPageSize, pageExperts = experts.slice(start, start + deptPageSize);
+    document.getElementById('dept-expert-table').innerHTML = pageExperts.map(e => { const pc = e.participationHistory ? e.participationHistory.length : 0; return `<tr><td><code style="font-size:11px;">${e.id}</code></td><td><strong>${e.name}</strong></td><td>${e.district}</td><td style="font-size:11px;">${e.school}</td><td>${e.title}</td><td>${e.major}</td><td>${e.education||'-'}(${e.educationType||''})</td><td>${e.seniority}年</td><td style="text-align:center;"><span class="eval-badge ${e.rating>=4.8?'eval-high':e.rating>=4.0?'eval-mid':'eval-low'}">${e.rating.toFixed(1)}</span></td><td style="text-align:center;">${pc}</td><td><span class="tag ${e.expertType==='自然候选人'?'tag-success':'tag-primary'}">${e.expertType}</span></td><td>${e.tags.length>0?e.tags.map(t=>`<span class="tag tag-primary">${t}</span>`).join(''):'-'}</td><td style="text-align:center;"><span class="tag ${e.status==='available'?'tag-success':'tag-warning'}">${e.status==='available'?'可用':'暂停'}</span></td><td><div style="display:flex;gap:3px;"><button class="btn-sm" onclick="viewExpertDetail('${e.id}')">详情</button><button class="btn-sm danger" onclick="deptRemoveExpert('${e.id}')">移出</button></div></td></tr>`; }).join('');
+    document.getElementById('dept-pool-total').textContent = experts.length;
+    document.getElementById('dept-pool-natural').textContent = experts.filter(e => e.expertType === '自然候选人').length;
+    document.getElementById('dept-pool-self').textContent = experts.filter(e => e.expertType !== '自然候选人').length;
+    const sp = subPools.find(s => s.id === currentSubPoolId);
+    if (sp) { const dl = Math.ceil((new Date(sp.validTo) - new Date()) / 86400000); document.getElementById('dept-pool-expire').textContent = dl + '天'; if (dl <= 30) document.getElementById('dept-pool-expire').style.color = '#f44336'; }
+    deptRenderPagination(experts.length, tp);
+}
+function deptRenderPagination(total, tp) { const c = document.getElementById('dept-pagination'); if (tp <= 1) { c.innerHTML = ''; return; } let h = `<button ${deptPage===1?'disabled':''} onclick="deptGoToPage(${deptPage-1})">上一页</button>`; for (let i = 1; i <= tp; i++) { if (tp <= 7 || i === 1 || i === tp || (i >= deptPage - 1 && i <= deptPage + 1)) h += `<button class="${i===deptPage?'active':''}" onclick="deptGoToPage(${i})">${i}</button>`; else if (i === deptPage - 2 || i === deptPage + 2) h += '<span class="page-info">...</span>'; } h += `<button ${deptPage===tp?'disabled':''} onclick="deptGoToPage(${deptPage+1})">下一页</button><span class="page-info">共${total}条</span>`; c.innerHTML = h; }
+function deptGoToPage(p) { deptPage = p; deptRenderCurrentPool(); }
+function deptRenderCompliance(experts) {
+    const nc = experts.filter(e => e.expertType === '自然候选人').length, nr = experts.length > 0 ? (nc / experts.length * 100).toFixed(1) : 0;
+    const yc = experts.filter(e => getAge(e.birthYear) <= 45).length, yr = experts.length > 0 ? (yc / experts.length * 100).toFixed(1) : 0;
+    const ratioOk = experts.length >= 20;
+    let h = '<div style="font-size:13px;line-height:2;">';
+    h += `<div>入库专家总数: <b>${experts.length}</b> 人 ${ratioOk?'<span class="tag tag-success">满足4:1比例</span>':'<span class="tag tag-warning">需≥20人</span>'}</div>`;
+    h += `<div>自然候选人占比: <b>${nr}%</b>（${nc}/${experts.length}） ${nr>=33.3?'<span class="tag tag-success">≥1/3 ✓</span>':'<span class="tag tag-warning">不足1/3</span>'}</div>`;
+    h += `<div>45岁以下中青年: <b>${yr}%</b>（${yc}人） ${yc>0?'<span class="tag tag-success">符合要求</span>':'<span class="tag tag-warning">需补充</span>'}</div>`;
+    const sp = subPools.find(s => s.id === currentSubPoolId);
+    if (sp) { const dl = Math.ceil((new Date(sp.validTo) - new Date()) / 86400000); h += `<div>有效期剩余: <b>${dl}天</b> ${dl<=30?'<span class="tag tag-warning">即将到期，请更新</span>':'<span class="tag tag-success">正常</span>'}</div>`; }
+    h += '</div>'; document.getElementById('dept-compliance-check').innerHTML = h;
+}
+function deptFilterExperts() {
+    const sp = subPools.find(s => s.id === currentSubPoolId); if (!sp) return;
+    let experts = sp.expertIds.map(id => mockData.find(e => e.id === id)).filter(Boolean);
+    const major = document.getElementById('dept-filter-major').value, title = document.getElementById('dept-filter-title').value;
+    const ageMin = parseInt(document.getElementById('dept-filter-ageMin').value) || 0, ageMax = parseInt(document.getElementById('dept-filter-ageMax').value) || 999;
+    const keyword = document.getElementById('dept-filter-search').value.trim().toLowerCase();
+    experts = experts.filter(e => { if (major && e.major !== major) return false; if (title && e.title !== title) return false; const age = getAge(e.birthYear); if (age < ageMin || age > ageMax) return false; if (keyword && !(e.id.toLowerCase().includes(keyword) || e.name.toLowerCase().includes(keyword) || e.school.toLowerCase().includes(keyword))) return false; return true; });
+    deptCurrentExperts = experts; deptPage = 1; deptRenderTable(experts);
+}
+function deptResetFilter() { ['dept-filter-major','dept-filter-title','dept-filter-search'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); ['dept-filter-ageMin','dept-filter-ageMax'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); deptRenderCurrentPool(); }
+function deptExportExcel() {
+    if (deptCurrentExperts.length === 0) { alert('没有可导出的数据'); return; }
+    const cols = ['编号','姓名','区县','学校','职称','专业','学历','教龄','评分','参与次数','证件类型','证件号码','手机号','标签','状态'];
+    let csv = '\uFEFF' + cols.join(',') + '\n';
+    deptCurrentExperts.forEach(e => { csv += [e.id, e.name, e.district, e.school, e.title, e.major, (e.education||'')+'('+(e.educationType||'')+')', e.seniority, e.rating.toFixed(1), (e.participationHistory||[]).length, e.idType||'身份证', e.idNumber||'', e.phone||'', e.tags.join(';'), e.status].join(',') + '\n'; });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `${(subPools.find(s=>s.id===currentSubPoolId)||{}).deptName||'子库'}_筛选结果.csv`; a.click(); URL.revokeObjectURL(url);
+    alert(`已导出 ${deptCurrentExperts.length} 条专家数据。`);
+}
+function deptRemoveExpert(eid) { if (!confirm('确定将该专家从本子库中移出吗？')) return; const sp = subPools.find(s => s.id === currentSubPoolId); if (sp) { sp.expertIds = sp.expertIds.filter(id => id !== eid); deptRenderCurrentPool(); renderSubPoolList(); } }
+
+// === 处室批量导入 ===
+let importPreviewData = [];
+function openDeptImportModal() { if (!currentSubPoolId) { alert('请先选择子库'); return; } importPreviewData = []; document.getElementById('dept-import-file').value = ''; document.getElementById('dept-import-preview').innerHTML = '<p style="color:#999;text-align:center;padding:20px;">请选择CSV文件</p>'; document.getElementById('btn-confirm-import').disabled = true; document.getElementById('dept-import-modal').style.display = 'flex'; }
+function closeDeptImportModal() { document.getElementById('dept-import-modal').style.display = 'none'; }
+function downloadImportTemplate() {
+    const headers = '编号,姓名,性别,出生年份,区县,学校,职称,正高年限,专业,学历,学历类型,岗位等级,人才项目,教龄,专家类别,证件类型,证件号码,手机号';
+    const sample = 'T001,张三,男,1975,渝中区,巴蜀中学,正高级,8,数学,博士,全日制,专技二级,万人计划,25,自然候选人,身份证,510000197501011234,13800001111';
+    const csv = '\uFEFF' + headers + '\n' + sample;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = '专家导入模板.csv'; a.click(); URL.revokeObjectURL(url);
+}
+function previewImportFile() {
+    const file = document.getElementById('dept-import-file').files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) { document.getElementById('dept-import-preview').innerHTML = '<p style="color:#f44336;text-align:center;padding:20px;">文件为空或格式不正确</p>'; return; }
+        const headers = lines[0].split(',').map(h => h.trim());
+        importPreviewData = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(',').map(c => c.trim());
+            if (cols.length < 3) continue;
+            const expert = {
+                id: 'IMP' + Date.now().toString(36).toUpperCase() + i,
+                name: cols[1] || '', gender: cols[2] || '男', birthYear: parseInt(cols[3]) || 1980,
+                district: cols[4] || '', school: cols[5] || '', title: cols[6] || '高级',
+                titleYears: parseInt(cols[7]) || 0, major: cols[8] || '', education: cols[9] || '本科',
+                educationType: cols[10] || '全日制', postLevel: cols[11] || '', talentProjects: cols[12] ? cols[12].split(';') : [],
+                seniority: parseInt(cols[13]) || 0, expertType: cols[14] || '自主候选人',
+                idType: cols[15]||'身份证', idNumber: cols[16]||'', phone: cols[17]||'',
+                certificates: [], rating: 4.0, serviceCount: 0, status: 'available',
+                autoTags: [], manualTags: [], tags: [], participationHistory: []
+            };
+            importPreviewData.push(expert);
+        }
+        document.getElementById('dept-import-preview').innerHTML = `<p style="padding:8px;color:#2e7d32;">识别到 <b>${importPreviewData.length}</b> 条专家记录</p>` +
+            `<table style="font-size:11px;"><thead><tr><th>姓名</th><th>区县</th><th>学校</th><th>职称</th><th>专业</th></tr></thead><tbody>` +
+            importPreviewData.map(e => `<tr><td>${e.name}</td><td>${e.district}</td><td>${e.school}</td><td>${e.title}</td><td>${e.major}</td></tr>`).join('') + '</tbody></table>';
+        document.getElementById('btn-confirm-import').disabled = false;
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+function confirmDeptImport() {
+    if (importPreviewData.length === 0) return;
+    const sp = subPools.find(s => s.id === currentSubPoolId);
+    if (!sp) return;
+    importPreviewData.forEach(e => {
+        e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags]));
+        mockData.push(e);
+        sp.expertIds.push(e.id);
+    });
+    closeDeptImportModal();
+    deptRenderCurrentPool(); renderSubPoolList();
+    alert(`成功导入 ${importPreviewData.length} 名专家到子库`);
+}
+
+// === 处室手动添加专家 ===
+function openDeptManualAddModal() {
+    if (!currentSubPoolId) { alert('请先选择子库'); return; }
+    ['dept-add-name','dept-add-school','dept-add-major','dept-add-talent'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('dept-add-birthYear').value = 1980;
+    document.getElementById('dept-add-titleYears').value = 5;
+    document.getElementById('dept-add-seniority').value = 15;
+    document.getElementById('dept-manual-add-modal').style.display = 'flex';
+}
+function closeDeptManualAddModal() { document.getElementById('dept-manual-add-modal').style.display = 'none'; }
+function confirmDeptManualAdd() {
+    const name = document.getElementById('dept-add-name').value.trim();
+    const school = document.getElementById('dept-add-school').value.trim();
+    const title = document.getElementById('dept-add-title').value;
+    if (!name || !school) { alert('请填写姓名和学校'); return; }
+    const id = 'MAN' + Date.now().toString(36).toUpperCase();
+    const talentStr = document.getElementById('dept-add-talent').value.trim();
+    const expert = {
+        id, name,
+        gender: document.getElementById('dept-add-gender').value,
+        birthYear: parseInt(document.getElementById('dept-add-birthYear').value) || 1980,
+        district: document.getElementById('dept-add-district').value,
+        school, title,
+        titleYears: parseInt(document.getElementById('dept-add-titleYears').value) || 0,
+        major: document.getElementById('dept-add-major').value.trim(),
+        education: document.getElementById('dept-add-edu').value,
+        educationType: document.getElementById('dept-add-eduType').value,
+        postLevel: document.getElementById('dept-add-postLevel').value,
+        talentProjects: talentStr ? talentStr.split(',').map(s => s.trim()).filter(Boolean) : [],
+        seniority: parseInt(document.getElementById('dept-add-seniority').value) || 0,
+        expertType: document.getElementById('dept-add-expertType').value,
+        certificates: [], rating: 4.0, serviceCount: 0, status: 'available',
+        autoTags: [], manualTags: [], tags: [], participationHistory: []
+    };
+    expert.tags = Array.from(new Set([...expert.autoTags, ...expert.manualTags]));
+    mockData.push(expert);
+    const sp = subPools.find(s => s.id === currentSubPoolId);
+    if (sp) sp.expertIds.push(id);
+    closeDeptManualAddModal();
+    deptRenderCurrentPool(); renderSubPoolList();
+    alert(`专家「${name}」已添加至子库`);
+}
+
+// === 人事处总库批量导入 ===
+let hrImportPreviewData = [];
+function openHRImportModal() { hrImportPreviewData = []; document.getElementById('hr-import-file').value = ''; document.getElementById('hr-import-preview').innerHTML = '<p style="color:#999;text-align:center;padding:20px;">请选择CSV文件</p>'; document.getElementById('btn-hr-confirm-import').disabled = true; document.getElementById('hr-import-modal').style.display = 'flex'; }
+function closeHRImportModal() { document.getElementById('hr-import-modal').style.display = 'none'; }
+function downloadHRImportTemplate() {
+    const headers = '编号,姓名,性别,出生年份,区县,学校,职称,正高年限,专业,学历,学历类型,岗位等级,人才项目,教龄,专家类别,证件类型,证件号码,手机号';
+    const s1 = 'T001,张三,男,1975,渝中区,巴蜀中学,正高级,8,数学,博士,全日制,专技二级,万人计划,25,自然候选人,身份证,510000197501011234,13800001111';
+    const s2 = 'T002,李四,男,1970,成都市,四川大学,正高级,12,基建工程,博士,全日制,专技二级,国家级人才,30,自主候选人,身份证,510000197001015678,13900002222';
+    const csv = '\uFEFF' + headers + '\n' + s1 + '\n' + s2;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = '总库专家导入模板.csv'; a.click(); URL.revokeObjectURL(url);
+}
+function previewHRImportFile() {
+    const file = document.getElementById('hr-import-file').files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result, lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) { document.getElementById('hr-import-preview').innerHTML = '<p style="color:#f44336;text-align:center;padding:20px;">文件为空或格式不正确</p>'; return; }
+        hrImportPreviewData = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(',').map(c => c.trim()); if (cols.length < 3) continue;
+            const expert = { id: 'IMP' + Date.now().toString(36).toUpperCase() + i, name: cols[1]||'', gender: cols[2]||'男', birthYear: parseInt(cols[3])||1980, district: cols[4]||'', school: cols[5]||'', title: cols[6]||'高级', titleYears: parseInt(cols[7])||0, major: cols[8]||'', education: cols[9]||'本科', educationType: cols[10]||'全日制', postLevel: cols[11]||'', talentProjects: cols[12]?cols[12].split(';'):[], seniority: parseInt(cols[13])||0, expertType: cols[14]||'自主候选人', idType: cols[15]||'身份证', idNumber: cols[16]||'', phone: cols[17]||'',
+                idType: cols[15]||'身份证', idNumber: cols[16]||'', phone: cols[17]||'', certificates: [], rating: 4.0, serviceCount: 0, status: 'available', autoTags: [], manualTags: [], tags: [], participationHistory: [] };
+            hrImportPreviewData.push(expert);
+        }
+        document.getElementById('hr-import-preview').innerHTML = `<p style="padding:8px;color:#2e7d32;">识别到 <b>${hrImportPreviewData.length}</b> 条专家记录</p><table style="font-size:11px;"><thead><tr><th>姓名</th><th>区县</th><th>学校</th><th>职称</th><th>专业</th><th>专家类别</th></tr></thead><tbody>` + hrImportPreviewData.map(e => `<tr><td>${e.name}</td><td>${e.district}</td><td>${e.school}</td><td>${e.title}</td><td>${e.major}</td><td>${e.expertType}</td></tr>`).join('') + '</tbody></table>';
+        document.getElementById('btn-hr-confirm-import').disabled = false;
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+function confirmHRImport() {
+    if (hrImportPreviewData.length === 0) return;
+    let newCount = 0;
+    hrImportPreviewData.forEach(e => {
+        if (!mockData.find(m => m.id === e.id)) { e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); mockData.push(e); newCount++; }
+    });
+    closeHRImportModal(); hrPage = 1; hrFilterExperts(); renderTagCloud();
+    alert(`成功导入 ${newCount} 名专家到总库（${hrImportPreviewData.length - newCount} 条重复跳过）`);
+}
+
+// === 人事处总库手动添加专家 ===
+function openHRManualAddModal() {
+    ['hr-add-name','hr-add-school','hr-add-major','hr-add-talent','hr-add-certificates','hr-add-idNumber','hr-add-phone'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('hr-add-birthYear').value = 1980; document.getElementById('hr-add-titleYears').value = 5;
+    document.getElementById('hr-add-seniority').value = 15; document.getElementById('hr-manual-add-modal').style.display = 'flex';
+}
+function closeHRManualAddModal() { document.getElementById('hr-manual-add-modal').style.display = 'none'; }
+function confirmHRManualAdd() {
+    const name = document.getElementById('hr-add-name').value.trim(), school = document.getElementById('hr-add-school').value.trim();
+    const title = document.getElementById('hr-add-title').value;
+    if (!name || !school) { alert('请填写姓名和单位'); return; }
+    const id = 'HR' + Date.now().toString(36).toUpperCase();
+    const talentStr = document.getElementById('hr-add-talent').value.trim(), certStr = document.getElementById('hr-add-certificates').value.trim();
+    const expert = {
+        id, name, gender: document.getElementById('hr-add-gender').value,
+        birthYear: parseInt(document.getElementById('hr-add-birthYear').value) || 1980,
+        district: document.getElementById('hr-add-district').value, school, title,
+        titleYears: parseInt(document.getElementById('hr-add-titleYears').value) || 0,
+        major: document.getElementById('hr-add-major').value.trim(),
+        education: document.getElementById('hr-add-edu').value,
+        educationType: document.getElementById('hr-add-eduType').value,
+        postLevel: document.getElementById('hr-add-postLevel').value,
+        talentProjects: talentStr ? talentStr.split(',').map(s => s.trim()).filter(Boolean) : [],
+        certificates: certStr ? certStr.split(',').map(s => s.trim()).filter(Boolean) : [],
+        seniority: parseInt(document.getElementById('hr-add-seniority').value) || 0,
+        expertType: document.getElementById('hr-add-expertType').value,
+        idType: document.getElementById('hr-add-idType').value,
+        idNumber: document.getElementById('hr-add-idNumber').value.trim(),
+        phone: document.getElementById('hr-add-phone').value.trim(),
+        rating: 4.0, serviceCount: 0, status: 'available',
+        autoTags: [], manualTags: [], tags: [], participationHistory: []
+    };
+    expert.tags = Array.from(new Set([...expert.autoTags, ...expert.manualTags]));
+    mockData.push(expert);
+    closeHRManualAddModal(); hrPage = 1; hrFilterExperts(); renderTagCloud();
+    alert(`专家「${name}」已添加至总库`);
+}
+function openCreateSubpoolModal() { if (!currentDept) { alert('请先选择所属处室'); return; } document.getElementById('create-subpool-dept-label').textContent = currentDept; document.getElementById('create-subpool-modal').style.display = 'flex'; }
+function closeCreateSubpoolModal() { document.getElementById('create-subpool-modal').style.display = 'none'; }
+function createSubpool() { const tag = document.getElementById('new-subpool-tag').value.trim(), v = parseInt(document.getElementById('new-subpool-validity').value), now = new Date(); subPools.push({ id: 'SP' + (subPools.length + 1).toString().padStart(3,'0'), deptName: currentDept, deptAdmin: currentDept + '管理员', expertIds: [], tags: tag ? [tag] : [], validFrom: now, validTo: new Date(now.getFullYear() + v, now.getMonth(), now.getDate()), status: 'active' }); closeCreateSubpoolModal(); renderSubPoolList(); alert('子库创建成功！'); }
+// === 专家抽取 ===
+function updateExtractSubpoolSelect() {
+    const sel = document.getElementById('extract-subpool');
+    const myPools = currentDept ? subPools.filter(sp => sp.deptName === currentDept) : subPools;
+    const compliant = myPools.filter(sp => {
+        const experts = sp.expertIds.map(id => mockData.find(e => e.id === id)).filter(Boolean);
+        const total = experts.length;
+        if (total < 12) return false;
+        const natural = experts.filter(e => e.expertType === '自然候选人').length;
+        if (natural / total < 1/3) return false;
+        const now = new Date();
+        if (new Date(sp.validTo) < now) return false;
+        return true;
+    });
+    const nonCompliant = myPools.filter(sp => !compliant.includes(sp));
+    let html = '<option value="">请选择处室子库</option>';
+    if (compliant.length > 0) html += `<optgroup label="合规子库（可抽取）">` + compliant.map(sp => `<option value="${sp.id}">${sp.deptName} - ${sp.tags[0]||'未命名'}（${sp.expertIds.length}人）</option>`).join('') + '</optgroup>';
+    if (nonCompliant.length > 0) html += `<optgroup label="不合规子库（不可抽取）">` + nonCompliant.map(sp => `<option value="${sp.id}" disabled style="color:#999;">${sp.deptName} - ${sp.tags[0]||'未命名'}（${sp.expertIds.length}人）</option>`).join('') + '</optgroup>';
+    sel.innerHTML = html;
+}
+function showNewExtraction() { document.getElementById('extract-history-view').classList.add('hidden'); document.getElementById('extract-new-view').classList.remove('hidden'); backToStep1(); if (currentRole === 'hr') { document.getElementById('extract-source-hr').classList.remove('hidden'); document.getElementById('extract-source-dept').classList.add('hidden'); } else { document.getElementById('extract-source-hr').classList.add('hidden'); document.getElementById('extract-source-dept').classList.remove('hidden'); updateExtractSubpoolSelect(); } }
+function showExtractHistory() { document.getElementById('extract-history-view').classList.remove('hidden'); document.getElementById('extract-new-view').classList.add('hidden'); renderExtractionHistory(); }
+function renderExtractionHistory() { const list = document.getElementById('extract-history-list'); if (extractionRecords.length === 0) { list.innerHTML = '<p style="color:#999;text-align:center;padding:40px;">暂无抽取记录</p>'; return; } list.innerHTML = extractionRecords.map(r => { let st = '待确认'; if (r.status === 'confirmed') st = '已确认'; const srcLabel = r.sourceType === 'hr' ? '人事处总库' : (subPools.find(s => s.id === r.subPoolId)||{}).deptName||'未知子库'; return `<div class="history-item"><div><div style="font-weight:bold;margin-bottom:2px;">${r.purpose}</div><div style="font-size:11px;color:#666;">${r.category||''}${r.level?' | '+r.level+'级':''} | 来源: ${srcLabel} | ${new Date(r.timestamp).toLocaleString()} | ${r.selectedExperts.length}名专家${r.leader?' + 1名组长':''}</div></div><div><span class="status-badge status-${r.status}">${st}</span><button class="btn btn-outline" style="padding:3px 10px;margin-left:8px;font-size:11px;" onclick="viewExtractionRecord('${r.id}')">查看</button></div></div>`; }).join(''); }
+function viewExtractionRecord(id) { const r = extractionRecords.find(r => r.id === id); if (!r) return; currentExtractionRecord = r; showNewExtraction(); document.getElementById('extract-step-1').classList.add('hidden'); document.getElementById('extract-step-2').classList.add('hidden'); document.getElementById('extract-step-3').classList.remove('hidden'); updateStepIndicators(3); renderExtractionResults(); updateExtractActionButtons(r.status); }
+function backToStep1() { document.getElementById('extract-step-1').classList.remove('hidden'); document.getElementById('extract-step-2').classList.add('hidden'); document.getElementById('extract-step-3').classList.add('hidden'); updateStepIndicators(1); }
+function nextToStep2() { const purpose = document.getElementById('extract-purpose').value; const category = document.getElementById('extract-category').value; const level = document.getElementById('extract-level').value; if (!purpose) { alert('请填写抽取用途'); return; } if (!category) { alert('请选择评审类别'); return; } if (!level) { alert('请选择评审层次'); return; } if (currentRole === 'dept') { const spId = document.getElementById('extract-subpool').value; if (!spId) { alert('请选择处室子库'); return; } const sp = subPools.find(s => s.id === spId); const poolExperts = sp.expertIds.map(id => mockData.find(e => e.id === id)).filter(Boolean); const natural = poolExperts.filter(e => e.expertType === '自然候选人').length; if (!sp || poolExperts.length < 12) { alert(`子库专家不足（${poolExperts.length}人，至少12人），请选择合规子库。`); return; } if (natural / poolExperts.length < 1/3) { alert(`自然候选人占比不足1/3（${(natural/poolExperts.length*100).toFixed(1)}%），请选择合规子库。`); return; } if (new Date(sp.validTo) < new Date()) { alert('子库已过期，请选择合规子库。'); return; } } document.getElementById('extract-step-1').classList.add('hidden'); document.getElementById('extract-step-2').classList.remove('hidden'); updateStepIndicators(2); const count = parseInt(document.getElementById('extract-count').value) || 5, tn = count * 4, hint = document.getElementById('extract-compliance-hint'); hint.classList.remove('hidden'); if (currentRole === 'hr') { const available = mockData.filter(e => e.status === 'available').length; if (available >= tn) { hint.className = 'alert-success'; hint.innerHTML = `合规检查通过：总库可用专家${available}人 ≥ ${tn}人（${count}人×4），满足4:1比例。`; } else { hint.className = 'alert-warn'; hint.innerHTML = `合规警告：总库可用专家仅${available}人，不足${tn}人（${count}人×4:1），请减少评审人数。`; } } else { const sp = subPools.find(s => s.id === document.getElementById('extract-subpool').value); if (sp.expertIds.length >= tn) { hint.className = 'alert-success'; hint.innerHTML = `合规检查通过：子库${sp.expertIds.length}人 ≥ ${tn}人（${count}人×4），满足4:1比例。`; } else { hint.className = 'alert-warn'; hint.innerHTML = `合规警告：子库仅${sp.expertIds.length}人，不足${tn}人（${count}人×4:1），请减少评审人数或补充子库。`; } } }
+function backToStep2() { document.getElementById('extract-step-2').classList.remove('hidden'); document.getElementById('extract-step-3').classList.add('hidden'); updateStepIndicators(2); }
+function updateStepIndicators(step) { for (let i = 1; i <= 3; i++) { const el = document.getElementById(`step-${i}-indicator`); el.classList.toggle('active', i === step); } }
+function runExtraction() {
+    const purpose = document.getElementById('extract-purpose').value;
+    const category = document.getElementById('extract-category').value;
+    const level = document.getElementById('extract-level').value;
+    const count = parseInt(document.getElementById('extract-count').value), major = document.getElementById('extract-major').value;
+    const redundancy = parseFloat(document.getElementById('extract-redundancy').value), avoidDistricts = getMultiSelectValues('extract-avoid');
+    const aus = document.getElementById('extract-avoid-units').value, avoidUnits = aus ? aus.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const rotation = document.getElementById('extract-rotation').value;
+    if (count < 3) { alert('评审专家数量不得少于3人'); return; }
+    if (count % 2 === 0) { alert('评审专家数量应为奇数'); return; }
+    let poolExperts, sourceType, subPoolId = '';
+    if (currentRole === 'hr') { sourceType = 'hr'; poolExperts = mockData.filter(e => e.status !== 'blacklisted' && e.status !== 'suspended'); }
+    else { sourceType = 'dept'; subPoolId = document.getElementById('extract-subpool').value; const sp = subPools.find(s => s.id === subPoolId); poolExperts = sp.expertIds.map(id => mockData.find(e => e.id === id)).filter(Boolean); }
+    const tn = count * redundancy;
+    let candidates = poolExperts.filter(e => { if (major && e.major !== major) return false; if (avoidDistricts.includes(e.district)) return false; if (avoidUnits.includes(e.school)) return false; if (e.status === 'blacklisted' || e.status === 'suspended') return false; return true; });
+    if (candidates.length < tn) { alert(`候选专家不足（当前${candidates.length}人，需要${Math.ceil(tn)}人），请调整筛选条件。`); return; }
+    if (rotation === 'recent') candidates.sort((a, b) => (a.participationHistory || []).length - (b.participationHistory || []).length);
+    else if (rotation === 'score') candidates.sort((a, b) => b.rating - a.rating);
+    else candidates.sort(() => 0.5 - Math.random());
+    const selected = candidates.slice(0, Math.ceil(tn));
+    currentExtractionRecord = { id: 'REC_' + Date.now(), sourceType, subPoolId, purpose, category, level, timestamp: new Date(), leader: null, config: { count, redundancy, major, avoidDistricts, avoidUnits, rotation }, selectedExperts: selected.map(e => ({ id: e.id, name: e.name, school: e.school, title: e.title, major: e.major, district: e.district })), status: 'pending' };
+    extractionRecords.unshift(currentExtractionRecord);
+    renderExtractionResults(); document.getElementById('extract-step-2').classList.add('hidden'); document.getElementById('extract-step-3').classList.remove('hidden'); updateStepIndicators(3); updateExtractActionButtons('pending');
+}
+function renderExtractionResults() {
+    const r = currentExtractionRecord, nc = r.selectedExperts.filter(e => { const exp = mockData.find(m => m.id === e.id); return exp && exp.expertType === '自然候选人'; }).length;
+    let html = `<div class="alert-info" style="margin-bottom:12px;">抽取结果：共 <b>${r.selectedExperts.length}</b> 名专家（冗余${r.config.redundancy}x），其中自然候选人 <b>${nc}</b> 人。${nc >= r.selectedExperts.length/3 ? '<span class="tag tag-success">满足≥1/3</span>' : '<span class="tag tag-warning">不足1/3</span>'}</div>`;
+    html += r.selectedExperts.map(e => { const exp = mockData.find(m => m.id === e.id), pc = exp ? (exp.participationHistory || []).length : 0; return `<div class="expert-card" style="display:flex;justify-content:space-between;align-items:center;border-left:4px solid #1976d2;"><div><div class="expert-name"><code>${e.id}</code> ${e.name} <span class="tag tag-primary">${e.title}</span> ${exp&&exp.expertType==='自然候选人'?'<span class="tag tag-success">自然候选人</span>':''}</div><div class="expert-info">${e.district} | ${e.school} | ${e.major} | 参与次数: ${pc}</div></div><div style="display:flex;gap:8px;align-items:center;"><button class="btn btn-outline" style="padding:3px 10px;font-size:11px;" onclick="viewExpertDetail('${e.id}')">详情</button>${r.status==='pending'?`<button class="btn btn-outline" style="padding:3px 10px;font-size:11px;" onclick="reExtractExpert('${e.id}')">重新抽取</button>`:''}</div></div>`; }).join('');
+    document.getElementById('extraction-result-list').innerHTML = html;
+}
+function reExtractExpert(oldId) { const r = currentExtractionRecord, cids = r.selectedExperts.map(e => e.id); let poolExperts; if (r.sourceType === 'hr') { poolExperts = mockData.filter(e => e.status !== 'blacklisted' && e.status !== 'suspended'); } else { const sp = subPools.find(s => s.id === r.subPoolId); poolExperts = sp ? sp.expertIds.map(id => mockData.find(e => e.id === id)).filter(Boolean) : []; } const cands = poolExperts.filter(e => { if (r.config.major && e.major !== r.config.major) return false; if ((r.config.avoidDistricts || []).includes(e.district)) return false; if ((r.config.avoidUnits || []).includes(e.school)) return false; if (e.status === 'blacklisted' || e.status === 'suspended') return false; if (cids.includes(e.id)) return false; return true; }); if (cands.length === 0) { alert('没有更多符合条件的专家可供替换'); return; } const ne = cands[Math.floor(Math.random() * cands.length)], idx = r.selectedExperts.findIndex(e => e.id === oldId); if (idx !== -1) r.selectedExperts[idx] = { id: ne.id, name: ne.name, school: ne.school, title: ne.title, major: ne.major, district: ne.district }; renderExtractionResults(); }
+function exportExtractionResult() { if (!currentExtractionRecord || currentExtractionRecord.selectedExperts.length === 0) { alert('没有可导出的数据'); return; } const cols = ['编号','姓名','区县','学校','职称','专业','角色']; let csv = '\uFEFF' + cols.join(',') + '\n'; if (currentExtractionRecord.leader) { csv += [currentExtractionRecord.leader.id, currentExtractionRecord.leader.name, currentExtractionRecord.leader.district||'', currentExtractionRecord.leader.school, currentExtractionRecord.leader.title, currentExtractionRecord.leader.major, '组长'].join(',') + '\n'; } currentExtractionRecord.selectedExperts.forEach(e => { csv += [e.id, e.name, e.district||'', e.school, e.title, e.major, '专家'].join(',') + '\n'; }); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; const prefix = currentExtractionRecord.category||'抽取'; a.download = `${prefix}_专家抽取结果_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); alert(`已导出 ${currentExtractionRecord.selectedExperts.length + (currentExtractionRecord.leader?1:0)} 名专家抽取结果。`); }
+function extractLeader() {
+    if (!currentExtractionRecord) return;
+    const r = currentExtractionRecord;
+    const avoidDistricts = (r.config.avoidDistricts || []), avoidUnits = (r.config.avoidUnits || []);
+    const leaders = getLeaderExperts().filter(e => e.status === 'available' && !avoidDistricts.includes(e.district) && !avoidUnits.includes(e.school) && (r.config.major ? e.major === r.config.major : true));
+    if (leaders.length === 0) { alert('组长专家库中没有符合条件的专家'); return; }
+    const rotation = r.config.rotation;
+    if (rotation === 'recent') leaders.sort((a,b) => (a.participationHistory||[]).length - (b.participationHistory||[]).length);
+    else if (rotation === 'score') leaders.sort((a,b) => b.rating - a.rating);
+    else leaders.sort(() => 0.5 - Math.random());
+    r.leader = { id: leaders[0].id, name: leaders[0].name, school: leaders[0].school, title: leaders[0].title, major: leaders[0].major, district: leaders[0].district };
+    document.getElementById('extract-leader-info').innerHTML = `<b>组长：</b>${r.leader.name}（${r.leader.title}，${r.leader.school}，${r.leader.major}）<span class="tag tag-success" style="margin-left:8px;">组长专家库</span>`;
+    document.getElementById('btn-extract-leader').textContent = '重新抽取组长';
+    document.getElementById('btn-extract-leader').style.background = '#ff9800';
+}
+function updateExtractActionButtons(status) { const bc = document.getElementById('btn-confirm-list'), bb = document.getElementById('btn-back-to-step2'), lc = document.getElementById('label-confirmed'), h = document.getElementById('extraction-hint'), la = document.getElementById('extract-leader-area'), li = document.getElementById('extract-leader-info'), bl = document.getElementById('btn-extract-leader'); bc.classList.add('hidden'); bb.classList.remove('hidden'); lc.classList.add('hidden'); if (status === 'pending') { bc.classList.remove('hidden'); la.classList.remove('hidden'); li.innerHTML = '请从组长专家库中抽取1名组长'; bl.textContent = '从组长专家库抽取1名组长'; bl.style.background = '#7b1fa2'; h.innerHTML = '提示：确认无误后点击"确认名单"，名单确认后将进入<b>线下备案流程</b>。'; } else if (status === 'confirmed') { lc.classList.remove('hidden'); bb.classList.add('hidden'); la.classList.add('hidden'); h.innerHTML = '提示：名单已确认。根据31号通知，最终评审名单及备案流程须<b>线下完成</b>。'; } }
+function confirmList() { if (!currentExtractionRecord) return; currentExtractionRecord.status = 'confirmed'; currentExtractionRecord.selectedExperts.forEach(e => { const exp = mockData.find(m => m.id === e.id); if (exp) { if (!exp.participationHistory) exp.participationHistory = []; exp.participationHistory.push({ recordId: currentExtractionRecord.id, date: new Date().toISOString() }); } }); renderExtractionResults(); updateExtractActionButtons('confirmed'); alert('名单已确认。根据31号通知要求，最终评审名单及备案流程须线下完成，系统仅作为辅助工具。'); }
+
+// === 服务评价 ===
+function showEvalRecordSelector() { document.getElementById('eval-record-selector-view').classList.remove('hidden'); document.getElementById('eval-expert-list-view').classList.add('hidden'); }
+function renderEvalRecordList() { const c = document.getElementById('eval-record-list'), cr = extractionRecords.filter(r => r.status === 'confirmed'); if (cr.length === 0) { c.innerHTML = '<p style="color:#999;text-align:center;padding:40px;">暂无已确认的抽取任务</p>'; return; } c.innerHTML = cr.map(r => `<div class="history-item"><div><div style="font-weight:bold;margin-bottom:2px;">${r.purpose}</div><div style="font-size:11px;color:#666;">确认时间: ${new Date(r.timestamp).toLocaleString()} | ${r.selectedExperts.length}人</div></div><button class="btn btn-primary" style="padding:6px 14px;font-size:12px;" onclick="selectEvalRecord('${r.id}')">开始评价</button></div>`).join(''); }
+function selectEvalRecord(id) { const r = extractionRecords.find(r => r.id === id); if (!r) return; currentEvaluatingRecord = r; document.getElementById('eval-task-name').textContent = '评价任务：' + r.purpose; document.getElementById('eval-record-selector-view').classList.add('hidden'); document.getElementById('eval-expert-list-view').classList.remove('hidden'); renderEvalExperts(); }
+function renderEvalExperts() { const c = document.getElementById('eval-experts-container'), r = currentEvaluatingRecord; c.innerHTML = r.selectedExperts.map(e => { const ev = evaluations.find(ev => ev.recordId === r.id && ev.expertId === e.id); return `<div class="expert-card" style="display:flex;justify-content:space-between;align-items:center;border-left:4px solid #1976d2;"><div><div class="expert-name"><code>${e.id}</code> ${e.name} <span class="tag tag-primary">${e.title}</span></div><div class="expert-info">${e.district||''} | ${e.school} | ${e.major}</div></div><div>${ev ? `<span class="tag tag-success" style="padding:5px 10px;">评分: ${ev.score.toFixed(1)} (已评价)</span><button class="btn btn-outline" style="padding:3px 10px;font-size:11px;margin-left:8px;" onclick="openEvalModal('${e.id}')">修改</button>` : `<button class="btn btn-primary" style="padding:6px 14px;font-size:12px;" onclick="openEvalModal('${e.id}')">去评价</button>`}</div></div>`; }).join(''); }
+function openEvalModal(eid) { currentEvaluatingExpert = currentEvaluatingRecord.selectedExperts.find(e => e.id === eid); document.getElementById('eval-modal-expert-name').textContent = currentEvaluatingExpert.name; const ex = evaluations.find(ev => ev.recordId === currentEvaluatingRecord.id && ev.expertId === eid); if (ex) { document.getElementById('eval-score').value = ex.score; document.getElementById('eval-comment').value = ex.comment; } else { document.getElementById('eval-score').value = 5.0; document.getElementById('eval-comment').value = ''; } document.getElementById('eval-modal').style.display = 'flex'; }
+function closeEvalModal() { document.getElementById('eval-modal').style.display = 'none'; }
+function submitEvaluation() { const score = parseFloat(document.getElementById('eval-score').value), comment = document.getElementById('eval-comment').value, rid = currentEvaluatingRecord.id, eid = currentEvaluatingExpert.id; const idx = evaluations.findIndex(ev => ev.recordId === rid && ev.expertId === eid), ed = { recordId: rid, expertId: eid, score, comment, timestamp: new Date() }; if (idx !== -1) evaluations[idx] = ed; else evaluations.push(ed); const exp = mockData.find(e => e.id === eid); if (exp) { exp.rating = (exp.rating * exp.serviceCount + score) / (exp.serviceCount + 1); exp.serviceCount += 1; if (exp.rating < 3.0) { exp.status = 'blacklisted'; exp.blacklistReason = `评分过低自动拉黑(当前:${exp.rating.toFixed(1)})`; exp.blacklistDate = new Date(); } } alert(`对专家「${currentEvaluatingExpert.name}」的评价已提交！`); closeEvalModal(); renderEvalExperts(); if (currentRole === 'hr') hrRenderTable(); }
+
+// === 黑名单 ===
+function renderBlacklistTable() { const tbody = document.getElementById('blacklistTable'), bl = mockData.filter(e => e.status === 'blacklisted'); if (bl.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:40px;">暂无黑名单数据</td></tr>'; return; } tbody.innerHTML = bl.map(e => `<tr><td><code>${e.id}</code></td><td><strong>${e.name}</strong></td><td>${e.district}/${e.school}</td><td><span class="eval-badge eval-low">${e.rating.toFixed(1)}</span></td><td><span style="color:#f44336;">${e.blacklistReason||'手动拉黑'}</span></td><td>${e.blacklistDate?new Date(e.blacklistDate).toLocaleDateString():'-'}</td><td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px;border-color:#4caf50;color:#4caf50;" onclick="removeFromBlacklist('${e.id}')">移出</button></td></tr>`).join(''); }
+function manualBlacklist(id) { const reason = prompt('请输入拉黑原因：','手动拉黑'); if (reason === null) return; const e = mockData.find(e => e.id === id); if (e) { e.status = 'blacklisted'; e.blacklistReason = reason; e.blacklistDate = new Date(); alert(`已将「${e.name}」加入黑名单`); if (currentRole === 'hr') hrRenderTable(); renderBlacklistTable(); } }
+function removeFromBlacklist(id) { if (!confirm('确定移出黑名单？')) return; const e = mockData.find(e => e.id === id); if (e) { e.status = 'available'; delete e.blacklistReason; delete e.blacklistDate; alert(`「${e.name}」已恢复`); if (currentRole === 'hr') hrRenderTable(); renderBlacklistTable(); } }
+function suspendExpert(id) { if (!confirm('确定暂停该专家使用？')) return; const e = mockData.find(e => e.id === id); if (e) { e.status = 'suspended'; alert(`「${e.name}」已暂停使用`); hrRenderTable(); } }
+function resumeExpert(id) { const e = mockData.find(e => e.id === id); if (e) { e.status = 'available'; alert(`「${e.name}」已恢复使用`); hrRenderTable(); } }
+function openManualBlacklistModal() { document.getElementById('blacklist-search-input').value = ''; document.getElementById('blacklist-search-results').innerHTML = '<p style="color:#999;text-align:center;padding:20px;">输入关键字开始搜索</p>'; document.getElementById('blacklist-reason-area').classList.add('hidden'); document.getElementById('blacklist-manual-modal').style.display = 'flex'; }
+function closeManualBlacklistModal() { document.getElementById('blacklist-manual-modal').style.display = 'none'; currentBlacklistTarget = null; }
+function searchExpertsForBlacklist() { const kw = document.getElementById('blacklist-search-input').value.trim().toLowerCase(), c = document.getElementById('blacklist-search-results'); if (!kw) { c.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">输入关键字开始搜索</p>'; return; } const results = mockData.filter(e => (e.name.toLowerCase().includes(kw) || e.school.toLowerCase().includes(kw) || e.id.toLowerCase().includes(kw)) && e.status !== 'blacklisted'); if (results.length === 0) { c.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">未找到</p>'; return; } c.innerHTML = results.map(e => `<div class="expert-card" style="margin:4px;cursor:pointer;border:1px solid #eee;" onclick="selectBlacklistTarget('${e.id}')" id="search-item-${e.id}"><div style="font-weight:bold;"><code>${e.id}</code> ${e.name} (${e.title})</div><div style="font-size:11px;color:#666;">${e.school} | ${e.major}</div></div>`).join(''); }
+function selectBlacklistTarget(id) { document.querySelectorAll('#blacklist-search-results .expert-card').forEach(el => el.style.borderColor = '#eee'); document.getElementById('search-item-' + id).style.borderColor = '#f44336'; currentBlacklistTarget = mockData.find(e => e.id === id); document.getElementById('blacklist-reason-area').classList.remove('hidden'); }
+function cancelManualBlacklist() { document.getElementById('blacklist-reason-area').classList.add('hidden'); currentBlacklistTarget = null; }
+function confirmManualBlacklist() { if (!currentBlacklistTarget) return; const reason = document.getElementById('blacklist-manual-reason').value.trim() || '手动添加'; currentBlacklistTarget.status = 'blacklisted'; currentBlacklistTarget.blacklistReason = reason; currentBlacklistTarget.blacklistDate = new Date(); alert(`已将「${currentBlacklistTarget.name}」加入黑名单`); closeManualBlacklistModal(); if (currentRole === 'hr') hrRenderTable(); renderBlacklistTable(); }
+
+// === 标签 ===
+function addGlobalTag() { const input = document.getElementById('new-global-tag'), tag = input.value.trim(); if (tag && !globalTags.includes(tag)) { globalTags.push(tag); input.value = ''; renderTagCloud(); updateTagSelects(); } }
+function deleteGlobalTag(tag) { if (confirm(`确定删除标签「${tag}」？`)) { globalTags = globalTags.filter(t => t !== tag); mockData.forEach(e => { e.manualTags = e.manualTags.filter(t => t !== tag); e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); }); renderTagCloud(); if (currentRole === 'hr') hrRenderTable(); updateTagSelects(); } }
+function renderTagCloud() { const tc = {}; mockData.forEach(e => { e.tags.forEach(t => { tc[t] = (tc[t] || 0) + 1; }); }); document.getElementById('tag-cloud').innerHTML = globalTags.map(tag => `<span class="tag tag-primary" style="font-size:13px;padding:5px 12px;">${tag}<span class="tag-remove" onclick="deleteGlobalTag('${tag}')">×</span></span>`).join(''); document.getElementById('tag-stats').innerHTML = Object.entries(tc).map(([tag, count]) => `<div class="stat-card" style="min-width:100px;"><div class="stat-number" style="font-size:22px;">${count}</div><div class="stat-label">${tag}</div></div>`).join(''); }
+function updateTagSelects() { const sel = document.getElementById('hr-batch-tag-select'); if (sel) { const cv = sel.value; sel.innerHTML = '<option value="">选择标签</option>' + globalTags.map(t => `<option value="${t}">${t}</option>`).join(''); sel.value = cv; } }
+function runRule(field, value, operator, tag) { let count = 0; mockData.forEach(e => { let match = false; if (operator === 'equals' && e[field] === value) match = true; if (match) { if (!e.manualTags.includes(tag)) { e.manualTags.push(tag); e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); count++; } } }); if (!globalTags.includes(tag)) globalTags.push(tag); alert(`自动化规则执行完毕：共识别 ${count} 名符合条件的教师，已自动打标「${tag}」。`); if (currentRole === 'hr') hrRenderTable(); renderTagCloud(); updateTagSelects(); }
+function runAgeRule() { let count = 0; const tag = '中青年专家'; mockData.forEach(e => { if (getAge(e.birthYear) <= 45) { if (!e.manualTags.includes(tag)) { e.manualTags.push(tag); e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); count++; } } }); if (!globalTags.includes(tag)) globalTags.push(tag); alert(`中青年专家识别完毕：共识别 ${count} 名45岁及以下专家。`); if (currentRole === 'hr') hrRenderTable(); renderTagCloud(); updateTagSelects(); }
+
+// === 打标弹窗 ===
+function openTagModal(eid) { currentTaggingExpert = mockData.find(e => e.id === eid); document.getElementById('modal-expert-name').textContent = currentTaggingExpert.name; renderModalTags(); document.getElementById('tag-modal').style.display = 'flex'; }
+function closeTagModal() { document.getElementById('tag-modal').style.display = 'none'; currentTaggingExpert = null; if (currentRole === 'hr') hrRenderTable(); else deptRenderCurrentPool(); }
+function renderModalTags() { const e = currentTaggingExpert; document.getElementById('modal-expert-tags').innerHTML = `<div style="margin-bottom:6px;">${e.autoTags.map(t => `<span class="tag tag-success" title="系统自动">${t}</span>`).join('')}${e.manualTags.map(t => `<span class="tag tag-primary">${t}<span class="tag-remove" onclick="toggleExpertTag('${t}')">×</span></span>`).join('')}</div>`; document.getElementById('modal-tag-pool').innerHTML = globalTags.map(tag => { const ia = e.autoTags.includes(tag), im = e.manualTags.includes(tag); return `<div class="tag-item ${ia||im?'active':''}" onclick="${ia?'':`toggleExpertTag('${tag}')`}" style="${ia?'cursor:not-allowed;opacity:0.7;':''}" title="${ia?'系统自动标签，不可手动修改':''}">${tag}</div>`; }).join(''); }
+function toggleExpertTag(tag) { const e = currentTaggingExpert; if (e.manualTags.includes(tag)) e.manualTags = e.manualTags.filter(t => t !== tag); else e.manualTags.push(tag); e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); renderModalTags(); renderTagCloud(); }
+
+// === 专家详情 ===
+function viewExpertDetail(eid) { const e = mockData.find(e => e.id === eid); if (!e) return; const age = getAge(e.birthYear), isSecret = (e.talentProjects || []).includes('国家级人才'), dn = (currentRole === 'dept' && isSecret) ? e.name.charAt(0) + '**' : e.name, ds = (currentRole === 'dept' && isSecret) ? '***（涉密）' : e.school; document.getElementById('expert-detail-content').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-size:13px;line-height:2;"><div><strong>编号：</strong>${e.id}</div><div><strong>姓名：</strong>${dn}</div><div><strong>性别：</strong>${e.gender}</div><div><strong>年龄：</strong>${age}岁</div><div><strong>区县：</strong>${e.district}</div><div><strong>学校：</strong>${ds}</div><div><strong>职称：</strong>${e.title}</div><div><strong>正高年限：</strong>${e.titleYears||0}年</div><div><strong>专业：</strong>${e.major}</div><div><strong>学历：</strong>${e.education||'-'}（${e.educationType||'-'}）</div><div><strong>岗位等级：</strong>${e.postLevel||'-'}</div><div><strong>人才项目：</strong>${(e.talentProjects||[]).join('、')||'无'}</div><div><strong>教龄：</strong>${e.seniority}年</div><div><strong>荣誉：</strong>${(e.certificates||[]).join('、')||'无'}</div><div><strong>证件类型：</strong>${e.idType||'身份证'}</div><div><strong>证件号码：</strong>${e.idNumber||'-'}</div><div><strong>手机号：</strong>${e.phone||'-'}</div><div><strong>服务次数：</strong>${e.serviceCount}次</div><div><strong>参与评审：</strong>${(e.participationHistory||[]).length}次</div><div><strong>评分：</strong><span class="eval-badge ${e.rating>=4.8?'eval-high':e.rating>=4.0?'eval-mid':'eval-low'}">${e.rating.toFixed(1)}</span></div><div><strong>专家类别：</strong><span class="tag ${e.expertType==='自然候选人'?'tag-success':'tag-primary'}">${e.expertType}</span></div><div><strong>状态：</strong><span class="tag ${e.status==='available'?'tag-success':'tag-danger'}">${e.status==='available'?'可用':e.status}</span></div></div><div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;"><strong>标签：</strong><div style="margin-top:6px;">${e.tags.length>0?e.tags.map(t=>`<span class="tag tag-primary" style="margin-right:4px;">${t}</span>`).join(''):'<span style="color:#999;">暂无</span>'}</div></div>`; document.getElementById('expert-detail-modal').style.display = 'flex'; }
+function closeExpertDetailModal() { document.getElementById('expert-detail-modal').style.display = 'none'; }
+
+// === 同步数据 ===
+async function syncData() { const loading = document.getElementById('sync-loading'); loading.style.display = 'flex'; await new Promise(r => setTimeout(r, 2000)); const nt = [{ id:'CQ001',name:'刘洋',gender:'男',birthYear:1982,district:'渝北区',school:'渝北中学',title:'高级',titleYears:5,major:'数学',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:12,rating:4.8,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },{ id:'CQ002',name:'陈思',gender:'女',birthYear:1971,district:'沙坪坝区',school:'重庆一中',title:'正高级',titleYears:10,major:'语文',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['特级教师'],seniority:25,rating:5.0,serviceCount:0,status:'available',expertType:'自然候选人',autoTags:['名师','自然候选人'],manualTags:[],tags:[],participationHistory:[] },{ id:'CQ003',name:'杨光',gender:'男',birthYear:1990,district:'九龙坡区',school:'育才中学',title:'一级',titleYears:2,major:'物理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:6,rating:4.2,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] }]; let nc = 0; nt.forEach(n => { if (!mockData.find(m => m.id === n.id)) { n.tags = Array.from(new Set([...n.autoTags, ...n.manualTags])); mockData.push(n); nc++; } }); loading.style.display = 'none'; alert(`同步成功！拉取到 ${nt.length} 条教师信息，其中 ${nc} 名新专家已入库。`); if (currentRole === 'hr') { hrPage = 1; hrFilterExperts(); } renderTagCloud(); updateTagSelects(); }
+
+// === Multi-select ===
+const multiSelectState = {};
+const allCQDistricts = ['渝中区','大渡口区','江北区','沙坪坝区','九龙坡区','南岸区','北碚区','渝北区','巴南区','涪陵区','綦江区','大足区','长寿区','江津区','合川区','永川区','南川区','璧山区','铜梁区','潼南区','荣昌区','开州区','梁平区','武隆区','万州区','黔江区','城口县','丰都县','垫江县','忠县','云阳县','奉节县','巫山县','巫溪县','石柱县','秀山县','酉阳县','彭水县'];
+function initMultiSelect(id) { if (multiSelectState[id]) return; multiSelectState[id] = { selected: [] }; const dd = document.getElementById(id + '-dropdown'); if (dd) dd.innerHTML = allCQDistricts.map(d => `<label><input type="checkbox" value="${d}" onchange="toggleMultiSelectItem('${id}','${d}',this.checked)">${d}</label>`).join(''); }
+function toggleMultiSelect(id) { const dd = document.getElementById(id + '-dropdown'), io = dd.classList.contains('show'); document.querySelectorAll('.multi-select-dropdown.show').forEach(d => d.classList.remove('show')); if (!io) { initMultiSelect(id); dd.classList.add('show'); } }
+function toggleMultiSelectItem(id, value, checked) { const st = multiSelectState[id]; if (checked) { if (!st.selected.includes(value)) st.selected.push(value); } else { st.selected = st.selected.filter(v => v !== value); } updateMultiSelectTrigger(id); }
+function updateMultiSelectTrigger(id) { const st = multiSelectState[id], tr = document.querySelector('#' + id + '-container .multi-select-trigger'); if (!tr) return; if (st.selected.length === 0) tr.innerHTML = '<span class="multi-select-placeholder">点击选择...</span>'; else tr.innerHTML = st.selected.map(v => `<span class="multi-select-chip">${v}<span class="multi-select-chip-remove" onclick="event.stopPropagation();toggleMultiSelectItem('${id}','${v}',false);document.getElementById('${id}-dropdown').querySelector('input[value=\\'${v}\\']').checked=false;">×</span></span>`).join(''); }
+function getMultiSelectValues(id) { initMultiSelect(id); return multiSelectState[id] ? [...multiSelectState[id].selected] : []; }
+document.addEventListener('click', function(e) { if (!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select-dropdown.show').forEach(d => d.classList.remove('show')); });
+
+// === 初始化 ===
+document.addEventListener('DOMContentLoaded', () => {
+    const majors = [...new Set(mockData.map(e => e.major))].sort(), mo = '<option value="">全部</option>' + majors.map(m => `<option value="${m}">${m}</option>`).join('');
+    ['hr-filter-major','dept-filter-major','extract-major'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = mo; });
+    const distOpt = '<option value="">全部</option>' + allCQDistricts.map(d => `<option value="${d}">${d}</option>`).join('');
+    const hdEl = document.getElementById('hr-filter-district'); if (hdEl) hdEl.innerHTML = distOpt;
+    const deptAddDistEl = document.getElementById('dept-add-district');
+    if (deptAddDistEl) deptAddDistEl.innerHTML = '<option value="">请选择</option>' + allCQDistricts.map(d => `<option value="${d}">${d}</option>`).join('');
+    const hrAddDistEl = document.getElementById('hr-add-district');
+    if (hrAddDistEl) hrAddDistEl.innerHTML = '<option value="">请选择</option>' + allCQDistricts.map(d => `<option value="${d}">${d}</option>`).join('') + '<option value="市外">市外</option>';
+    hrRenderTable(); renderTagCloud(); updateTagSelects();
+});
+</script>
+</body>
+</html>

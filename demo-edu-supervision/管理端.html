@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>渝慧学-教辅监管平台 管理端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--blue:#1a3c6e;--blue2:#2d5a9e;--bg:#f0f2f5;--green:#4caf50;--orange:#ff9800;--red:#f44336;--grey:#90a4ae}
+body{font-family:"Microsoft YaHei",Arial,sans-serif;background:var(--bg);color:#333;font-size:14px}
+a{text-decoration:none;color:inherit}
+.sidebar{width:200px;background:var(--blue);color:#fff;height:100vh;position:fixed;left:0;top:0;overflow-y:auto}
+.sidebar .logo{padding:20px 16px;font-size:15px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,.15);text-align:center;line-height:1.4}
+.sidebar .nav-item{padding:12px 20px;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:8px}
+.sidebar .nav-item:hover{background:rgba(255,255,255,.1)}
+.sidebar .nav-item.active{background:rgba(255,255,255,.15);border-left:3px solid #fff}
+.sidebar .nav-icon{width:20px;text-align:center;font-size:16px}
+.main{margin-left:200px;min-height:100vh}
+.topbar{background:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);position:sticky;top:0;z-index:100}
+.topbar .page-title{font-size:16px;font-weight:600;color:var(--blue)}
+.role-switch{display:flex;gap:0;border:1px solid var(--blue);border-radius:4px;overflow:hidden}
+.role-switch button{padding:6px 14px;border:none;background:#fff;color:var(--blue);cursor:pointer;font-size:13px;transition:all .2s}
+.role-switch button.active{background:var(--blue);color:#fff}
+.content{padding:20px}
+.page{display:none}.page.active{display:block}
+.card{background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--blue);display:flex;justify-content:space-between;align-items:center}
+.stat-row{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:200px;background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;gap:16px}
+.stat-icon{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff}
+.stat-info .num{font-size:24px;font-weight:700;color:#333}
+.stat-info .label{font-size:13px;color:#999;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--blue);color:#fff;padding:10px 12px;text-align:left;font-weight:500;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #eee}
+tr:nth-child(even){background:#f9f9f9}
+tr:hover{background:#e3f2fd}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:500}
+.badge-green{background:#e8f5e9;color:var(--green)}.badge-orange{background:#fff3e0;color:var(--orange)}
+.badge-red{background:#ffebee;color:var(--red)}.badge-grey{background:#eceff1;color:var(--grey)}
+.badge-blue{background:#e3f2fd;color:var(--blue)}
+.sub-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--blue);flex-wrap:wrap}
+.sub-tab{padding:8px 20px;cursor:pointer;font-size:14px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap}
+.sub-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.sub-page{display:none}.sub-page.active{display:block}
+.bar-chart{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-label{width:120px;font-size:13px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:24px;background:#f0f0f0;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:12px;font-weight:600}
+.pie{width:120px;height:120px;border-radius:50%;position:relative;margin:0 auto}
+.pie-legend{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.pie-legend .dot{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px}
+.form-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.form-label{width:100px;text-align:right;font-size:13px;color:#666;flex-shrink:0;padding-top:8px}
+.form-input{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px}
+.form-select{padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:13px;background:#fff}
+.btn{padding:8px 20px;border:none;border-radius:4px;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue2)}
+.btn-sm{padding:4px 12px;font-size:12px}
+.btn-success{background:var(--green);color:#fff}.btn-warn{background:var(--orange);color:#fff}
+.btn-danger{background:var(--red);color:#fff}.btn-outline{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.progress{width:100%;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);border-radius:4px;transition:width .5s}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:8px;padding:24px;min-width:480px;max-width:680px;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--blue)}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:20px}
+.timeline{border-left:2px solid var(--blue);margin:12px 0 12px 8px;padding-left:16px}
+.timeline-item{position:relative;margin-bottom:16px}
+.timeline-item:before{content:'';position:absolute;left:-21px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.timeline-item .t-time{font-size:12px;color:#999}
+.timeline-item .t-actor{font-size:13px;font-weight:600;color:var(--blue)}
+.timeline-item .t-note{font-size:13px;color:#555;margin-top:2px}
+.flex{display:flex}.gap8{gap:8px}.gap16{gap:16px}
+.mt8{margin-top:8px}.mt16{margin-top:16px}.mb8{margin-bottom:8px}.mb16{margin-bottom:16px}
+.text-center{text-align:center}.text-right{text-align:right}
+.text-green{color:var(--green)}.text-red{color:var(--red)}.text-orange{color:var(--orange)}
+.text-grey{color:var(--grey)}.text-blue{color:var(--blue)}
+.fw700{font-weight:700}.fs12{font-size:12px}.fs16{font-size:16px}.fs20{font-size:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.notice{background:#fff3e0;border-left:4px solid var(--orange);padding:12px 16px;border-radius:4px;font-size:13px;color:#e65100;margin-bottom:16px}
+.notice-blue{background:#e3f2fd;border-left:4px solid var(--blue);padding:12px 16px;border-radius:4px;font-size:13px;color:#1565c0;margin-bottom:16px}
+.clickable{cursor:pointer}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-bar .form-select,.filter-bar .form-input{min-width:120px}
+.phone-frame{width:375px;height:720px;margin:20px auto;border:8px solid #333;border-radius:32px;overflow:hidden;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.phone-screen{width:100%;height:100%;overflow-y:auto;background:#f5f5f5;position:relative}
+.phone-header{background:var(--blue);color:#fff;padding:12px 16px;font-size:16px;font-weight:600;text-align:center;position:sticky;top:0;z-index:10}
+.phone-tabbar{position:absolute;bottom:0;left:0;right:0;height:56px;background:#fff;display:flex;border-top:1px solid #eee;box-shadow:0 -1px 4px rgba(0,0,0,.06)}
+.phone-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;color:#999;cursor:pointer}
+.phone-tab.active{color:var(--blue)}
+.phone-tab .tab-icon{font-size:20px}
+.phone-page{display:none;padding:12px;padding-bottom:70px}.phone-page.active{display:block}
+.phone-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.phone-card .card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.phone-card .card-h .t{font-size:14px;font-weight:600;color:#333}
+.phone-card .card-h .p{font-size:16px;font-weight:700;color:var(--blue)}
+.phone-card .info{font-size:12px;color:#999;line-height:1.6}
+.phone-banner{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;padding:16px;border-radius:8px;margin-bottom:12px}
+.phone-banner .b-num{font-size:28px;font-weight:700}
+.phone-banner .b-label{font-size:12px;opacity:.8}
+.stars{display:flex;gap:2px}.stars span{font-size:22px;cursor:pointer;color:#ccc}.stars span.on{color:#ff9800}
+.detail-section{background:#f9f9f9;border-radius:8px;padding:16px;margin-bottom:12px}
+.detail-section .section-title{font-size:14px;font-weight:600;color:var(--blue);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e0e0e0}
+.pagination{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px}
+.funnel-container{display:flex;flex-direction:column;align-items:center;gap:0;margin:16px 0}
+.funnel-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;color:#fff;font-size:13px;border-radius:4px;min-width:300px;transition:width .5s;font-weight:500}
+.funnel-arrow{font-size:11px;color:#999;padding:3px 0}
+.dash-dark{background:#061024;background-image:radial-gradient(#0f2448 0.5px,transparent 0.5px);background-size:24px 24px;color:#c6e2ff;min-height:calc(100vh - 56px);margin:-20px;padding:16px 8px;overflow-y:auto}
+.dash-dark .top-kpi-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.dash-dark .kpi-card{background:linear-gradient(135deg,#0f2b5288,#08193888);border:1px solid #1b589980;border-radius:6px;padding:16px 20px;display:flex;align-items:center;gap:16px}
+.dash-dark .kpi-icon{width:48px;height:48px;background:#0077cc44;display:flex;align-items:center;justify-content:center;color:#39c0ff;font-size:26px;flex-shrink:0}
+.dash-dark .kpi-main-num{font-size:32px;color:#fff;font-weight:bold}
+.dash-dark .kpi-desc-text{font-size:14px;color:#91c3ee}
+.dash-dark .grid-row-2,.dash-dark .grid-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.dash-dark .single-card-wrap{display:grid;grid-template-columns:1fr}
+.dash-dark .panel-card{background:linear-gradient(135deg,#0f234477,#07173377);border:1px solid #1b589970;border-radius:6px;min-height:360px;display:flex;flex-direction:column}
+.dash-dark .panel-title{font-size:18px;color:#66ccff;padding:12px 16px;border-bottom:1px solid #17407266;display:flex;align-items:center}
+.dash-dark .panel-content{flex:1;padding:12px 16px;overflow:hidden}
+.dash-dark .warn-tag-group{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.dash-dark .warn-tag{background:#0e2b5099;text-align:center;padding:6px 0;font-size:13px;border-radius:3px;color:#c6e2ff}
+.dash-dark .warn-list-item{font-size:13px;line-height:28px;padding-left:4px;color:#c6e2ff}
+.dash-dark .risk-box{float:right;width:160px;background:#0c2246;border:1px solid #226099;padding:8px;border-radius:4px;color:#c6e2ff}
+.dash-dark .data-table{width:100%;border-collapse:collapse;font-size:13px}
+.dash-dark .data-table th{background:#10346888;padding:8px 4px;text-align:left;border:1px solid #1b488077;color:#c6e2ff}
+.dash-dark .data-table td{padding:7px 4px;border:1px solid #14335c66;color:#c6e2ff;background:#0a1f3e}
+.dash-dark .data-table tr:nth-child(even){background:#0d2748}
+.dash-dark .data-table tr:hover{background:#143660}
+.dash-dark .chart-dom{width:100%;height:calc(100% - 10px);min-height:280px}
+.dash-dark .stat-item-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.dash-dark .stat-item-box{background:#0e274d88;padding:10px;display:flex;align-items:center;gap:8px}
+.dash-dark .stat-num{font-size:24px;color:#fff;font-weight:bold}
+.dash-dark .dash-select{background:#0a2042;color:#c6e2ff;border:1px solid #255994;padding:2px 4px;font-size:13px}
+.dash-dark .dash-btn{background:#103468;border:1px solid #266099;color:#fff;padding:5px 12px;border-radius:3px;cursor:pointer;font-size:13px}
+.dash-dark .dash-btn-alt{background:#081c38;border:1px solid #1c4475;color:#88aacc;padding:3px 6px;cursor:pointer;font-size:13px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">渝慧学<br>教辅监管平台</div>
+  <div class="nav-item active" onclick="nav('dashboard',event)"><span class="nav-icon">&#9776;</span> 驾驶舱</div>
+  <div class="nav-item" onclick="nav('catalog',event)"><span class="nav-icon">&#128218;</span> 教辅目录</div>
+  <div class="nav-item" onclick="nav('orders',event)"><span class="nav-icon">&#128230;</span> 征订管理</div>
+  <div class="nav-item" onclick="nav('feedback',event)"><span class="nav-icon">&#128172;</span> 意见反馈</div>
+  <div class="nav-item" onclick="nav('satisfaction',event)"><span class="nav-icon">&#11088;</span> 满意度管理</div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">驾驶舱</div>
+    <div class="role-switch">
+      <button class="active" onclick="switchRole('shiwei',this)">市教委</button>
+      <button onclick="switchRole('quxian',this)">区县教委</button>
+      <button onclick="switchRole('school',this)">学校</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+var D = {"districts": [{"id": 1, "name": "渝中区", "schools": 5, "students": 12000, "classes": 240}, {"id": 2, "name": "江北区", "schools": 4, "students": 9500, "classes": 190}, {"id": 3, "name": "沙坪坝区", "schools": 6, "students": 15000, "classes": 300}, {"id": 4, "name": "云阳县", "schools": 8, "students": 18000, "classes": 360}, {"id": 5, "name": "万州区", "schools": 7, "students": 16000, "classes": 320}], "schools": [{"id": 1, "name": "渝中区第一小学", "district": "渝中区", "stage": "小学", "students": 800, "classes": 20}, {"id": 2, "name": "渝中区求精中学", "district": "渝中区", "stage": "初中", "students": 1200, "classes": 24}, {"id": 3, "name": "江北区华新小学", "district": "江北区", "stage": "小学", "students": 650, "classes": 16}, {"id": 4, "name": "江北区字水中学", "district": "江北区", "stage": "初中", "students": 1000, "classes": 20}, {"id": 5, "name": "沙坪坝小学", "district": "沙坪坝区", "stage": "小学", "students": 900, "classes": 22}, {"id": 6, "name": "沙坪坝区七中", "district": "沙坪坝区", "stage": "初中", "students": 1100, "classes": 22}, {"id": 7, "name": "云阳县第一初级中学", "district": "云阳县", "stage": "初中", "students": 950, "classes": 19}, {"id": 8, "name": "云阳县紫金小学", "district": "云阳县", "stage": "小学", "students": 700, "classes": 18}], "textbooks": [{"id": 1, "name": "语文同步练习册(三年级)", "publisher": "人民教育出版社", "subject": "语文", "stage": "小学", "grade": "三年级", "type": "同步练习册", "price": 15.5, "free": false, "isbn": "9787107333210", "status": "启用"}, {"id": 2, "name": "数学同步练习册(七年级)", "publisher": "重庆出版社", "subject": "数学", "stage": "初中", "grade": "七年级", "type": "同步练习册", "price": 18.0, "free": true, "isbn": "9787112345678", "status": "启用"}, {"id": 3, "name": "英语同步练习册(五年级)", "publisher": "外研社", "subject": "英语", "stage": "小学", "grade": "五年级", "type": "同步练习册", "price": 16.0, "free": false, "isbn": "9787560044321", "status": "启用"}, {"id": 4, "name": "中考数学复习资料", "publisher": "重庆出版社", "subject": "数学", "stage": "初中", "grade": "九年级", "type": "中考复习", "price": 22.0, "free": true, "isbn": "9787112987654", "status": "启用"}, {"id": 5, "name": "中考语文复习资料", "publisher": "人民教育出版社", "subject": "语文", "stage": "初中", "grade": "九年级", "type": "中考复习", "price": 20.0, "free": true, "isbn": "9787107987654", "status": "启用"}, {"id": 6, "name": "暑假作业(四年级)", "publisher": "重庆出版社", "subject": "综合", "stage": "小学", "grade": "四年级", "type": "寒暑假作业", "price": 12.0, "free": false, "isbn": "9787112567890", "status": "启用"}, {"id": 7, "name": "数学同步练习册(三年级)", "publisher": "重庆出版社", "subject": "数学", "stage": "小学", "grade": "三年级", "type": "同步练习册", "price": 14.5, "free": false, "isbn": "9787112345699", "status": "启用"}, {"id": 8, "name": "语文同步练习册(七年级)", "publisher": "人民教育出版社", "subject": "语文", "stage": "初中", "grade": "七年级", "type": "同步练习册", "price": 16.5, "free": false, "isbn": "9787107333221", "status": "禁用"}], "orders": [{"id": "ZD001", "title": "2026秋季三年级语文教辅征订", "school": "渝中区第一小学", "district": "渝中区", "textbook": "语文同步练习册(三年级)", "publisher": "人民教育出版社", "type": "同步练习册", "stage": "小学", "grade": "三年级", "year": "2026", "semester": "秋季", "classes": "三年级1-4班", "count": 160, "price": 15.5, "amount": 2480, "ordered": 98, "paid": 95, "status": "征订中", "date": "2026-07-29", "free": false, "remark": ""}, {"id": "ZD002", "title": "2026秋季三年级数学教辅征订", "school": "渝中区第一小学", "district": "渝中区", "textbook": "数学同步练习册(三年级)", "publisher": "重庆出版社", "type": "同步练习册", "stage": "小学", "grade": "三年级", "year": "2026", "semester": "秋季", "classes": "三年级1-4班", "count": 160, "price": 14.5, "amount": 2320, "ordered": 155, "paid": 0, "status": "征订中", "date": "2026-07-29", "free": false, "remark": ""}, {"id": "ZD003", "title": "2026秋季七年级数学教辅征订", "school": "渝中区求精中学", "district": "渝中区", "textbook": "数学同步练习册(七年级)", "publisher": "重庆出版社", "type": "同步练习册", "stage": "初中", "grade": "七年级", "year": "2026", "semester": "秋季", "classes": "七年级1-6班", "count": 300, "price": 18.0, "amount": 0, "ordered": 295, "paid": 0, "status": "征订中", "date": "2026-07-29", "free": true, "remark": "免费教辅，市级财政全额买单"}, {"id": "ZD004", "title": "2026秋季五年级英语教辅征订", "school": "江北区华新小学", "district": "江北区", "textbook": "英语同步练习册(五年级)", "publisher": "外研社", "type": "同步练习册", "stage": "小学", "grade": "五年级", "year": "2026", "semester": "秋季", "classes": "五年级1-3班", "count": 120, "price": 16.0, "amount": 1920, "ordered": 0, "paid": 0, "status": "已结束", "date": "2026-07-30", "free": false, "remark": ""}, {"id": "ZD005", "title": "2026秋季三年级数学教辅征订", "school": "沙坪坝小学", "district": "沙坪坝区", "textbook": "数学同步练习册(三年级)", "publisher": "重庆出版社", "type": "同步练习册", "stage": "小学", "grade": "三年级", "year": "2026", "semester": "秋季", "classes": "三年级1-6班", "count": 150, "price": 14.5, "amount": 2175, "ordered": 142, "paid": 140, "status": "征订中", "date": "2026-07-30", "free": false, "remark": ""}], "orderStudents": [{"orderId": "ZD001", "name": "张小明", "cls": "三年级1班", "ordered": true, "paid": true, "received": true, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "李小红", "cls": "三年级1班", "ordered": true, "paid": true, "received": true, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "王大伟", "cls": "三年级1班", "ordered": true, "paid": true, "received": false, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "刘思雨", "cls": "三年级2班", "ordered": true, "paid": false, "received": false, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "陈浩然", "cls": "三年级2班", "ordered": true, "paid": true, "received": true, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "杨子涵", "cls": "三年级2班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": true}, {"orderId": "ZD001", "name": "赵欣怡", "cls": "三年级3班", "ordered": true, "paid": true, "received": true, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "黄宇轩", "cls": "三年级3班", "ordered": true, "paid": false, "received": false, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "周诗琪", "cls": "三年级3班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": false}, {"orderId": "ZD001", "name": "吴俊杰", "cls": "三年级4班", "ordered": true, "paid": true, "received": true, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "徐梦瑶", "cls": "三年级4班", "ordered": true, "paid": true, "received": false, "amount": 15.5, "notOrdered": false}, {"orderId": "ZD001", "name": "孙梓睿", "cls": "三年级4班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": true}, {"orderId": "ZD005", "name": "马雨彤", "cls": "三年级1班", "ordered": true, "paid": true, "received": true, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "林子轩", "cls": "三年级1班", "ordered": true, "paid": true, "received": true, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "何欣怡", "cls": "三年级2班", "ordered": true, "paid": true, "received": false, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "高瑞泽", "cls": "三年级2班", "ordered": true, "paid": false, "received": false, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "罗紫萱", "cls": "三年级3班", "ordered": true, "paid": true, "received": true, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "梁宇涵", "cls": "三年级3班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": true}, {"orderId": "ZD005", "name": "宋雅琪", "cls": "三年级4班", "ordered": true, "paid": true, "received": true, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "谢明轩", "cls": "三年级4班", "ordered": true, "paid": true, "received": false, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "韩诗涵", "cls": "三年级5班", "ordered": true, "paid": false, "received": false, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "唐梓涵", "cls": "三年级5班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": false}, {"orderId": "ZD005", "name": "冯雅婷", "cls": "三年级5班", "ordered": true, "paid": true, "received": true, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD005", "name": "邓皓轩", "cls": "三年级6班", "ordered": true, "paid": true, "received": true, "amount": 14.5, "notOrdered": false}, {"orderId": "ZD003", "name": "朱嘉怡", "cls": "七年级1班", "ordered": true, "paid": true, "received": true, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "秦昊然", "cls": "七年级1班", "ordered": true, "paid": true, "received": true, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "尤思源", "cls": "七年级2班", "ordered": true, "paid": true, "received": false, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "许梓涵", "cls": "七年级2班", "ordered": true, "paid": true, "received": true, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "何诗琪", "cls": "七年级3班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "吕俊豪", "cls": "七年级3班", "ordered": true, "paid": true, "received": true, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "张雅楠", "cls": "七年级4班", "ordered": true, "paid": true, "received": false, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "曹子默", "cls": "七年级4班", "ordered": true, "paid": true, "received": true, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "袁沐阳", "cls": "七年级5班", "ordered": true, "paid": true, "received": true, "amount": 0, "notOrdered": false}, {"orderId": "ZD003", "name": "狄梦琪", "cls": "七年级5班", "ordered": false, "paid": false, "received": false, "amount": 0, "notOrdered": true}], "enrollmentData": [{"scope": "district", "name": "渝中区", "stage": "小学", "grade": "三年级", "classes": 20, "students": 800}, {"scope": "district", "name": "渝中区", "stage": "小学", "grade": "五年级", "classes": 16, "students": 640}, {"scope": "district", "name": "渝中区", "stage": "初中", "grade": "七年级", "classes": 24, "students": 1200}, {"scope": "district", "name": "渝中区", "stage": "初中", "grade": "九年级", "classes": 20, "students": 1000}, {"scope": "district", "name": "江北区", "stage": "小学", "grade": "五年级", "classes": 16, "students": 650}, {"scope": "district", "name": "沙坪坝区", "stage": "小学", "grade": "三年级", "classes": 22, "students": 900}, {"scope": "district", "name": "云阳县", "stage": "初中", "grade": "七年级", "classes": 19, "students": 950}, {"scope": "school", "name": "渝中区第一小学", "stage": "小学", "grade": "三年级", "classes": 4, "students": 160}, {"scope": "school", "name": "渝中区第一小学", "stage": "小学", "grade": "五年级", "classes": 3, "students": 120}, {"scope": "school", "name": "渝中区求精中学", "stage": "初中", "grade": "七年级", "classes": 6, "students": 300}], "feedbacks": [{"id": "FK001", "reporter": "张小明家长", "phone": "138****1234", "studentName": "张小明", "studentId": "500103201501011234", "school": "渝中区第一小学", "content": "教辅纸张质量差，偏薄透字", "type": "教辅投诉", "status": "待处理", "submitCount": 1, "date": "2026-08-05", "handler": "", "attachments": ["教辅照片1.jpg", "教辅照片2.jpg"], "timeline": []}, {"id": "FK002", "reporter": "李小红家长", "phone": "138****5678", "studentName": "李小红", "studentId": "500103201502022345", "school": "渝中区第一小学", "content": "咨询订购缴费截止时间是什么时候", "type": "教辅咨询", "status": "已解决", "submitCount": 1, "date": "2026-08-04", "handler": "渝中区第一小学", "attachments": [], "timeline": [{"time": "2026-08-04", "actor": "学校管理员", "action": "回复", "note": "订购缴费截止8月15日，请尽快完成。"}]}, {"id": "FK003", "reporter": "王大伟家长", "phone": "138****9988", "studentName": "王大伟", "studentId": "500103201503033456", "school": "渝中区第一小学", "content": "数学练习册第三页答案有误，影响孩子学习", "type": "教辅投诉", "status": "已超时", "submitCount": 3, "date": "2026-08-04", "handler": "渝中区教委", "attachments": ["答案错误照片.jpg"], "timeline": [{"time": "2026-08-04", "actor": "学校管理员", "action": "回复", "note": "已联系出版社核实，请耐心等待。"}, {"time": "2026-08-05", "actor": "家长", "action": "再次提交", "note": "仍未解决，答案依旧有误。"}, {"time": "2026-08-06", "actor": "系统", "action": "自动升级", "note": "同一诉求提交3次，自动转派至区县教委。"}, {"time": "2026-08-06", "actor": "渝中区教委", "action": "督办", "note": "请学校管理员尽快对接出版社更换，限3日内反馈。"}]}, {"id": "FK004", "reporter": "刘思雨家长", "phone": "138****3322", "studentName": "刘思雨", "studentId": "500103201504044567", "school": "江北区华新小学", "content": "教辅价格高于市场同类产品", "type": "教辅投诉", "status": "处理中", "submitCount": 3, "date": "2026-08-06", "handler": "江北区教委", "attachments": ["价格对比截图.png"], "timeline": [{"time": "2026-08-06", "actor": "学校管理员", "action": "回复", "note": "价格为市级目录定价。"}, {"time": "2026-08-07", "actor": "系统", "action": "自动升级", "note": "同一诉求提交3次，自动转派至区县教委。"}, {"time": "2026-08-07", "actor": "江北区教委", "action": "督办", "note": "请学校向家长解释定价依据，并记录反馈。"}]}, {"id": "FK005", "reporter": "监督员张三", "phone": "139****1122", "studentName": "陈浩然", "studentId": "500103201505055678", "school": "渝中区第一小学", "content": "订购数量超出班级实际人数", "type": "教辅投诉", "status": "已解决", "submitCount": 1, "date": "2026-08-03", "handler": "渝中区第一小学", "attachments": [], "timeline": [{"time": "2026-08-03", "actor": "学校管理员", "action": "处理", "note": "经核实为预征订数，实际按订购数发货，已向家长说明。"}]}, {"id": "FK006", "reporter": "杨子涵家长", "phone": "138****4455", "studentName": "杨子涵", "studentId": "500103201506066789", "school": "云阳县紫金小学", "content": "一科多辅，语文配了两本练习册", "type": "教辅投诉", "status": "处理中", "submitCount": 3, "date": "2026-08-06", "handler": "市教委", "attachments": ["教辅清单照片.jpg"], "timeline": [{"time": "2026-08-06", "actor": "学校管理员", "action": "回复", "note": "一本为区县定版，一本为学校自主选品。"}, {"time": "2026-08-07", "actor": "系统", "action": "自动升级", "note": "同一诉求提交3次，自动转派至区县教委。"}, {"time": "2026-08-08", "actor": "云阳县教委", "action": "督办", "note": "请学校核实是否违规，暂停自主选品。"}, {"time": "2026-08-09", "actor": "系统", "action": "升级市教委", "note": "区县无法处理，升级至市教委。"}]}, {"id": "FK007", "reporter": "赵欣怡家长", "phone": "138****7788", "studentName": "赵欣怡", "studentId": "500103201507077890", "school": "沙坪坝小学", "content": "咨询教辅是否可以自愿购买，不订购会有什么影响", "type": "教辅咨询", "status": "待处理", "submitCount": 1, "date": "2026-08-08", "handler": "", "attachments": [], "timeline": []}, {"id": "FK008", "reporter": "黄宇轩家长", "phone": "138****6655", "studentName": "黄宇轩", "studentId": "500103201508088901", "school": "江北区字水中学", "content": "教辅封面印刷模糊，影响使用", "type": "教辅投诉", "status": "无需处理", "submitCount": 1, "date": "2026-08-07", "handler": "江北区字水中学", "attachments": ["封面照片.jpg"], "timeline": [{"time": "2026-08-07", "actor": "学校管理员", "action": "处理", "note": "经核实为运输磨损，已联系新华书店更换。"}]}], "satisfaction": [{"textbook": "语文同步练习册(三年级)", "subject": "语文", "type": "同步练习册", "stage": "小学", "score": 4.5, "count": 120, "total": 160, "schools": 3, "district": "渝中区"}, {"textbook": "数学同步练习册(七年级)", "subject": "数学", "type": "同步练习册", "stage": "初中", "score": 4.7, "count": 180, "total": 300, "schools": 2, "district": "渝中区"}, {"textbook": "英语同步练习册(五年级)", "subject": "英语", "type": "同步练习册", "stage": "小学", "score": 4.2, "count": 60, "total": 120, "schools": 1, "district": "江北区"}, {"textbook": "中考数学复习资料", "subject": "数学", "type": "中考复习", "stage": "初中", "score": 4.6, "count": 130, "total": 300, "schools": 2, "district": "沙坪坝区"}, {"textbook": "数学同步练习册(三年级)", "subject": "数学", "type": "同步练习册", "stage": "小学", "score": 4.3, "count": 90, "total": 160, "schools": 2, "district": "渝中区"}], "questionnaires": [{"id": 1, "title": "2026年秋季教辅满意度调查", "status": "进行中", "responses": 580, "target": 1200, "date": "2026-08-10", "scope": "全市", "questions": ["教辅内容质量评分", "教辅印刷质量评分", "教辅价格合理性评分", "整体满意度评分"]}, {"id": 2, "title": "同步练习册质量专项问卷", "status": "已结束", "responses": 850, "target": 1000, "date": "2026-07-20", "scope": "渝中区", "questions": ["内容质量评分", "印刷质量评分", "难度适宜度评分"]}], "announcements": [{"id": 1, "title": "关于2026年秋季教辅征订工作的通知", "date": "2026-07-20", "org": "市教委"}, {"id": 2, "title": "渝中区教辅征订结果公示", "date": "2026-07-25", "org": "渝中区教委"}, {"id": 3, "title": "教辅满意度调查问卷发放通知", "date": "2026-08-10", "org": "市教委"}], "parentTextbooks": [{"id": 1, "name": "语文同步练习册(三年级)", "subject": "语文", "price": 15.5, "free": false, "publisher": "人民教育出版社"}, {"id": 2, "name": "数学同步练习册(三年级)", "subject": "数学", "price": 14.5, "free": false, "publisher": "重庆出版社"}], "parentOrders": [{"id": "JZ001", "textbook": "英语同步练习册(五年级)", "amount": 16.0, "status": "已收货", "date": "2026-08-01", "free": false, "delivered": true, "evaluated": false, "score": 0}, {"id": "JZ002", "textbook": "语文同步练习册(三年级)", "amount": 15.5, "status": "待收货", "date": "2026-08-05", "free": false, "delivered": false, "evaluated": false, "score": 0}], "parentFeedbacks": [{"id": "FK001", "content": "教辅纸张质量差，偏薄透字", "type": "教辅投诉", "status": "待处理", "level": "一级", "date": "2026-08-05", "submitCount": 1, "timeline": []}, {"id": "FK002", "content": "数学练习册第三页答案有误，影响孩子学习", "type": "教辅投诉", "status": "处理中", "level": "二级", "date": "2026-08-04", "submitCount": 3, "timeline": [{"time": "2026-08-04", "actor": "学校管理员", "action": "回复", "note": "已联系出版社核实，请耐心等待。"}, {"time": "2026-08-05", "actor": "家长", "action": "再次提交", "note": "仍未解决，答案依旧有误。"}, {"time": "2026-08-06", "actor": "系统", "action": "自动升级", "note": "同一诉求提交3次，自动转派至区县教委。"}, {"time": "2026-08-06", "actor": "渝中区教委", "action": "督办", "note": "请学校管理员尽快对接出版社更换，限3日内反馈。"}]}], "parentQuestionnaires": [{"id": 1, "title": "2026年秋季教辅满意度调查", "status": "待填写", "questions": ["教辅内容质量评分", "教辅印刷质量评分", "教辅价格合理性评分", "整体满意度评分"]}]};
+var role = 'shiwei';
+var curPage = 'dashboard';
+var titles = {dashboard:'驾驶舱',catalog:'教辅目录管理',orders:'征订管理',feedback:'意见反馈',satisfaction:'满意度管理'};
+var fbCurStatus = '全部';
+var rankOrder = 'desc';
+
+function nav(page, ev) {
+  curPage = page;
+  document.getElementById('pageTitle').textContent = titles[page];
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+  ev.target.closest('.nav-item').classList.add('active');
+  render();
+}
+function switchRole(r, btn) {
+  role = r;
+  document.querySelectorAll('.role-switch button').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  render();
+}
+function render() {
+  var c = document.getElementById('content');
+  var pages = {dashboard:pageDashboard,catalog:pageCatalog,orders:pageOrders,feedback:pageFeedback,satisfaction:pageSatisfaction};
+  c.innerHTML = pages[curPage]();
+  if(curPage==='dashboard' && typeof initDashboardCharts==='function'){
+    setTimeout(initDashboardCharts,50);
+  }
+}
+var _dashCharts = {};
+function initDashboardCharts(){
+  for(var k in _dashCharts){if(_dashCharts[k]){_dashCharts[k].dispose();}}
+  _dashCharts = {};
+  var el1 = document.getElementById('chart-satisfaction');
+  if(el1 && typeof echarts !== 'undefined'){
+    _dashCharts.sat = echarts.init(el1);
+    _dashCharts.sat.setOption({
+      backgroundColor:'transparent',textStyle:{color:'#c6e2ff'},tooltip:{trigger:'axis'},
+      grid:{left:50,right:20,top:40,bottom:40},
+      xAxis:{type:'category',data:['非常满意','满意','基本满意','较不满意','不满意'],axisLine:{lineStyle:{color:'#245488'}},axisLabel:{color:'#87b8e8'}},
+      yAxis:{type:'value',axisLine:{lineStyle:{color:'#245488'}},splitLine:{lineStyle:{color:'#183860'}},axisLabel:{color:'#87b8e8'}},
+      series:[{name:'参评人数',type:'bar',data:[0,0,0,0,0],itemStyle:{color:'#00a8ff'}}]
+    });
+  }
+  var el2 = document.getElementById('chart-fund');
+  if(el2 && typeof echarts !== 'undefined'){
+    _dashCharts.fund = echarts.init(el2);
+    _dashCharts.fund.setOption({
+      backgroundColor:'transparent',textStyle:{color:'#c6e2ff'},tooltip:{trigger:'axis'},
+      grid:{left:50,right:20,top:40,bottom:40},
+      xAxis:{type:'category',data:["重庆市云阳盘石中学","重庆市中山外国语学校","重庆市云阳盐渠中学"],axisLabel:{color:'#87b8e8',rotate:15},axisLine:{lineStyle:{color:'#245488'}}},
+      yAxis:{type:'value',axisLine:{lineStyle:{color:'#245488'}},splitLine:{lineStyle:{color:'#183860'}},axisLabel:{color:'#87b8e8'}},
+      series:[{name:'人均经费',type:'bar',data:[142,122,115],itemStyle:{color:'#00a8ff'}},{name:'平均值',type:'line',data:[107.55,107.55,107.55],lineStyle:{color:'#ffcc00'},symbol:'none'}]
+    });
+  }
+  var el3 = document.getElementById('chart-problem');
+  if(el3 && typeof echarts !== 'undefined'){
+    _dashCharts.prob = echarts.init(el3);
+    _dashCharts.prob.setOption({
+      backgroundColor:'transparent',textStyle:{color:'#c6e2ff'},tooltip:{trigger:'axis'},
+      grid:{left:40,right:10,top:20,bottom:30},
+      xAxis:{type:'category',data:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月"],axisLine:{lineStyle:{color:'#245488'}},axisLabel:{color:'#87b8e8'}},
+      yAxis:{type:'value',axisLine:{lineStyle:{color:'#245488'}},splitLine:{lineStyle:{color:'#183860'}},axisLabel:{color:'#87b8e8'}},
+      series:[{name:'已解决',type:'bar',stack:'total',data:[1,0,0,0,0,0,3,0,0,0,0],itemStyle:{color:'#00bbbb'}},{name:'未整改',type:'bar',stack:'total',data:[0,0,0,0,0,0,1,0,0,0,0],itemStyle:{color:'#ff5555'}}]
+    });
+  }
+}
+function badge(s) {
+  var m = {'启用':'badge-green','禁用':'badge-grey','征订中':'badge-blue','已完成':'badge-green','待处理':'badge-red','处理中':'badge-orange','已超时':'badge-red','已解决':'badge-green','无需处理':'badge-grey','进行中':'badge-blue','已结束':'badge-grey','待填写':'badge-orange','已订购':'badge-green','已收货':'badge-green','待收货':'badge-orange','免费':'badge-green','收费':'badge-blue'};
+  return '<span class="badge '+(m[s]||'badge-grey')+'">'+s+'</span>';
+}
+function freeTag(f){return f?'<span class="badge badge-green">免费</span>':'<span class="badge badge-blue">收费</span>';}
+function tbl(headers, rows) {
+  var h = headers.map(function(x){return '<th>'+x+'</th>'}).join('');
+  var r = rows.map(function(row){return '<tr>'+row.map(function(c){return '<td>'+c+'</td>'}).join('')+'</tr>'}).join('');
+  return '<table><thead><tr>'+h+'</tr></thead><tbody>'+r+'</tbody></table>';
+}
+function subTab(e, id) {
+  e.target.parentElement.querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active')});
+  e.target.classList.add('active');
+  e.target.closest('.content').querySelectorAll('.sub-page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+}
+function showModal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalOverlay').classList.add('show');}
+function closeModal(e){if(e.target.id==='modalOverlay'||e.target.classList.contains('btn-outline'))document.getElementById('modalOverlay').classList.remove('show');}
+function scopedOrders(){if(role==='quxian')return D.orders.filter(function(o){return o.district==='渝中区'});if(role==='school')return D.orders.filter(function(o){return o.school==='渝中区第一小学'});return D.orders;}
+function scopedFeedbacks(){if(role==='quxian')return D.feedbacks.filter(function(f){return f.school.indexOf('渝中区')>=0||f.handler.indexOf('渝中区')>=0});if(role==='school')return D.feedbacks.filter(function(f){return f.school==='渝中区第一小学'});return D.feedbacks;}
+function scopedSatisfaction(){if(role==='quxian'||role==='school')return D.satisfaction.filter(function(s){return s.district==='渝中区'});return D.satisfaction;}
+
+function pageDashboard() {
+  var html = '<div class="dash-dark">';
+  html += '<div class="top-kpi-row">';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#127970;</div><div><div class="kpi-desc-text">学校总数</div><div class="kpi-main-num">112 <span style="font-size:16px">所</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#128104;&#8205;&#127891;</div><div><div class="kpi-desc-text">学生总人数</div><div class="kpi-main-num">113,162 <span style="font-size:16px">人</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#128203;</div><div><div class="kpi-desc-text">征订台账</div><div class="kpi-main-num">620 <span style="font-size:16px">项</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#128176;</div><div><div class="kpi-desc-text">累计金额</div><div class="kpi-main-num">1,816.14 <span style="font-size:16px">万元</span></div></div></div>';
+  html += '</div>';
+  html += '<div class="grid-row-2">';
+  html += '<div class="panel-card"><div class="panel-title">预警信息</div><div class="panel-content">';
+  html += '<div class="warn-tag-group">';
+  html += '<div class="warn-tag">超数量 <b>1</b></div><div class="warn-tag">超范围 <b>0</b></div><div class="warn-tag">价格虚高 <b>1</b></div><div class="warn-tag">利益输送 <b>0</b></div><div class="warn-tag">指定购买 <b>0</b></div>';
+  html += '<div class="warn-tag">资料不完善 <b>0</b></div><div class="warn-tag">程序不规范 <b>0</b></div><div class="warn-tag">强制/变相强制购买 <b>0</b></div><div class="warn-tag">满意度低于80% <b>0</b></div><div class="warn-tag">家委会组织购买 <b>0</b></div>';
+  html += '</div>';
+  html += '<div class="risk-box"><div style="margin-bottom:6px">处理反馈情况</div><div style="font-size:13px;line-height:24px">待处理 2｜无风险 4<br>低风险 6｜中风险 4｜高风险 1</div></div>';
+  html += '<div style="margin-top:12px;clear:both;">';
+  html += '<div class="warn-list-item">云阳县龙洞镇龙洞九年制学校【超数量】</div>';
+  html += '<div class="warn-list-item">云阳县龙洞镇龙洞九年制学校的五年级出现了一科多辅</div>';
+  html += '<div class="warn-list-item">云阳县龙洞镇龙洞九年制学校【价格虚高】</div>';
+  html += '<div class="warn-list-item">云阳县龙洞镇龙洞九年制学校的五年级合订本科目价格高于平均价格</div>';
+  html += '</div></div></div>';
+  html += '<div class="panel-card"><div class="panel-title">满意度统计</div><div class="panel-content"><div id="chart-satisfaction" class="chart-dom"></div></div></div>';
+  html += '<div class="panel-card"><div class="panel-title">经费分析<span style="margin-left:auto;font-size:13px"><select class="dash-select"><option>春季</option><option>秋季</option></select><select class="dash-select" style="margin-left:6px"><option>2026</option></select></span></div><div class="panel-content"><div id="chart-fund" class="chart-dom"></div></div></div>';
+  html += '</div>';
+  html += '<div class="grid-row-3">';
+  html += '<div class="panel-card"><div class="panel-title">问题整改<span style="margin-left:auto;font-size:13px"><button class="dash-btn-alt">柱状图</button><button class="dash-btn-alt" style="margin-left:4px;background:#081c38;border:1px solid #1c4475;color:#88aacc">折线图</button><select class="dash-select" style="margin-left:6px"><option>2026</option></select></span></div><div class="panel-content"><div id="chart-problem" class="chart-dom"></div><div style="text-align:center;margin-top:8px;"><button class="dash-btn">问题清单</button><button class="dash-btn" style="margin-left:8px">整改清单</button></div></div></div>';
+  html += '<div class="panel-card"><div class="panel-title">征订情况</div><div class="panel-content">';
+  html += '<div class="stat-item-row">';
+  html += '<div class="stat-item-box"><span>&#128216;</span><div><div class="stat-num">336</div><div style="font-size:13px">同步练习</div></div></div>';
+  html += '<div class="stat-item-box"><span>&#128214;</span><div><div class="stat-num">0</div><div style="font-size:13px">学习辅助</div></div></div>';
+  html += '<div class="stat-item-box"><span>&#128215;</span><div><div class="stat-num">132</div><div style="font-size:13px">中考复习资料</div></div></div>';
+  html += '</div>';
+  html += '<div class="stat-item-row">';
+  html += '<div class="stat-item-box"><span>&#128217;</span><div><div class="stat-num">113</div><div style="font-size:13px">高考复习资料</div></div></div>';
+  html += '<div class="stat-item-box"><span>&#128210;</span><div><div class="stat-num">14</div><div style="font-size:13px">寒假作业</div></div></div>';
+  html += '<div class="stat-item-box"><span>&#128211;</span><div><div class="stat-num">0</div><div style="font-size:13px">暑假作业</div></div></div>';
+  html += '</div></div></div>';
+  html += '<div class="panel-card"><div class="panel-title">征订管理</div><div class="panel-content" style="overflow-y:auto;"><table class="data-table"><thead><tr><th>学校/年级</th><th>征订次数</th><th>总金额</th></tr></thead><tbody>';
+  html += '<tr><td>重庆市云阳盘石中学校</td><td>15</td><td>¥25.52万元</td></tr>';
+  html += '<tr><td>重庆市云阳双江中学</td><td>19</td><td>¥92.04万元</td></tr>';
+  html += '<tr><td>云阳县第三初级中学黄石校区</td><td>13</td><td>¥4.12万元</td></tr>';
+  html += '<tr><td>云阳县凤鸣中学</td><td>34</td><td>¥126.88万元</td></tr>';
+  html += '<tr><td>z测试学校</td><td>9</td><td>¥708.28万元</td></tr>';
+  html += '<tr><td>云阳县红狮初级中学</td><td>20</td><td>¥14.29万元</td></tr>';
+  html += '<tr><td>重庆市云阳高级中学</td><td>11</td><td>¥103.44万元</td></tr>';
+  html += '<tr><td>云阳县第二初级中学</td><td>4</td><td>¥2.64万元</td></tr>';
+  html += '</tbody></table></div></div>';
+  html += '</div>';
+  html += '<div class="single-card-wrap"><div class="panel-card"><div class="panel-title">目录清单</div><div class="panel-content"><table class="data-table"><thead><tr><th>材料名称</th><th>出版社</th><th>适用年级</th><th>科目</th></tr></thead><tbody>';
+  html += '<tr><td>2026春高中地理思维练习册 选择性...</td><td>人民教育</td><td>高二</td><td>地理</td></tr>';
+  html += '<tr><td>高中地理思维练习册(选择性必修2...</td><td>人民教育</td><td>高二</td><td>地理</td></tr>';
+  html += '<tr><td>2026春高中地理思维练习册 选择...</td><td>人民教育</td><td>高二</td><td>地理</td></tr>';
+  html += '<tr><td>2026春高中地理思维练习册 必修第...</td><td>人民教育</td><td>高一</td><td>地理</td></tr>';
+  html += '</tbody></table></div></div></div>';
+  html += '</div>';
+  return html;
+}
+
+function pageCatalog() {
+  var html='<div class="notice-blue">教辅合规准入基础数据库，全校教辅征订的前置依据。仅目录中<span class="text-green fw700">启用</span>状态的合规教辅，学校方可发起征订申请。</div>';
+  if(role==='shiwei'){
+    html+='<div class="card"><div class="card-title">教辅目录管理<div class="flex gap8"><button class="btn btn-outline btn-sm" onclick="downloadTemplate()">下载模板</button><button class="btn btn-outline btn-sm" onclick="batchUpload()">批量导入</button><button class="btn btn-primary btn-sm" onclick="showAddCatalog()">+ 新增教辅</button></div></div></div>';
+  }
+  html+='<div class="card"><div class="card-title">教辅目录列表</div>';
+  html+='<div class="filter-bar">';
+  html+='<select class="form-select" id="f_stage" onchange="filterCatalog()"><option value="">全部学段</option><option>小学</option><option>初中</option></select>';
+  html+='<select class="form-select" id="f_grade" onchange="filterCatalog()"><option value="">全部年级</option><option>三年级</option><option>四年级</option><option>五年级</option><option>七年级</option><option>九年级</option></select>';
+  html+='<select class="form-select" id="f_subject" onchange="filterCatalog()"><option value="">全部科目</option><option>语文</option><option>数学</option><option>英语</option><option>综合</option></select>';
+  html+='<select class="form-select" id="f_publisher" onchange="filterCatalog()"><option value="">全部出版社</option><option>人民教育出版社</option><option>重庆出版社</option><option>外研社</option></select>';
+  html+='<select class="form-select" id="f_type" onchange="filterCatalog()"><option value="">全部类型</option><option>同步练习册</option><option>中考复习</option><option>寒暑假作业</option></select>';
+  html+='<select class="form-select" id="f_status" onchange="filterCatalog()"><option value="">全部状态</option><option>启用</option><option>禁用</option></select>';
+  html+='<input class="form-input" id="f_keyword" placeholder="材料名称关键词" oninput="filterCatalog()">';
+  html+='</div>';
+  html+='<div id="catalogTable">'+renderCatalogTable()+'</div>';
+  html+='</div>';
+  return html;
+}
+function getCatalogFilter(){var st=document.getElementById('f_stage')?document.getElementById('f_stage').value:'',gr=document.getElementById('f_grade')?document.getElementById('f_grade').value:'',sj=document.getElementById('f_subject')?document.getElementById('f_subject').value:'',pb=document.getElementById('f_publisher')?document.getElementById('f_publisher').value:'',ty=document.getElementById('f_type')?document.getElementById('f_type').value:'',sp=document.getElementById('f_status')?document.getElementById('f_status').value:'',kw=(document.getElementById('f_keyword')?document.getElementById('f_keyword').value:'').toLowerCase();return{st:st,gr:gr,sj:sj,pb:pb,ty:ty,sp:sp,kw:kw};}
+function filterCatalogData(){var f=getCatalogFilter();return D.textbooks.filter(function(t){return(!f.st||t.stage===f.st)&&(!f.gr||t.grade===f.gr)&&(!f.sj||t.subject===f.sj)&&(!f.pb||t.publisher===f.pb)&&(!f.ty||t.type===f.ty)&&(!f.sp||t.status===f.sp)&&(!f.kw||t.name.toLowerCase().indexOf(f.kw)>=0)});}
+function renderCatalogTable(){var rows=filterCatalogData();return tbl(['材料名称','出版社','教辅类型','适用年级','科目','价格','启用状态','操作'],rows.map(function(t){var ops='<button class="btn btn-outline btn-sm" onclick="showCatalogDetail(\''+t.id+'\')">详情</button> ';if(role==='shiwei'){ops+='<button class="btn btn-outline btn-sm" onclick="editCatalog(\''+t.id+'\')">编辑</button> ';ops+=t.status==='启用'?'<button class="btn btn-warn btn-sm" onclick="toggleCatalog(\''+t.id+'\')">禁用</button> ':'<button class="btn btn-success btn-sm" onclick="toggleCatalog(\''+t.id+'\')">启用</button> ';ops+='<button class="btn btn-danger btn-sm" onclick="delCatalog(\''+t.id+'\')">删除</button>';}return[t.name,t.publisher,t.type,t.grade,t.subject,'\u00a5'+t.price+(t.free?' '+freeTag(true):''),badge(t.status),ops]}));}
+function filterCatalog(){document.getElementById('catalogTable').innerHTML=renderCatalogTable();}
+function showAddCatalog(){showModal('<div class="modal-title">新增教辅目录</div><div class="form-row"><div class="form-label">教辅名称<span class="text-red">*</span></div><input class="form-input" id="add_name" placeholder="必填"></div><div class="form-row"><div class="form-label">出版社<span class="text-red">*</span></div><input class="form-input" id="add_publisher" placeholder="必填"></div><div class="form-row"><div class="form-label">学段<span class="text-red">*</span></div><select class="form-select" id="add_stage"><option value="小学">小学</option><option value="初中">初中</option></select></div><div class="form-row"><div class="form-label">适用年级<span class="text-red">*</span></div><input class="form-input" id="add_grade" placeholder="如三年级"></div><div class="form-row"><div class="form-label">科目<span class="text-red">*</span></div><select class="form-select" id="add_subject"><option>语文</option><option>数学</option><option>英语</option><option>综合</option></select></div><div class="form-row"><div class="form-label">教辅类型<span class="text-red">*</span></div><select class="form-select" id="add_type"><option>同步练习册</option><option>中考复习</option><option>寒暑假作业</option></select></div><div class="form-row"><div class="form-label">售价<span class="text-red">*</span></div><input class="form-input" id="add_price" type="number" placeholder="必填"></div><div class="form-row"><div class="form-label">ISBN</div><input class="form-input" id="add_isbn" placeholder="选填"></div><div class="form-row"><div class="form-label">状态</div><select class="form-select" id="add_status"><option>启用</option><option>禁用</option></select></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="confirmAddCatalog()">确认新增</button></div>');}
+function confirmAddCatalog(){var name=document.getElementById('add_name').value,publisher=document.getElementById('add_publisher').value,stage=document.getElementById('add_stage').value,grade=document.getElementById('add_grade').value,subject=document.getElementById('add_subject').value,type=document.getElementById('add_type').value,price=parseFloat(document.getElementById('add_price').value),isbn=document.getElementById('add_isbn').value,status=document.getElementById('add_status').value;if(!name||!publisher||!grade||!price){alert('请填写必填项');return;}var id=D.textbooks.length+1;D.textbooks.push({id:id,name:name,publisher:publisher,subject:subject,stage:stage,grade:grade,type:type,price:price,free:false,isbn:isbn,status:status});closeModal({target:{id:'modalOverlay'}});render();alert('教辅已新增到目录');}
+function showCatalogDetail(id){var t=D.textbooks.find(function(x){return x.id==id});showModal('<div class="modal-title">教辅详情 - '+t.name+'</div><div class="form-row"><div class="form-label">材料名称</div><div class="form-input" style="border:none">'+t.name+'</div></div><div class="form-row"><div class="form-label">出版社</div><div class="form-input" style="border:none">'+t.publisher+'</div></div><div class="form-row"><div class="form-label">教辅类型</div><div class="form-input" style="border:none">'+t.type+'</div></div><div class="form-row"><div class="form-label">适用年级</div><div class="form-input" style="border:none">'+t.grade+'</div></div><div class="form-row"><div class="form-label">学段</div><div class="form-input" style="border:none">'+t.stage+'</div></div><div class="form-row"><div class="form-label">科目</div><div class="form-input" style="border:none">'+t.subject+'</div></div><div class="form-row"><div class="form-label">售价</div><div class="form-input" style="border:none">\u00a5'+t.price+(t.free?'（免费）':'')+'</div></div><div class="form-row"><div class="form-label">ISBN</div><div class="form-input" style="border:none">'+(t.isbn||'-')+'</div></div><div class="form-row"><div class="form-label">启用状态</div><div class="form-input" style="border:none">'+badge(t.status)+'</div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">关闭</button></div>');}
+function editCatalog(id){var t=D.textbooks.find(function(x){return x.id==id});showModal('<div class="modal-title">编辑教辅 - '+t.name+'</div><div class="form-row"><div class="form-label">教辅名称</div><input class="form-input" id="ed_name" value="'+t.name+'"></div><div class="form-row"><div class="form-label">出版社</div><input class="form-input" id="ed_publisher" value="'+t.publisher+'"></div><div class="form-row"><div class="form-label">售价</div><input class="form-input" id="ed_price" type="number" value="'+t.price+'"></div><div class="form-row"><div class="form-label">ISBN</div><input class="form-input" id="ed_isbn" value="'+(t.isbn||'')+'"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="closeModal(event);alert(\'已保存修改\')">保存</button></div>');}
+function toggleCatalog(id){var t=D.textbooks.find(function(x){return x.id==id});t.status=t.status==='启用'?'禁用':'启用';render();}
+function delCatalog(id){if(confirm('确认删除该教辅？删除后无法恢复。')){D.textbooks=D.textbooks.filter(function(x){return x.id!=id});render();}}
+function downloadTemplate(){var csv='教辅名称,出版社,学段,适用年级,科目,教辅类型,售价,ISBN,免费,状态\n语文同步练习册(四年级),人民教育出版社,小学,四年级,语文,同步练习册,15.5,9787107333210,收费,启用\n数学同步练习册(八年级),重庆出版社,初中,八年级,数学,同步练习册,18.0,9787112345678,免费,启用\n';var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='教辅目录上传模板.csv';a.click();alert('模板已下载，请填写后点击批量导入');}
+function batchUpload(){showModal('<div class="modal-title">批量导入教辅目录</div><div class="notice-blue">请选择已填好的CSV模板文件上传，系统将自动解析并导入。</div><div class="form-row"><div class="form-label">选择文件</div><input type="file" accept=".csv" class="form-input"></div><div class="form-row"><div class="form-label">导入预览</div><div class="form-input" style="border:none;color:#666">预计导入3条，成功3条，失败0条</div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="closeModal(event);alert(\'批量导入成功：3条教辅已纳入目录\')">确认导入</button></div>');}
+function pageOrders() {
+  var html='<div class="notice-blue">征订管理统一管控全校各学期、各年级教辅征订单据及审批流程。区县选用教辅、发起征订均在此模块完成。</div>';
+  if(role==='quxian'||role==='school'){
+    html+='<div class="card"><div class="card-title">征订管理<div class="flex gap8"><button class="btn btn-primary btn-sm" onclick="showNewOrder()">+ 新增征订申请</button></div></div></div>';
+  }
+  html+='<div class="sub-tabs"><div class="sub-tab active" onclick="subTab(event,\'o_list\')">征订列表</div><div class="sub-tab" onclick="subTab(event,\'o_monitor\')">订购监控</div><div class="sub-tab" onclick="subTab(event,\'o_payment\')">缴费明细</div></div>';
+  html+='<div class="sub-page active" id="o_list"><div class="card"><div class="card-title">征订记录列表</div>';
+  html+='<div class="filter-bar">';
+  html+='<select class="form-select" id="o_year" onchange="filterOrders()"><option value="">全部年份</option><option>2026</option><option>2025</option></select>';
+  html+='<select class="form-select" id="o_semester" onchange="filterOrders()"><option value="">全部学期</option><option>春季</option><option>秋季</option></select>';
+  html+='<select class="form-select" id="o_school" onchange="filterOrders()"><option value="">全部学校</option>'+D.schools.map(function(s){return'<option>'+s.name+'</option>'}).join('')+'</select>';
+  html+='<select class="form-select" id="o_stage" onchange="filterOrders()"><option value="">全部学段</option><option>小学</option><option>初中</option></select>';
+  html+='</div>';
+  html+='<div id="orderTable">'+renderOrderTable()+'</div>';
+  html+='</div></div>';
+  html+='<div class="sub-page" id="o_monitor">'+renderMonitor()+'</div>';
+  html+='<div class="sub-page" id="o_payment"><div class="notice-blue">免费教辅由市级财政全额买单，收费教辅由家长在线缴费。</div><div class="card"><div class="card-title">缴费明细</div>';
+  html+='<div class="filter-bar">';
+  html+='<select class="form-select" id="p_year" onchange="filterPayment()"><option value="">全部年份</option><option>2026</option><option>2025</option></select>';
+  html+='<select class="form-select" id="p_semester" onchange="filterPayment()"><option value="">全部学期</option><option>春季</option><option>秋季</option></select>';
+  html+='<select class="form-select" id="p_school" onchange="filterPayment()"><option value="">全部学校</option>'+D.schools.map(function(s){return'<option>'+s.name+'</option>'}).join('')+'</select>';
+  html+='<select class="form-select" id="p_stage" onchange="filterPayment()"><option value="">全部学段</option><option>小学</option><option>初中</option></select>';
+  html+='<select class="form-select" id="p_payStatus" onchange="filterPayment()"><option value="">全部状态</option><option value="征订中">征订中</option><option value="已结束">已结束</option></select>';
+  html+='<select class="form-select" id="p_orderId" onchange="filterPayment()"><option value="">全部单号</option>'+scopedOrders().map(function(o){return'<option value="'+o.id+'">'+o.id+'</option>'}).join('')+'</select>';
+  html+='<button class="btn btn-outline btn-sm" onclick="exportPayDetail()">导出明细</button>';
+  html+='</div>';
+  html+='<div id="paymentTable">'+renderPaymentTable()+'</div>';
+  html+='</div></div>';
+  return html;
+}
+function filterOrders(){document.getElementById('orderTable').innerHTML=renderOrderTable();}
+function getMonitorData(){var orders=scopedOrders();var groups={};orders.forEach(function(o){var key=role==='shiwei'?o.district:(role==='quxian'?o.school:o.grade);if(!groups[key]){groups[key]={name:key,textbooks:[],schools:{},grades:[],totalClasses:0,totalPeople:0,totalAmount:0,orderedPeople:0,orderedAmount:0,paidPeople:0,paidAmount:0,receivedPeople:0,receivedAmount:0};}var g=groups[key];if(g.textbooks.indexOf(o.textbook)<0)g.textbooks.push(o.textbook);g.schools[o.school]=true;if(g.grades.indexOf(o.grade)<0)g.grades.push(o.grade);var cm=(o.classes||'').match(/(\d+)个班/);if(cm){g.totalClasses+=parseInt(cm[1]);}else{cm=(o.classes||'').match(/(\d+)-(\d+)/);if(cm){g.totalClasses+=parseInt(cm[2])-parseInt(cm[1])+1;}}g.totalPeople+=o.count;g.totalAmount+=o.amount;g.orderedPeople+=o.ordered;g.orderedAmount+=o.free?0:o.ordered*o.price;g.paidPeople+=o.paid;g.paidAmount+=o.free?0:o.paid*o.price;var students=D.orderStudents.filter(function(s){return s.orderId===o.id});var received=students.filter(function(s){return s.received}).length;g.receivedPeople+=received;g.receivedAmount+=o.free?0:received*o.price;});var result=[];for(var k in groups){groups[k].schoolCount=Object.keys(groups[k].schools).length;result.push(groups[k]);}return result;}
+function renderMonitor(){var data=getMonitorData();var tp=0,ta=0,op=0,oa=0,pp=0,pa=0,rp=0,ra=0;data.forEach(function(d){tp+=d.totalPeople;ta+=d.totalAmount;op+=d.orderedPeople;oa+=d.orderedAmount;pp+=d.paidPeople;pa+=d.paidAmount;rp+=d.receivedPeople;ra+=d.receivedAmount;});var html='<div class="card"><div class="card-title">征订漏斗总览</div>';html+='<div class="funnel-container">';var w1=100,w2=tp>0?Math.round(op/tp*100):0,w3=tp>0?Math.round(pp/tp*100):0,w4=tp>0?Math.round(rp/tp*100):0;html+='<div class="funnel-bar" style="width:'+w1+'%;background:var(--blue)"><span>征订总范围</span><span>'+tp+'人 | \u00a5'+ta.toFixed(0)+' | 100%</span></div>';html+='<div class="funnel-arrow">\u2193 订购率 '+w2+'%</div>';html+='<div class="funnel-bar" style="width:'+Math.max(w2,30)+'%;background:var(--green)"><span>已确认订购</span><span>'+op+'人 | \u00a5'+oa.toFixed(0)+' | '+w2+'%</span></div>';html+='<div class="funnel-arrow">\u2193 缴费率 '+(op>0?Math.round(pp/op*100):0)+'%</div>';html+='<div class="funnel-bar" style="width:'+Math.max(w3,25)+'%;background:var(--orange)"><span>已缴费</span><span>'+pp+'人 | \u00a5'+pa.toFixed(0)+' | '+w3+'%</span></div>';html+='<div class="funnel-arrow">\u2193 收货率 '+(pp>0?Math.round(rp/pp*100):0)+'%</div>';html+='<div class="funnel-bar" style="width:'+Math.max(w4,20)+'%;background:var(--red)"><span>已收货</span><span>'+rp+'人 | \u00a5'+ra.toFixed(0)+' | '+w4+'%</span></div>';html+='</div></div>';var unitLabel=role==='shiwei'?'区县':(role==='quxian'?'学校':'年级');var title=role==='shiwei'?'各区县征订情况统计':(role==='quxian'?'本区县各学校征订情况统计':'本校各年级征订情况统计');var headers=[unitLabel,'征订内容','征订金额'];if(role==='shiwei')headers.push('学校数');headers=headers.concat(['对应年级','班级数','人数','已订购(人/额/占比)','已缴费(人/额/占比)','已收货(人/额/占比)']);var rows=data.map(function(d){var row=[d.name,d.textbooks.join('、'),'\u00a5'+d.totalAmount.toFixed(0)];if(role==='shiwei')row.push(d.schoolCount);row=row.concat([d.grades.join('、'),d.totalClasses,d.totalPeople,d.orderedPeople+'人<br>\u00a5'+d.orderedAmount.toFixed(0)+'<br>'+(d.totalPeople>0?Math.round(d.orderedPeople/d.totalPeople*100):0)+'%',d.paidPeople+'人<br>\u00a5'+d.paidAmount.toFixed(0)+'<br>'+(d.orderedPeople>0?Math.round(d.paidPeople/d.orderedPeople*100):0)+'%',d.receivedPeople+'人<br>\u00a5'+d.receivedAmount.toFixed(0)+'<br>'+(d.paidPeople>0?Math.round(d.receivedPeople/d.paidPeople*100):0)+'%']);return row;});html+='<div class="card"><div class="card-title">'+title+'</div>';html+=tbl(headers,rows);html+='</div>';return html;}
+function filterPayment(){document.getElementById('paymentTable').innerHTML=renderPaymentTable();}
+function renderPaymentTable(){var yr=document.getElementById('p_year')?document.getElementById('p_year').value:'',se=document.getElementById('p_semester')?document.getElementById('p_semester').value:'',sc=document.getElementById('p_school')?document.getElementById('p_school').value:'',st=document.getElementById('p_stage')?document.getElementById('p_stage').value:'',ps=document.getElementById('p_payStatus')?document.getElementById('p_payStatus').value:'',oi=document.getElementById('p_orderId')?document.getElementById('p_orderId').value:'';var rows=scopedOrders().filter(function(o){return(!yr||o.year===yr)&&(!se||o.semester===se)&&(!sc||o.school===sc)&&(!st||o.stage===st)&&(!oi||o.id===oi)&&(!ps||o.status===ps)});return tbl(['单号','学校','教辅','金额','状态','备注','操作'],rows.map(function(o){return[o.id,o.school,o.textbook,o.free?'-':'\u00a5'+o.amount,badge(o.status),o.free?'市级财政买单':'在线缴费','<button class="btn btn-outline btn-sm" onclick="showPayDetail(\''+o.id+'\')">明细</button>']}));}
+function exportPayDetail(){var oi=document.getElementById('p_orderId')?document.getElementById('p_orderId').value:'';if(!oi){alert('请先选择征订单号再导出');return;}var o=D.orders.find(function(x){return x.id===oi});var students=D.orderStudents.filter(function(s){return s.orderId===oi});if(students.length===0){alert('该订单暂无学生明细数据');return;}var csv='学生姓名,班级,是否订购,是否缴费,是否收货,金额\n';students.forEach(function(s){csv+=[s.name,s.cls,s.ordered?'已订购':(s.notOrdered?'未订购':'待确认'),s.paid?'是':'否',s.received?'是':'否',o.free?'-':'\u00a5'+s.amount].join(',')+'\n';});var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='缴费明细_'+oi+'.csv';a.click();alert('已导出'+oi+'的缴费明细（'+students.length+'人）');}
+function renderOrderTable(){var yr=document.getElementById('o_year')?document.getElementById('o_year').value:'',se=document.getElementById('o_semester')?document.getElementById('o_semester').value:'',sc=document.getElementById('o_school')?document.getElementById('o_school').value:'',st=document.getElementById('o_stage')?document.getElementById('o_stage').value:'';var rows=scopedOrders().filter(function(o){return(!yr||o.year===yr)&&(!se||o.semester===se)&&(!sc||o.school===sc)&&(!st||o.stage===st)});return tbl(['学校名称','教辅类型','适用年级','征订年份','学期','征订总价','征订人数','状态','操作'],rows.map(function(o){return[o.school,o.type,o.grade,o.year,o.semester,o.free?'<span class="text-green">免费</span>':'\u00a5'+o.amount,o.count,badge(o.status),'<button class="btn btn-outline btn-sm" onclick="showOrderDetail(\''+o.id+'\')">详情</button>']}));}
+function showNewOrder(){showModal('<div class="modal-title">新增征订申请</div><div class="notice-blue">选择征订学段、适用年级后，系统自动带出班级数量和征订人数（学籍数据只读）。选择教辅类型后筛选合规教辅，选中后自动带出单价并核算总价。确认发起直接保存，无审批流程。</div><div class="form-row"><div class="form-label">征订标题<span class="text-red">*</span></div><input class="form-input" id="ord_title" placeholder="如2026秋季三年级语文教辅征订"></div><div class="form-row"><div class="form-label">征订学段<span class="text-red">*</span></div><select class="form-select" id="ord_stage" onchange="autoFillEnrollment();updateOrderBookOptions()"><option>小学</option><option>初中</option></select></div><div class="form-row"><div class="form-label">适用年级<span class="text-red">*</span></div><input class="form-input" id="ord_grade" placeholder="如三年级" oninput="autoFillEnrollment();updateOrderBookOptions()"></div><div class="form-row"><div class="form-label">教辅类型<span class="text-red">*</span></div><select class="form-select" id="ord_type" onchange="updateOrderBookOptions()"><option>同步练习册</option><option>中考复习</option><option>寒暑假作业</option></select></div><div class="form-row"><div class="form-label">班级数量</div><input class="form-input" id="ord_classes" readonly placeholder="选学段+年级自动带出" style="background:#f5f5f5"></div><div class="form-row"><div class="form-label">征订人数</div><input class="form-input" id="ord_count" type="number" readonly placeholder="选学段+年级自动带出" style="background:#f5f5f5"></div><div class="form-row"><div class="form-label">年份<span class="text-red">*</span></div><input class="form-input" id="ord_year" value="2026"></div><div class="form-row"><div class="form-label">学期<span class="text-red">*</span></div><select class="form-select" id="ord_semester"><option>春季</option><option>秋季</option></select></div><div class="form-row"><div class="form-label">教辅选型</div><div class="form-input" style="border:none" id="ord_book_sel">请先选择学段、年级和类型</div></div><div class="form-row"><div class="form-label">备注</div><textarea class="form-input" id="ord_remark" rows="2"></textarea></div><div class="form-row"><div class="form-label">征订总价</div><div class="form-input" style="border:none" id="ord_total">\u00a50.0</div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="confirmNewOrder()">确认发起</button></div>');}
+function autoFillEnrollment(){var stage=document.getElementById('ord_stage').value,grade=document.getElementById('ord_grade').value;if(!stage||!grade){document.getElementById('ord_classes').value='';document.getElementById('ord_count').value='';calcOrderTotal();return;}var scope=role==='school'?'school':'district';var name=role==='school'?'渝中区第一小学':'渝中区';var data=D.enrollmentData.find(function(e){return e.scope===scope&&e.name===name&&e.stage===stage&&e.grade===grade});if(data){document.getElementById('ord_classes').value=data.classes;document.getElementById('ord_count').value=data.students;}else{document.getElementById('ord_classes').value='';document.getElementById('ord_count').value='';}calcOrderTotal();}
+function updateOrderBookOptions(){var stage=document.getElementById('ord_stage').value,type=document.getElementById('ord_type').value,grade=document.getElementById('ord_grade').value;var books=D.textbooks.filter(function(t){return t.status==='启用'&&(!stage||t.stage===stage)&&(!type||t.type===type)&&(!grade||t.grade===grade)});var sel=document.getElementById('ord_book_sel');if(books.length===0){sel.innerHTML='<span class="text-grey">无匹配的合规教辅</span>';return;}var html='<select class="form-select" id="ord_book" onchange="calcOrderTotal()">';books.forEach(function(b){html+='<option value="'+b.id+'">'+b.name+' | '+b.publisher+' | \u00a5'+b.price+(b.free?'（免费）':'')+'</option>';});html+='</select>';sel.innerHTML=html;calcOrderTotal();}
+function calcOrderTotal(){var bookSel=document.getElementById('ord_book');if(!bookSel)return;var book=D.textbooks.find(function(t){return t.id==bookSel.value});var count=parseInt(document.getElementById('ord_count').value)||0;var total=book?(book.free?0:count*book.price):0;document.getElementById('ord_total').innerHTML='\u00a5'+total.toFixed(1)+(book&&book.free?'（免费）':'');}
+function confirmNewOrder(){var title=document.getElementById('ord_title').value,stage=document.getElementById('ord_stage').value,grade=document.getElementById('ord_grade').value,type=document.getElementById('ord_type').value,classCount=document.getElementById('ord_classes').value,count=parseInt(document.getElementById('ord_count').value),year=document.getElementById('ord_year').value,semester=document.getElementById('ord_semester').value,remark=document.getElementById('ord_remark').value,bookSel=document.getElementById('ord_book');if(!title||!grade){alert('请填写必填项');return;}if(!classCount||!count){alert('请先选择学段和年级，系统自动带出班级数量和征订人数');return;}if(!bookSel){alert('请先选择教辅');return;}var book=D.textbooks.find(function(t){return t.id==bookSel.value});var oid='ZD'+String(D.orders.length+1).padStart(3,'0');D.orders.push({id:oid,title:title,school:'渝中区第一小学',district:'渝中区',textbook:book.name,publisher:book.publisher,type:book.type,stage:stage,grade:grade,year:year,semester:semester,classes:classCount+'个班',count:count,price:book.price,amount:book.free?0:count*book.price,ordered:0,paid:0,status:'已结束',date:'2026-07-31',free:book.free,remark:remark});closeModal({target:{id:'modalOverlay'}});render();alert('征订记录已保存！征订单'+oid+'已创建，无审批流程。');}
+function showOrderDetail(id){var o=D.orders.find(function(x){return x.id===id});showModal('<div class="modal-title">征订详情 - '+o.id+'</div><div class="form-row"><div class="form-label">征订标题</div><div class="form-input" style="border:none">'+o.title+'</div></div><div class="form-row"><div class="form-label">学校</div><div class="form-input" style="border:none">'+o.school+'</div></div><div class="form-row"><div class="form-label">教辅</div><div class="form-input" style="border:none">'+o.textbook+'</div></div><div class="form-row"><div class="form-label">出版社</div><div class="form-input" style="border:none">'+o.publisher+'</div></div><div class="form-row"><div class="form-label">教辅类型</div><div class="form-input" style="border:none">'+o.type+'</div></div><div class="form-row"><div class="form-label">学段/年级</div><div class="form-input" style="border:none">'+o.stage+' / '+o.grade+'</div></div><div class="form-row"><div class="form-label">班级数量</div><div class="form-input" style="border:none">'+o.classes+'</div></div><div class="form-row"><div class="form-label">征订人数</div><div class="form-input" style="border:none">'+o.count+'人</div></div><div class="form-row"><div class="form-label">单价</div><div class="form-input" style="border:none">\u00a5'+o.price+(o.free?'（免费）':'')+'</div></div><div class="form-row"><div class="form-label">征订总价</div><div class="form-input" style="border:none">'+(o.free?'免费（财政买单）':'\u00a5'+o.amount)+'</div></div><div class="form-row"><div class="form-label">年份/学期</div><div class="form-input" style="border:none">'+o.year+'年'+o.semester+'</div></div><div class="form-row"><div class="form-label">已订购</div><div class="form-input" style="border:none">'+o.ordered+'人</div></div><div class="form-row"><div class="form-label">已缴费</div><div class="form-input" style="border:none">'+o.paid+'人</div></div><div class="form-row"><div class="form-label">状态</div><div class="form-input" style="border:none">'+badge(o.status)+'</div></div>'+(o.remark?'<div class="form-row"><div class="form-label">备注</div><div class="form-input" style="border:none">'+o.remark+'</div></div>':'')+'<div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">关闭</button> <button class="btn btn-outline btn-sm" onclick="showPayDetail(\''+o.id+'\')">缴费明细</button></div>');}
+function showPayDetail(id){var o=D.orders.find(function(x){return x.id===id});var students=D.orderStudents.filter(function(s){return s.orderId===id});var html='<div class="modal-title">缴费明细 - '+o.id+'</div>';if(o.free){html+='<div class="notice-blue">免费教辅，由市级财政全额买单，家长无需缴费。</div>';}else{html+='<div class="form-row"><div class="form-label">应缴金额</div><div class="form-input" style="border:none">\u00a5'+o.amount+'</div></div><div class="form-row"><div class="form-label">已缴金额</div><div class="form-input" style="border:none">\u00a5'+(o.amount*o.paid/o.count).toFixed(1)+'</div></div><div class="form-row"><div class="form-label">缴费方式</div><div class="form-input" style="border:none">在线缴费</div></div>';}var total=students.length;var orderedCount=students.filter(function(s){return s.ordered}).length;var notOrderedCount=students.filter(function(s){return s.notOrdered}).length;var unconfirmedCount=total-orderedCount-notOrderedCount;var paidCount=students.filter(function(s){return s.ordered&&s.paid}).length;var unpaidCount=orderedCount-paidCount;var receivedCount=students.filter(function(s){return s.ordered&&s.paid&&s.received}).length;var notReceivedCount=paidCount-receivedCount;html+='<div class="detail-section"><div class="section-title">征订总范围维度</div><div style="display:flex;justify-content:space-around;text-align:center;margin-bottom:8px"><div><div class="fs20 fw700">'+total+'</div><div class="text-grey fs12">征订总范围</div></div><div><div class="fs20 fw700 text-green">'+orderedCount+'</div><div class="text-grey fs12">已订购</div></div><div><div class="fs20 fw700 text-red">'+notOrderedCount+'</div><div class="text-grey fs12">未订购</div></div><div><div class="fs20 fw700 text-orange">'+unconfirmedCount+'</div><div class="text-grey fs12">待确认</div></div></div><div class="bar-row"><div class="bar-label">订购率</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(orderedCount/total*100)+'%;background:var(--green)">'+Math.round(orderedCount/total*100)+'%</div></div></div></div>';html+='<div class="detail-section"><div class="section-title">订购人群缴费维度（仅统计已订购'+orderedCount+'人）</div><div class="grid2" style="text-align:center"><div><div class="fs20 fw700 text-green">'+paidCount+'</div><div class="text-grey fs12">已缴费人数</div></div><div><div class="fs20 fw700 text-orange">'+unpaidCount+'</div><div class="text-grey fs12">待缴费人数</div></div></div><div class="bar-row mt8"><div class="bar-label">缴费率</div><div class="bar-track"><div class="bar-fill" style="width:'+(orderedCount>0?Math.round(paidCount/orderedCount*100):0)+'%;background:var(--blue)">'+(orderedCount>0?Math.round(paidCount/orderedCount*100):0)+'%</div></div></div></div>';html+='<div class="detail-section"><div class="section-title">缴费人群收货维度（仅统计已缴费'+paidCount+'人）</div><div class="grid2" style="text-align:center"><div><div class="fs20 fw700 text-green">'+receivedCount+'</div><div class="text-grey fs12">已收货人数</div></div><div><div class="fs20 fw700 text-orange">'+notReceivedCount+'</div><div class="text-grey fs12">待收货人数</div></div></div><div class="bar-row mt8"><div class="bar-label">收货率</div><div class="bar-track"><div class="bar-fill" style="width:'+(paidCount>0?Math.round(receivedCount/paidCount*100):0)+'%;background:var(--orange)">'+(paidCount>0?Math.round(receivedCount/paidCount*100):0)+'%</div></div></div></div>';html+='<div class="detail-section"><div class="section-title">学生购买明细</div><div class="filter-bar">';var cls=[...new Set(students.map(function(s){return s.cls}))];html+='<select class="form-select" id="pay_cls" onchange="filterPayStudents(\''+id+'\')"><option value="">全部班级</option>'+cls.map(function(c){return'<option>'+c+'</option>'}).join('')+'</select>';html+='<select class="form-select" id="pay_ordered" onchange="filterPayStudents(\''+id+'\')"><option value="">全部订购状态</option><option value="ordered">已订购</option><option value="notOrdered">未订购</option><option value="unconfirmed">待确认</option></select>';html+='<select class="form-select" id="pay_paid" onchange="filterPayStudents(\''+id+'\')"><option value="">全部缴费状态</option><option value="true">已缴费</option><option value="false">未缴费</option></select>';html+='<select class="form-select" id="pay_received" onchange="filterPayStudents(\''+id+'\')"><option value="">全部收货状态</option><option value="true">已收货</option><option value="false">未收货</option></select>';html+='<span id="pay_count" class="text-blue fw700">筛选出 '+students.length+' 人</span>';html+='</div><div id="payTable">'+renderPayTable(id,students)+'</div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">关闭</button></div></div>';showModal(html);}
+function filterPayStudents(orderId){var students=D.orderStudents.filter(function(s){return s.orderId===orderId});var cls=document.getElementById('pay_cls').value,ord=document.getElementById('pay_ordered').value,pd=document.getElementById('pay_paid').value,rc=document.getElementById('pay_received').value;var filtered=students.filter(function(s){return(!cls||s.cls===cls)&&(!ord||(ord==='ordered'&&s.ordered)||(ord==='notOrdered'&&s.notOrdered)||(ord==='unconfirmed'&&!s.ordered&&!s.notOrdered))&&(!pd||s.paid===(pd==='true'))&&(!rc||s.received===(rc==='true'))});document.getElementById('pay_count').textContent='筛选出 '+filtered.length+' 人';document.getElementById('payTable').innerHTML=renderPayTable(orderId,filtered);}
+function renderPayTable(orderId,students){var o=D.orders.find(function(x){return x.id===orderId});return tbl(['学生姓名','班级','是否订购','是否缴费','是否收货','金额'],students.map(function(s){return[s.name,s.cls,s.ordered?'<span class="text-green">已订购</span>':(s.notOrdered?'<span class="text-red">未订购</span>':'<span class="text-grey">待确认</span>'),s.paid?(o.free?'<span class="text-green">免费</span>':'<span class="text-green">是</span>'):'<span class="text-grey">否</span>',s.received?'<span class="text-green">是</span>':'<span class="text-grey">否</span>',o.free?'-':'\u00a5'+s.amount]}));}
+function pageFeedback() {
+  var html='<div class="card"><div class="card-title">反馈管理</div>';
+  var statuses=['全部','待处理','处理中','已超时','已解决','无需处理'];
+  html+='<div class="sub-tabs">';
+  statuses.forEach(function(s,i){html+='<div class="sub-tab'+(i===0?' active':'')+'" onclick="filterFeedbackStatus(\''+s+'\',this)">'+s+'</div>';});
+  html+='</div>';
+  html+='<div class="filter-bar">';
+  html+='<input class="form-input" id="fb_keyword" placeholder="反馈编号/反馈人" oninput="filterFeedback()">';
+  html+='<select class="form-select" id="fb_school" onchange="filterFeedback()"><option value="">全部学校</option>'+D.schools.map(function(s){return'<option>'+s.name+'</option>'}).join('')+'</select>';
+  html+='<select class="form-select" id="fb_type" onchange="filterFeedback()"><option value="">全部类型</option><option>教辅咨询</option><option>教辅投诉</option></select>';
+  html+='<input class="form-input" id="fb_date_start" type="date" onchange="filterFeedback()" title="开始日期">';
+  html+='<input class="form-input" id="fb_date_end" type="date" onchange="filterFeedback()" title="结束日期">';
+  html+='</div>';
+  html+='<div id="fbTable">'+renderFeedbackTable()+'</div>';
+  html+='<div class="pagination"><button class="btn btn-outline btn-sm">上一页</button> <span>第1页 / 共2页</span> <button class="btn btn-outline btn-sm">下一页</button></div>';
+  html+='</div>';
+  return html;
+}
+function filterFeedbackStatus(status,el){fbCurStatus=status;el.parentElement.querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');filterFeedback();}
+function filterFeedback(){document.getElementById('fbTable').innerHTML=renderFeedbackTable();}
+function renderFeedbackTable(){var kw=(document.getElementById('fb_keyword')?document.getElementById('fb_keyword').value:'').toLowerCase(),school=document.getElementById('fb_school')?document.getElementById('fb_school').value:'',type=document.getElementById('fb_type')?document.getElementById('fb_type').value:'',dateStart=document.getElementById('fb_date_start')?document.getElementById('fb_date_start').value:'',dateEnd=document.getElementById('fb_date_end')?document.getElementById('fb_date_end').value:'';var rows=scopedFeedbacks().filter(function(f){return(fbCurStatus==='全部'||f.status===fbCurStatus)&&(!kw||f.id.toLowerCase().indexOf(kw)>=0||f.reporter.toLowerCase().indexOf(kw)>=0)&&(!school||f.school===school)&&(!type||f.type===type)&&(!dateStart||f.date>=dateStart)&&(!dateEnd||f.date<=dateEnd)});return tbl(['反馈编号','反馈人','联系电话','所属学校','问题类型','提交时间','工单状态','操作'],rows.map(function(f){var ops='<button class="btn btn-outline btn-sm" onclick="showFeedbackDetail(\''+f.id+'\')">查看</button> ';if(f.status!=='已解决'&&f.status!=='无需处理'){ops+='<button class="btn btn-primary btn-sm" onclick="showFeedbackDetail(\''+f.id+'\')">处理</button>';}return[f.id,f.reporter,f.phone,f.school,f.type,f.date,badge(f.status),ops]}));}
+function showFeedbackDetail(id){var f=D.feedbacks.find(function(x){return x.id===id});var html='<div class="modal-title">反馈详情 - '+f.id+'</div>';html+='<div class="detail-section"><div class="section-title">基本信息</div><div class="form-row"><div class="form-label">反馈编号</div><div class="form-input" style="border:none">'+f.id+'</div></div><div class="form-row"><div class="form-label">提交时间</div><div class="form-input" style="border:none">'+f.date+'</div></div><div class="form-row"><div class="form-label">问题类型</div><div class="form-input" style="border:none">'+f.type+'</div></div><div class="form-row"><div class="form-label">工单状态</div><div class="form-input" style="border:none">'+badge(f.status)+'</div></div></div>';html+='<div class="detail-section"><div class="section-title">家长信息</div><div class="form-row"><div class="form-label">反馈人</div><div class="form-input" style="border:none">'+f.reporter+'</div></div><div class="form-row"><div class="form-label">联系电话</div><div class="form-input" style="border:none">'+f.phone+'</div></div></div>';html+='<div class="detail-section"><div class="section-title">子女信息</div><div class="form-row"><div class="form-label">学生姓名</div><div class="form-input" style="border:none">'+f.studentName+'</div></div><div class="form-row"><div class="form-label">身份证号</div><div class="form-input" style="border:none">'+f.studentId+'</div></div><div class="form-row"><div class="form-label">就读学校</div><div class="form-input" style="border:none">'+f.school+'</div></div></div>';html+='<div class="detail-section"><div class="section-title">问题描述</div><div class="form-input" style="border:none;min-height:40px">'+f.content+'</div></div>';html+='<div class="detail-section"><div class="section-title">证明材料</div>';if(f.attachments&&f.attachments.length>0){f.attachments.forEach(function(a){html+='<div style="display:inline-block;margin:4px;padding:8px 12px;background:#f0f0f0;border-radius:4px;font-size:12px">'+a+'</div>';});}else{html+='<p class="text-grey">无附件</p>';}html+='</div>';html+='<div class="detail-section"><div class="section-title">处理记录</div>';if(f.timeline.length===0){html+='<p class="text-grey text-center" style="padding:12px">暂无处理记录</p>';}else{html+='<div class="timeline">';f.timeline.forEach(function(t){html+='<div class="timeline-item"><div class="t-time">'+t.time+'</div><div class="t-actor">'+t.actor+' - '+t.action+'</div><div class="t-note">'+t.note+'</div></div>';});html+='</div>';}html+='</div>';html+='<div class="detail-section"><div class="section-title">处理操作</div>';if(f.status==='已解决'||f.status==='无需处理'){html+='<p class="text-grey text-center" style="padding:8px">该工单已关闭</p>';}else{html+='<div class="form-row"><div class="form-label">处理状态</div><select class="form-select" id="fb_status"><option>处理中</option><option>已解决</option><option>无需处理</option></select></div><div class="form-row"><div class="form-label">处理回复</div><textarea class="form-input" id="fb_reply" rows="3" placeholder="请输入处理回复内容..."></textarea></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">关闭</button><button class="btn btn-primary" onclick="submitFeedback2(\''+f.id+'\')">提交处理</button></div>';}html+='</div>';showModal(html);}
+function submitFeedback2(id){var f=D.feedbacks.find(function(x){return x.id===id});var status=document.getElementById('fb_status').value;var reply=document.getElementById('fb_reply').value;if(!reply){alert('请输入处理回复');return;}var now=new Date();var date=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');f.status=status;f.timeline.push({time:date,actor:'管理员',action:'处理',note:reply});closeModal({target:{id:'modalOverlay'}});render();alert('处理成功！工单状态已更新为"'+status+'"，处理结果已同步反馈给诉求人。');}
+function pageSatisfaction() {
+  var html='<div class="sub-tabs"><div class="sub-tab active" onclick="subTab(event,\'sat_q\')">问卷管理</div><div class="sub-tab" onclick="subTab(event,\'sat_stat\')">满意度统计</div></div>';
+  html+='<div class="sub-page active" id="sat_q"><div class="card"><div class="card-title">问卷管理<button class="btn btn-primary btn-sm" onclick="showQuestionnaireForm()">+ 新建问卷</button></div>';
+  html+=tbl(['标题','范围','状态','回收量','目标量','进度','日期','操作'],D.questionnaires.map(function(q){var pct=Math.round(q.responses/q.target*100);return[q.title,q.scope,badge(q.status),q.responses,q.target,'<div class="progress"><div class="progress-fill" style="width:'+pct+'%"></div></div>',q.date,'<button class="btn btn-outline btn-sm" onclick="showQDetail(\''+q.id+'\')">查看</button>']}));
+  html+='</div></div>';
+  html+='<div class="sub-page" id="sat_stat"><div class="notice-blue">满意度以书籍为维度统计，支持按教辅类型、科目、学段筛选查看。</div>';
+  html+='<div class="card"><div class="card-title">满意度统计</div>';
+  html+='<div class="filter-bar"><select class="form-select" id="sat_type" onchange="filterSat()"><option value="">全部类型</option><option>同步练习册</option><option>中考复习</option><option>寒暑假作业</option></select><select class="form-select" id="sat_subject" onchange="filterSat()"><option value="">全部科目</option><option>语文</option><option>数学</option><option>英语</option><option>综合</option></select><select class="form-select" id="sat_stage" onchange="filterSat()"><option value="">全部学段</option><option>小学</option><option>初中</option></select></div>';
+  html+='<div id="satTable">'+renderSatTable()+'</div>';
+  html+='</div>';
+  html+='<div class="card"><div class="card-title">满意度排行榜</div>';
+  html+='<div class="filter-bar"><select class="form-select" id="rank_type" onchange="filterSatRanking()"><option value="">全部类型</option><option>同步练习册</option><option>中考复习</option><option>寒暑假作业</option></select><div class="flex gap8"><button class="btn btn-sm btn-primary" id="rank_desc" onclick="toggleRankOrder(\'desc\')">倒序</button><button class="btn btn-sm btn-outline" id="rank_asc" onclick="toggleRankOrder(\'asc\')">正序</button></div><span style="font-size:13px;color:#999">展示前10</span></div>';
+  html+='<div id="satRanking">'+renderSatRanking()+'</div>';
+  html+='</div></div>';
+  return html;
+}
+function showQuestionnaireForm(){showModal('<div class="modal-title">新建满意度问卷</div><div class="form-row"><div class="form-label">问卷标题</div><input class="form-input" placeholder="如：2026秋季教辅满意度调查"></div><div class="form-row"><div class="form-label">调查范围</div><select class="form-select"><option>全市</option><option>渝中区</option><option>江北区</option></select></div><div class="form-row"><div class="form-label">目标量</div><input class="form-input" type="number" value="1000"></div><div class="form-row"><div class="form-label">题目设置</div><textarea class="form-input" rows="4" placeholder="每行一道题">教辅内容质量评分\n教辅印刷质量评分\n教辅价格合理性评分\n整体满意度评分</textarea></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="closeModal(event);alert(\'问卷已创建并发放\')">发布问卷</button></div>');}
+function showQDetail(id){var q=D.questionnaires.find(function(x){return x.id==id});showModal('<div class="modal-title">'+q.title+'</div><div class="form-row"><div class="form-label">范围</div><div class="form-input" style="border:none">'+q.scope+'</div></div><div class="form-row"><div class="form-label">状态</div><div class="form-input" style="border:none">'+badge(q.status)+'</div></div><div class="form-row"><div class="form-label">回收/目标</div><div class="form-input" style="border:none">'+q.responses+' / '+q.target+'</div></div><div class="card-title" style="margin-top:12px">问卷题目</div><ol style="padding-left:20px;line-height:2">'+q.questions.map(function(x){return'<li>'+x+'</li>'}).join('')+'</ol><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">关闭</button></div>');}
+function getSatFilter(){var t=document.getElementById('sat_type')?document.getElementById('sat_type').value:'',s=document.getElementById('sat_subject')?document.getElementById('sat_subject').value:'',st=document.getElementById('sat_stage')?document.getElementById('sat_stage').value:'';return{t:t,s:s,st:st};}
+function filterSatData(){var f=getSatFilter();return scopedSatisfaction().filter(function(x){return(!f.t||x.type===f.t)&&(!f.s||x.subject===f.s)&&(!f.st||x.stage===f.st)});}
+function renderSatTable(){var rows=filterSatData();return tbl(['教辅书籍','类型','科目','学段','平均评分','参评人数','应参评人数','参评率','覆盖学校数'],rows.map(function(s){var pct=Math.round(s.count/s.total*100);return[s.textbook,s.type,s.subject,s.stage,'<span class="text-green fw700">'+s.score+'</span> / 5',s.count,s.total,pct+'%',s.schools+'所']}));}
+function renderSatRanking(){var t=document.getElementById('rank_type')?document.getElementById('rank_type').value:'';var rows=scopedSatisfaction().filter(function(x){return!t||x.type===t}).slice().sort(function(a,b){return rankOrder==='desc'?b.score-a.score:a.score-b.score}).slice(0,10);if(!rows.length)return'<div style="text-align:center;color:#999;padding:20px">暂无数据</div>';var h='';var medals=['&#129351;','&#129352;','&#129353;'];rows.forEach(function(s,i){var pct=Math.round(s.score/5*100);var rk=i<3?medals[i]:'<span style="color:#999">'+(i+1)+'</span>';h+='<div class="bar-row"><div class="bar-label" style="width:32px;text-align:center;font-size:18px">'+rk+'</div><div class="bar-label" style="width:180px">'+s.textbook+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:var(--green)">'+s.score+'/5</div></div></div>';});return h;}
+function toggleRankOrder(o){rankOrder=o;document.getElementById('rank_desc').className='btn btn-sm '+(o==='desc'?'btn-primary':'btn-outline');document.getElementById('rank_asc').className='btn btn-sm '+(o==='asc'?'btn-primary':'btn-outline');document.getElementById('satRanking').innerHTML=renderSatRanking();}
+function filterSatRanking(){document.getElementById('satRanking').innerHTML=renderSatRanking();}
+function filterSat(){document.getElementById('satTable').innerHTML=renderSatTable();filterSatRanking();}
+
+render();
+</script>
+</body>
+</html>
