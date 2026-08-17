@@ -158,7 +158,7 @@
 
 <div class="container">
     <div class="page-header">
-        <div><div class="page-title">XX教育系统评审专家库管理系统</div><div class="page-desc">XX〔2021〕31号 · 人事处总库管控 + 处室子库独立自用 · 双层权限隔离</div></div>
+        <div><div class="page-title">XX教育系统评审专家库管理系统</div><div class="page-desc">demo数据均为模拟测试数据</div></div>
         <div class="role-switch"><span class="role-badge">当前角色：</span><button class="role-btn active" onclick="switchRole('hr')">人事处管理员</button><button class="role-btn" onclick="switchRole('dept')">处室管理员</button><select id="dept-selector" class="hidden" onchange="onDeptSelectChange()" style="padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;margin-left:4px;"><option value="">选择所属处室</option><option value="基教处">基教处</option><option value="师范处">师范处</option><option value="职成教处">职成教处</option><option value="体卫艺处">体卫艺处</option><option value="基建后勤处">基建后勤处</option></select></div>
     </div>
 
@@ -215,7 +215,7 @@
         <div id="dept-pool-view" class="hidden">
             <div class="grid-2" style="margin-bottom:16px;">
                 <div class="card" style="margin-bottom:0;"><div class="card-title">我的子库<span class="card-subtitle">选择要管理的处室子库</span></div><div id="dept-subpool-list"></div><div style="margin-top:12px;"><button class="btn btn-primary" onclick="openCreateSubpoolModal()">新建子库</button></div></div>
-                <div class="card" style="margin-bottom:0;"><div class="card-title">子库合规检查<span class="card-subtitle">对标XX〔2021〕31号</span></div><div id="dept-compliance-check"></div></div>
+                <div class="card" style="margin-bottom:0;"><div class="card-title">子库合规检查<span class="card-subtitle">对标上级文件</span></div><div id="dept-compliance-check"></div></div>
             </div>
             <div id="dept-pool-detail" class="hidden">
                 <div class="grid-4" style="margin-bottom:16px;">

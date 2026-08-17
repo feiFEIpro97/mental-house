@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>渝慧学-教辅监管平台 管理端</title>
+<title>教辅监管平台 管理端</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--blue:#1a3c6e;--blue2:#2d5a9e;--bg:#f0f2f5;--green:#4caf50;--orange:#ff9800;--red:#f44336;--grey:#90a4ae}
@@ -142,7 +142,8 @@ tr:hover{background:#e3f2fd}
 </head>
 <body>
 <div class="sidebar">
-  <div class="logo">渝慧学<br>教辅监管平台</div>
+  <div class="logo">教辅监管平台</div>
+  <div style="padding:10px 12px;font-size:11px;color:#8fb7e0;text-align:center;opacity:.85;border-bottom:1px solid rgba(255,255,255,.15)">demo数据均为模拟测试数据</div>
   <div class="nav-item active" onclick="nav('dashboard',event)"><span class="nav-icon">&#9776;</span> 驾驶舱</div>
   <div class="nav-item" onclick="nav('catalog',event)"><span class="nav-icon">&#128218;</span> 教辅目录</div>
   <div class="nav-item" onclick="nav('orders',event)"><span class="nav-icon">&#128230;</span> 征订管理</div>
@@ -256,10 +257,10 @@ function scopedSatisfaction(){if(role==='quxian'||role==='school')return D.satis
 function pageDashboard() {
   var html = '<div class="dash-dark">';
   html += '<div class="top-kpi-row">';
-  html += '<div class="kpi-card"><div class="kpi-icon">&#127970;</div><div><div class="kpi-desc-text">学校总数</div><div class="kpi-main-num">112 <span style="font-size:16px">所</span></div></div></div>';
-  html += '<div class="kpi-card"><div class="kpi-icon">&#128104;&#8205;&#127891;</div><div><div class="kpi-desc-text">学生总人数</div><div class="kpi-main-num">113,162 <span style="font-size:16px">人</span></div></div></div>';
-  html += '<div class="kpi-card"><div class="kpi-icon">&#128203;</div><div><div class="kpi-desc-text">征订台账</div><div class="kpi-main-num">620 <span style="font-size:16px">项</span></div></div></div>';
-  html += '<div class="kpi-card"><div class="kpi-icon">&#128176;</div><div><div class="kpi-desc-text">累计金额</div><div class="kpi-main-num">1,816.14 <span style="font-size:16px">万元</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#127970;</div><div><div class="kpi-desc-text">学校总数</div><div class="kpi-main-num">XXX <span style="font-size:16px">所</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#128104;&#8205;&#127891;</div><div><div class="kpi-desc-text">学生总人数</div><div class="kpi-main-num">XXX <span style="font-size:16px">人</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#128203;</div><div><div class="kpi-desc-text">征订台账</div><div class="kpi-main-num">XXX <span style="font-size:16px">项</span></div></div></div>';
+  html += '<div class="kpi-card"><div class="kpi-icon">&#128176;</div><div><div class="kpi-desc-text">累计金额</div><div class="kpi-main-num">XXX <span style="font-size:16px">万元</span></div></div></div>';
   html += '</div>';
   html += '<div class="grid-row-2">';
   html += '<div class="panel-card"><div class="panel-title">预警信息</div><div class="panel-content">';
