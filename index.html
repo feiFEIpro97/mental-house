@@ -2419,11 +2419,11 @@ function buildCurtain() {
     const side = si % 2 === 0 ? -1 : 1;
     const nLeft = Math.ceil(segCount / 2);
     const colIdx = side === -1 ? Math.floor(si / 2) : Math.floor((si - 1) / 2);
-    const gap = W * 0.03;
-    const inner = W * 0.28;   // 中央留空加大：两侧珠帘外移，不挡标题
+    const gap = W * 0.05;   // 珠帘间距扩大：两侧留白加宽
+    const inner = W * 0.20;   // 中央留空（标题区宽40%，标题/按钮足够居中）
     const span = (W / 2 - gap) - inner;
     const nCol = Math.max(1, nLeft - 1);
-    const spacing = span / nCol;
+    const spacing = span / nCol;   // 列间距：宽屏≈0.0139W（原线上≈0.0106W，约1.32倍）
     return side * (inner + spacing * colIdx);
   });
   // 频率映射已不再需要（风铃声效使用真实音频文件），统一给每列固定基频占位
@@ -2439,11 +2439,11 @@ function buildCurtain() {
     const side = si % 2 === 0 ? -1 : 1;
     const nLeft = Math.ceil(segCount / 2);
     const colIdx = side === -1 ? Math.floor(si / 2) : Math.floor((si - 1) / 2);
-    const gap = W * 0.03;
-    const inner = W * 0.28;   // 中央留空：两侧珠帘外移
+    const gap = W * 0.05;   // 珠帘间距扩大：两侧留白加宽
+    const inner = W * 0.20;   // 中央留空（标题区宽40%）
     const span = (W / 2 - gap) - inner;
     const nCol = Math.max(1, nLeft - 1);
-    const spacing = span / nCol;
+    const spacing = span / nCol;   // 列间距：宽屏≈0.0139W（原线上≈0.0106W，约1.32倍）
     const x = side * (inner + spacing * colIdx);
 
     const chars = Array.from(seg.text);
