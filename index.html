@@ -2390,9 +2390,9 @@ function buildCurtain() {
   crownLines = [];
 
   // 屏幕左右两侧各布若干条珠帘，中央留出标题区
-  // 固定顺序：不随机打乱，每次进入样式一致
+  // 列数随窗口宽度自适应：列距恒定为约 30px 舒适值（宽屏多列、窄屏少列，不挤）
   const all = curtainLines.slice();
-  const count = Math.min(30, all.length);
+  const count = Math.max(8, Math.min(all.length, Math.round(W / 36)));
   // 完整句子，不截断：每条帘从页面顶端垂到底部
   let lines = all.slice(0, count);
   // 太短的句子两两拼接，保证每条够长
