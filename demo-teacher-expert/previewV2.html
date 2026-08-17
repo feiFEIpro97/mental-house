@@ -158,7 +158,7 @@
 
 <div class="container">
     <div class="page-header">
-        <div><div class="page-title">重庆市教育系统评审专家库管理系统</div><div class="page-desc">渝教人函〔2021〕31号 · 人事处总库管控 + 处室子库独立自用 · 双层权限隔离</div></div>
+        <div><div class="page-title">XX教育系统评审专家库管理系统</div><div class="page-desc">XX〔2021〕31号 · 人事处总库管控 + 处室子库独立自用 · 双层权限隔离</div></div>
         <div class="role-switch"><span class="role-badge">当前角色：</span><button class="role-btn active" onclick="switchRole('hr')">人事处管理员</button><button class="role-btn" onclick="switchRole('dept')">处室管理员</button><select id="dept-selector" class="hidden" onchange="onDeptSelectChange()" style="padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:13px;cursor:pointer;margin-left:4px;"><option value="">选择所属处室</option><option value="基教处">基教处</option><option value="师范处">师范处</option><option value="职成教处">职成教处</option><option value="体卫艺处">体卫艺处</option><option value="基建后勤处">基建后勤处</option></select></div>
     </div>
 
@@ -188,7 +188,7 @@
                     <div class="filter-item"><label>职称:</label><select id="hr-filter-title"><option value="">全部</option><option value="正高级">正高级</option><option value="高级">高级</option><option value="一级">一级</option><option value="二级">二级</option></select></div>
                     <div class="filter-item"><label>学历:</label><select id="hr-filter-edu"><option value="">全部</option><option value="博士">博士</option><option value="硕士">硕士</option><option value="本科">本科</option></select></div>
                     <div class="filter-item"><label>学历类型:</label><select id="hr-filter-eduType"><option value="">全部</option><option value="全日制">全日制</option><option value="在职">在职</option></select></div>
-                    <div class="filter-item"><label>人才项目:</label><select id="hr-filter-talent"><option value="">全部</option><option value="国家级人才">国家级人才</option><option value="省部级人才">省部级人才</option><option value="万人计划">万人计划</option><option value="重庆英才">重庆英才</option></select></div>
+                    <div class="filter-item"><label>人才项目:</label><select id="hr-filter-talent"><option value="">全部</option><option value="国家级人才">国家级人才</option><option value="省部级人才">省部级人才</option><option value="万人计划">万人计划</option><option value="XX英才">XX英才</option></select></div>
                     <div class="filter-item"><label>岗位等级:</label><select id="hr-filter-post"><option value="">全部</option><option value="专技二级">专技二级</option><option value="专技三级">专技三级</option><option value="专技四级">专技四级</option><option value="专技五级">专技五级</option><option value="专技六级">专技六级</option><option value="专技七级">专技七级</option></select></div>
                 </div>
                 <div class="filter-row">
@@ -215,7 +215,7 @@
         <div id="dept-pool-view" class="hidden">
             <div class="grid-2" style="margin-bottom:16px;">
                 <div class="card" style="margin-bottom:0;"><div class="card-title">我的子库<span class="card-subtitle">选择要管理的处室子库</span></div><div id="dept-subpool-list"></div><div style="margin-top:12px;"><button class="btn btn-primary" onclick="openCreateSubpoolModal()">新建子库</button></div></div>
-                <div class="card" style="margin-bottom:0;"><div class="card-title">子库合规检查<span class="card-subtitle">对标渝教人函〔2021〕31号</span></div><div id="dept-compliance-check"></div></div>
+                <div class="card" style="margin-bottom:0;"><div class="card-title">子库合规检查<span class="card-subtitle">对标XX〔2021〕31号</span></div><div id="dept-compliance-check"></div></div>
             </div>
             <div id="dept-pool-detail" class="hidden">
                 <div class="grid-4" style="margin-bottom:16px;">
@@ -398,55 +398,55 @@ let currentDept = ''; // 处室管理员当前所属处室
 let currentTab = 'pool';
 
 const mockData = [
-    { id:'T001',name:'张伟',gender:'男',birthYear:1971,district:'渝北区',school:'渝北中学',title:'正高级',titleYears:8,major:'数学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['重庆英才'],certificates:['特级教师','学科带头人'],seniority:25,rating:4.9,serviceCount:12,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T002',name:'王芳',gender:'女',birthYear:1981,district:'沙坪坝区',school:'沙坪坝实验小学',title:'高级',titleYears:5,major:'语文',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:15,rating:4.7,serviceCount:8,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[{recordId:'REC_DEMO_1',date:'2026-04-20'}] },
-    { id:'T003',name:'李强',gender:'男',birthYear:1988,district:'九龙坡区',school:'九龙坡育才中学',title:'一级',titleYears:3,major:'英语',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:8,rating:4.5,serviceCount:3,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T004',name:'赵静',gender:'女',birthYear:1978,district:'渝北区',school:'南岸实验小学',title:'高级',titleYears:6,major:'数学',education:'硕士',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['学科带头人'],seniority:18,rating:4.8,serviceCount:15,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家','优质专家'],manualTags:[],tags:[],participationHistory:[{recordId:'REC_DEMO_1',date:'2026-04-20'}] },
-    { id:'T005',name:'孙博',gender:'男',birthYear:1974,district:'江北区',school:'重庆二中',title:'正高级',titleYears:10,major:'物理',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划','国家级人才'],certificates:['特级教师'],seniority:22,rating:5.0,serviceCount:20,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T006',name:'周梅',gender:'女',birthYear:1984,district:'巴南区',school:'巴南中学',title:'高级',titleYears:4,major:'化学',education:'硕士',educationType:'全日制',postLevel:'专技六级',talentProjects:[],certificates:[],seniority:12,rating:4.6,serviceCount:5,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T007',name:'吴刚',gender:'男',birthYear:1986,district:'沙坪坝区',school:'重庆八中',title:'一级',titleYears:2,major:'语文',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:['市级骨干'],seniority:10,rating:4.4,serviceCount:4,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T008',name:'郑红',gender:'女',birthYear:1968,district:'渝北区',school:'重庆一中',title:'正高级',titleYears:12,major:'数学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['重庆英才','国家级人才'],certificates:['学科带头人'],seniority:28,rating:4.9,serviceCount:18,status:'available',expertType:'自然候选人',autoTags:['高层次人才','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T009',name:'马超',gender:'男',birthYear:1976,district:'渝中区',school:'巴蜀中学',title:'高级',titleYears:7,major:'历史',education:'硕士',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['市级名师'],seniority:20,rating:4.8,serviceCount:10,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T010',name:'林燕',gender:'女',birthYear:1970,district:'南岸区',school:'南开中学',title:'正高级',titleYears:9,major:'政治',education:'硕士',educationType:'在职',postLevel:'专技三级',talentProjects:['万人计划'],certificates:['特级教师','学科带头人'],seniority:26,rating:4.9,serviceCount:16,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T011',name:'何涛',gender:'男',birthYear:1989,district:'江北区',school:'重庆十八中',title:'一级',titleYears:2,major:'地理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:7,rating:4.3,serviceCount:2,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T012',name:'陈琳',gender:'女',birthYear:1982,district:'涪陵区',school:'涪陵五中',title:'高级',titleYears:5,major:'生物',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:14,rating:4.6,serviceCount:6,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T013',name:'刘波',gender:'男',birthYear:1977,district:'万州区',school:'万州二中',title:'高级',titleYears:6,major:'物理',education:'本科',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['学科带头人'],seniority:19,rating:4.7,serviceCount:11,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T014',name:'胡敏',gender:'女',birthYear:1987,district:'永川区',school:'永川中学',title:'一级',titleYears:3,major:'英语',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:9,rating:4.4,serviceCount:4,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T015',name:'朱伟',gender:'男',birthYear:1972,district:'合川区',school:'合川中学',title:'正高级',titleYears:8,major:'信息技术',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['重庆英才'],certificates:['特级教师'],seniority:24,rating:4.8,serviceCount:14,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T016',name:'罗丽',gender:'女',birthYear:1980,district:'江津区',school:'江津中学',title:'高级',titleYears:5,major:'音乐',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['市级名师'],seniority:16,rating:4.5,serviceCount:7,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T017',name:'唐勇',gender:'男',birthYear:1990,district:'大渡口区',school:'重庆三十七中',title:'一级',titleYears:1,major:'体育',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:6,rating:4.2,serviceCount:2,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T018',name:'彭丽',gender:'女',birthYear:1969,district:'北碚区',school:'西南大学附中',title:'正高级',titleYears:11,major:'化学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划','国家级人才'],certificates:['特级教师','学科带头人'],seniority:27,rating:5.0,serviceCount:19,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T019',name:'蒋峰',gender:'男',birthYear:1983,district:'綦江区',school:'綦江中学',title:'高级',titleYears:4,major:'数学',education:'硕士',educationType:'在职',postLevel:'专技六级',talentProjects:[],certificates:['骨干教师'],seniority:13,rating:4.6,serviceCount:5,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T020',name:'沈洁',gender:'女',birthYear:1979,district:'渝中区',school:'重庆二十九中',title:'高级',titleYears:6,major:'美术',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['学科带头人'],seniority:17,rating:4.7,serviceCount:9,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T021',name:'韩磊',gender:'男',birthYear:1991,district:'璧山区',school:'璧山中学',title:'一级',titleYears:1,major:'语文',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:5,rating:4.1,serviceCount:1,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T022',name:'曹芳',gender:'女',birthYear:1975,district:'长寿区',school:'长寿中学',title:'高级',titleYears:8,major:'英语',education:'硕士',educationType:'在职',postLevel:'专技三级',talentProjects:['重庆英才'],certificates:['市级名师'],seniority:21,rating:4.8,serviceCount:13,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T023',name:'秦莉',gender:'女',birthYear:1973,district:'南岸区',school:'重庆十一中',title:'正高级',titleYears:7,major:'政治',education:'博士',educationType:'在职',postLevel:'专技三级',talentProjects:['万人计划'],certificates:['特级教师'],seniority:23,rating:4.9,serviceCount:17,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T024',name:'丁浩',gender:'男',birthYear:1985,district:'黔江区',school:'黔江中学',title:'一级',titleYears:3,major:'地理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:11,rating:3.8,serviceCount:3,status:'suspended',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
-    { id:'T025',name:'贺敏',gender:'女',birthYear:1981,district:'开州区',school:'开州中学',title:'高级',titleYears:5,major:'生物',education:'硕士',educationType:'全日制',postLevel:'专技六级',talentProjects:[],certificates:['骨干教师'],seniority:15,rating:4.5,serviceCount:6,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] }
+    { id:'T001',name:'张伟',gender:'男',birthYear:1971,district:'XX区',school:'XX中学',title:'正高级',titleYears:8,major:'数学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['XX英才'],certificates:['特级教师','学科带头人'],seniority:25,rating:4.9,serviceCount:12,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T002',name:'王芳',gender:'女',birthYear:1981,district:'XX区',school:'XX实验小学',title:'高级',titleYears:5,major:'语文',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:15,rating:4.7,serviceCount:8,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[{recordId:'REC_DEMO_1',date:'2026-04-20'}] },
+    { id:'T003',name:'李强',gender:'男',birthYear:1988,district:'XX区',school:'XX育才中学',title:'一级',titleYears:3,major:'英语',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:8,rating:4.5,serviceCount:3,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T004',name:'赵静',gender:'女',birthYear:1978,district:'XX区',school:'XX实验小学',title:'高级',titleYears:6,major:'数学',education:'硕士',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['学科带头人'],seniority:18,rating:4.8,serviceCount:15,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家','优质专家'],manualTags:[],tags:[],participationHistory:[{recordId:'REC_DEMO_1',date:'2026-04-20'}] },
+    { id:'T005',name:'孙博',gender:'男',birthYear:1974,district:'XX区',school:'XX二中',title:'正高级',titleYears:10,major:'物理',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划','国家级人才'],certificates:['特级教师'],seniority:22,rating:5.0,serviceCount:20,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T006',name:'周梅',gender:'女',birthYear:1984,district:'XX区',school:'XX中学',title:'高级',titleYears:4,major:'化学',education:'硕士',educationType:'全日制',postLevel:'专技六级',talentProjects:[],certificates:[],seniority:12,rating:4.6,serviceCount:5,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T007',name:'吴刚',gender:'男',birthYear:1986,district:'XX区',school:'XX八中',title:'一级',titleYears:2,major:'语文',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:['市级骨干'],seniority:10,rating:4.4,serviceCount:4,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T008',name:'郑红',gender:'女',birthYear:1968,district:'XX区',school:'XX一中',title:'正高级',titleYears:12,major:'数学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['XX英才','国家级人才'],certificates:['学科带头人'],seniority:28,rating:4.9,serviceCount:18,status:'available',expertType:'自然候选人',autoTags:['高层次人才','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T009',name:'马超',gender:'男',birthYear:1976,district:'XX区',school:'巴蜀中学',title:'高级',titleYears:7,major:'历史',education:'硕士',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['市级名师'],seniority:20,rating:4.8,serviceCount:10,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T010',name:'林燕',gender:'女',birthYear:1970,district:'XX区',school:'南开中学',title:'正高级',titleYears:9,major:'政治',education:'硕士',educationType:'在职',postLevel:'专技三级',talentProjects:['万人计划'],certificates:['特级教师','学科带头人'],seniority:26,rating:4.9,serviceCount:16,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T011',name:'何涛',gender:'男',birthYear:1989,district:'XX区',school:'XX十八中',title:'一级',titleYears:2,major:'地理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:7,rating:4.3,serviceCount:2,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T012',name:'陈琳',gender:'女',birthYear:1982,district:'XX区',school:'XX五中',title:'高级',titleYears:5,major:'生物',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:14,rating:4.6,serviceCount:6,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T013',name:'刘波',gender:'男',birthYear:1977,district:'XX区',school:'XX二中',title:'高级',titleYears:6,major:'物理',education:'本科',educationType:'在职',postLevel:'专技四级',talentProjects:[],certificates:['学科带头人'],seniority:19,rating:4.7,serviceCount:11,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T014',name:'胡敏',gender:'女',birthYear:1987,district:'XX区',school:'XX中学',title:'一级',titleYears:3,major:'英语',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:9,rating:4.4,serviceCount:4,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T015',name:'朱伟',gender:'男',birthYear:1972,district:'XX区',school:'XX中学',title:'正高级',titleYears:8,major:'信息技术',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['XX英才'],certificates:['特级教师'],seniority:24,rating:4.8,serviceCount:14,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T016',name:'罗丽',gender:'女',birthYear:1980,district:'XX区',school:'XX中学',title:'高级',titleYears:5,major:'音乐',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['市级名师'],seniority:16,rating:4.5,serviceCount:7,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T017',name:'唐勇',gender:'男',birthYear:1990,district:'XX区',school:'XX三十七中',title:'一级',titleYears:1,major:'体育',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:6,rating:4.2,serviceCount:2,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T018',name:'彭丽',gender:'女',birthYear:1969,district:'XX区',school:'西南大学附中',title:'正高级',titleYears:11,major:'化学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划','国家级人才'],certificates:['特级教师','学科带头人'],seniority:27,rating:5.0,serviceCount:19,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','优质专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T019',name:'蒋峰',gender:'男',birthYear:1983,district:'XX区',school:'XX中学',title:'高级',titleYears:4,major:'数学',education:'硕士',educationType:'在职',postLevel:'专技六级',talentProjects:[],certificates:['骨干教师'],seniority:13,rating:4.6,serviceCount:5,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T020',name:'沈洁',gender:'女',birthYear:1979,district:'XX区',school:'XX二十九中',title:'高级',titleYears:6,major:'美术',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['学科带头人'],seniority:17,rating:4.7,serviceCount:9,status:'available',expertType:'自主候选人',autoTags:['高层次人才','骨干专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T021',name:'韩磊',gender:'男',birthYear:1991,district:'XX区',school:'XX中学',title:'一级',titleYears:1,major:'语文',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:5,rating:4.1,serviceCount:1,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T022',name:'曹芳',gender:'女',birthYear:1975,district:'XX区',school:'XX中学',title:'高级',titleYears:8,major:'英语',education:'硕士',educationType:'在职',postLevel:'专技三级',talentProjects:['XX英才'],certificates:['市级名师'],seniority:21,rating:4.8,serviceCount:13,status:'available',expertType:'自主候选人',autoTags:['高层次人才','资深专家'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T023',name:'秦莉',gender:'女',birthYear:1973,district:'XX区',school:'XX十一中',title:'正高级',titleYears:7,major:'政治',education:'博士',educationType:'在职',postLevel:'专技三级',talentProjects:['万人计划'],certificates:['特级教师'],seniority:23,rating:4.9,serviceCount:17,status:'available',expertType:'自然候选人',autoTags:['高层次人才','名师','资深专家','自然候选人'],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T024',name:'丁浩',gender:'男',birthYear:1985,district:'XX区',school:'XX中学',title:'一级',titleYears:3,major:'地理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:11,rating:3.8,serviceCount:3,status:'suspended',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] },
+    { id:'T025',name:'贺敏',gender:'女',birthYear:1981,district:'XX区',school:'XX中学',title:'高级',titleYears:5,major:'生物',education:'硕士',educationType:'全日制',postLevel:'专技六级',talentProjects:[],certificates:['骨干教师'],seniority:15,rating:4.5,serviceCount:6,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] }
 ];
 // 批量生成额外专家数据，使总数达到45人
 // 批量生成额外专家数据，使总数达到45人（含市外专家和行业专家）
 const extraNames = [
-    ['杨明','男',1972,'万州区',['正高级','自然候选人'],'数学','博士','专技二级',['特级教师']],
-    ['黄丽','女',1983,'涪陵区',['高级','自主候选人'],'语文','硕士','专技五级',['骨干教师']],
-    ['许刚','男',1979,'渝中区',['高级','自主候选人'],'英语','硕士','专技四级',['学科带头人']],
-    ['程静','女',1986,'江北区',['一级','自主候选人'],'生物','本科','专技七级',[]],
-    ['段涛','男',1974,'沙坪坝区',['正高级','自然候选人'],'物理','博士','专技二级',['特级教师','重庆英才']],
-    ['蔡琳','女',1982,'九龙坡区',['高级','自主候选人'],'化学','硕士','专技五级',['市级名师']],
-    ['范超','男',1988,'南岸区',['一级','自主候选人'],'地理','本科','专技七级',[]],
-    ['谭芳','女',1976,'北碚区',['高级','自主候选人'],'历史','硕士','专技四级',['学科带头人']],
-    ['龙伟','男',1971,'渝北区',['正高级','自然候选人'],'政治','博士','专技二级',['特级教师','万人计划']],
-    ['夏敏','女',1984,'巴南区',['高级','自主候选人'],'信息技术','硕士','专技六级',['骨干教师']],
-    ['聂磊','男',1989,'大渡口区',['一级','自主候选人'],'体育','本科','专技七级',[]],
-    ['余芳','女',1978,'綦江区',['高级','自主候选人'],'音乐','硕士','专技五级',['市级名师']],
-    ['熊刚','男',1973,'江津区',['正高级','自然候选人'],'美术','博士','专技三级',['特级教师']],
-    ['康丽','女',1985,'合川区',['高级','自主候选人'],'数学','硕士','专技六级',['骨干教师']],
-    ['雷洋','男',1987,'永川区',['一级','自主候选人'],'语文','本科','专技七级',[]],
-    ['代洁','女',1977,'长寿区',['高级','自主候选人'],'英语','硕士','专技四级',['学科带头人']],
-    ['田峰','男',1970,'璧山区',['正高级','自然候选人'],'物理','博士','专技二级',['特级教师','重庆英才']],
-    ['兰敏','女',1983,'铜梁区',['高级','自主候选人'],'化学','硕士','专技五级',['骨干教师']],
-    ['袁坤','男',1988,'潼南区',['一级','自主候选人'],'生物','本科','专技七级',[]],
-    ['崔芳','女',1975,'荣昌区',['高级','自主候选人'],'地理','硕士','专技四级',['市级名师']]
+    ['杨明','男',1972,'XX区',['正高级','自然候选人'],'数学','博士','专技二级',['特级教师']],
+    ['黄丽','女',1983,'XX区',['高级','自主候选人'],'语文','硕士','专技五级',['骨干教师']],
+    ['许刚','男',1979,'XX区',['高级','自主候选人'],'英语','硕士','专技四级',['学科带头人']],
+    ['程静','女',1986,'XX区',['一级','自主候选人'],'生物','本科','专技七级',[]],
+    ['段涛','男',1974,'XX区',['正高级','自然候选人'],'物理','博士','专技二级',['特级教师','XX英才']],
+    ['蔡琳','女',1982,'XX区',['高级','自主候选人'],'化学','硕士','专技五级',['市级名师']],
+    ['范超','男',1988,'XX区',['一级','自主候选人'],'地理','本科','专技七级',[]],
+    ['谭芳','女',1976,'XX区',['高级','自主候选人'],'历史','硕士','专技四级',['学科带头人']],
+    ['龙伟','男',1971,'XX区',['正高级','自然候选人'],'政治','博士','专技二级',['特级教师','万人计划']],
+    ['夏敏','女',1984,'XX区',['高级','自主候选人'],'信息技术','硕士','专技六级',['骨干教师']],
+    ['聂磊','男',1989,'XX区',['一级','自主候选人'],'体育','本科','专技七级',[]],
+    ['余芳','女',1978,'XX区',['高级','自主候选人'],'音乐','硕士','专技五级',['市级名师']],
+    ['熊刚','男',1973,'XX区',['正高级','自然候选人'],'美术','博士','专技三级',['特级教师']],
+    ['康丽','女',1985,'XX区',['高级','自主候选人'],'数学','硕士','专技六级',['骨干教师']],
+    ['雷洋','男',1987,'XX区',['一级','自主候选人'],'语文','本科','专技七级',[]],
+    ['代洁','女',1977,'XX区',['高级','自主候选人'],'英语','硕士','专技四级',['学科带头人']],
+    ['田峰','男',1970,'XX区',['正高级','自然候选人'],'物理','博士','专技二级',['特级教师','XX英才']],
+    ['兰敏','女',1983,'XX区',['高级','自主候选人'],'化学','硕士','专技五级',['骨干教师']],
+    ['袁坤','男',1988,'XX区',['一级','自主候选人'],'生物','本科','专技七级',[]],
+    ['崔芳','女',1975,'XX区',['高级','自主候选人'],'地理','硕士','专技四级',['市级名师']]
 ];
 extraNames.forEach(([name,gender,birthYear,district,titleTypePair,major,edu,postLevel,certs],i) => {
     const id = 'T0' + (26 + i);
@@ -458,8 +458,8 @@ extraNames.forEach(([name,gender,birthYear,district,titleTypePair,major,edu,post
         id, name, gender, birthYear, district, school: district.replace('区','') + '中学', title,
         titleYears: title === '正高级' ? 5 + Math.floor(Math.random() * 8) : title === '高级' ? 2 + Math.floor(Math.random() * 6) : 1 + Math.floor(Math.random() * 3),
         major, education: edu, educationType: i % 3 === 0 ? '在职' : '全日制',
-        postLevel, talentProjects: (certs||[]).filter(c => ['万人计划','重庆英才','国家级人才'].includes(c)),
-        certificates: (certs||[]).filter(c => !['万人计划','重庆英才','国家级人才'].includes(c)),
+        postLevel, talentProjects: (certs||[]).filter(c => ['万人计划','XX英才','国家级人才'].includes(c)),
+        certificates: (certs||[]).filter(c => !['万人计划','XX英才','国家级人才'].includes(c)),
         seniority: 5 + Math.floor(Math.random() * 25), rating: 4.0 + Math.random() * 1.0,
         serviceCount: Math.floor(Math.random() * 15), status: 'available',
         expertType, autoTags, manualTags: [], tags: [], participationHistory: []
@@ -467,11 +467,11 @@ extraNames.forEach(([name,gender,birthYear,district,titleTypePair,major,edu,post
 });
 // 追加市外专家和行业专家示例数据
 const specialExperts = [
-    { id:'T046',name:'赵建国',gender:'男',birthYear:1968,district:'市外',school:'四川大学',title:'正高级',titleYears:15,major:'教育学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['国务院特殊津贴'],seniority:30,rating:4.9,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'510000196801011234',phone:'13900001111' },
-    { id:'T047',name:'钱美华',gender:'女',birthYear:1971,district:'市外',school:'北京师范大学',title:'正高级',titleYears:12,major:'心理学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划'],certificates:['特级教师'],seniority:28,rating:4.8,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'110000197101015678',phone:'13900002222' },
-    { id:'T048',name:'孙建国',gender:'男',birthYear:1965,district:'市外',school:'华东师范大学',title:'正高级',titleYears:18,major:'课程论',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['长江学者'],seniority:32,rating:5.0,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'310000196501019012',phone:'13900003333' },
-    { id:'T049',name:'周建华',gender:'男',birthYear:1972,district:'渝中区',school:'重庆市住建委',title:'其他',titleYears:10,major:'基建工程',education:'硕士',educationType:'在职',postLevel:'其他',talentProjects:[],certificates:['高级工程师'],seniority:20,rating:4.6,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'500000197201011234',phone:'13900004444' },
-    { id:'T050',name:'吴正',gender:'男',birthYear:1970,district:'渝北区',school:'重庆市财政局',title:'其他',titleYears:12,major:'财务审计',education:'硕士',educationType:'在职',postLevel:'其他',talentProjects:[],certificates:['高级会计师'],seniority:22,rating:4.7,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'500000197001015678',phone:'13900005555' }
+    { id:'T046',name:'赵建国',gender:'男',birthYear:1968,district:'市外',school:'XX大学',title:'正高级',titleYears:15,major:'教育学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['国务院特殊津贴'],seniority:30,rating:4.9,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'XXXXXX196801011234',phone:'13900001111' },
+    { id:'T047',name:'钱美华',gender:'女',birthYear:1971,district:'市外',school:'XX师范大学',title:'正高级',titleYears:12,major:'心理学',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['万人计划'],certificates:['特级教师'],seniority:28,rating:4.8,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'XXXXXX197101015678',phone:'13900002222' },
+    { id:'T048',name:'孙建国',gender:'男',birthYear:1965,district:'市外',school:'华东师范大学',title:'正高级',titleYears:18,major:'课程论',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['长江学者'],seniority:32,rating:5.0,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['高层次人才','名师'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'XXXXXX196501019012',phone:'13900003333' },
+    { id:'T049',name:'周建华',gender:'男',birthYear:1972,district:'XX区',school:'XX住建委',title:'其他',titleYears:10,major:'基建工程',education:'硕士',educationType:'在职',postLevel:'其他',talentProjects:[],certificates:['高级工程师'],seniority:20,rating:4.6,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'XXXXXX197201011234',phone:'13900004444' },
+    { id:'T050',name:'吴正',gender:'男',birthYear:1970,district:'XX区',school:'XX财政局',title:'其他',titleYears:12,major:'财务审计',education:'硕士',educationType:'在职',postLevel:'其他',talentProjects:[],certificates:['高级会计师'],seniority:22,rating:4.7,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[],idType:'身份证',idNumber:'XXXXXX197001015678',phone:'13900005555' }
 ];
 specialExperts.forEach(e => {
     e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags]));
@@ -480,7 +480,7 @@ specialExperts.forEach(e => {
 mockData.forEach(e => { e.tags = Array.from(new Set([...e.autoTags, ...e.manualTags])); });
 // 为所有专家补充证件和联系方式字段
 mockData.forEach((e, i) => {
-    if (!e.idType) { e.idType = '身份证'; e.idNumber = '510000' + (1970 + i) + '0101' + i.toString().padStart(4,'0'); e.phone = '138' + (10000000 + i).toString().padStart(8,'0'); }
+    if (!e.idType) { e.idType = '身份证'; e.idNumber = 'XXXXXX' + (1970 + i) + '0101' + i.toString().padStart(4,'0'); e.phone = '138' + (10000000 + i).toString().padStart(8,'0'); }
 });
 
 let subPools = [
@@ -495,7 +495,7 @@ let globalTags = ['高层次人才','名师','资深专家','骨干专家','优�
 let hrCurrentExperts = [...mockData], hrPage = 1; const hrPageSize = 10;
 let leaderPage = 1; const leaderPageSize = 10;
 let deptCurrentExperts = [], deptPage = 1; const deptPageSize = 10;
-let extractionRecords = [{ id:'REC_DEMO_1',sourceType:'dept',subPoolId:'SP001',purpose:'2026年重庆市数学中考命题专家抽取',category:'骨干教师评审',level:'市级',timestamp:new Date('2026-04-20'),status:'confirmed',selectedExperts:[{id:'T001',name:'张伟',school:'渝北中学',title:'正高级',major:'数学',district:'渝北区'},{id:'T004',name:'赵静',school:'南岸实验小学',title:'高级',major:'数学',district:'渝北区'},{id:'T008',name:'郑红',school:'重庆一中',title:'正高级',major:'数学',district:'渝北区'},{id:'T019',name:'蒋峰',school:'綦江中学',title:'高级',major:'数学',district:'綦江区'},{id:'T002',name:'王芳',school:'沙坪坝实验小学',title:'高级',major:'语文',district:'沙坪坝区'}] }];
+let extractionRecords = [{ id:'REC_DEMO_1',sourceType:'dept',subPoolId:'SP001',purpose:'2026年XX数学中考命题专家抽取',category:'骨干教师评审',level:'市级',timestamp:new Date('2026-04-20'),status:'confirmed',selectedExperts:[{id:'T001',name:'张伟',school:'XX中学',title:'正高级',major:'数学',district:'XX区'},{id:'T004',name:'赵静',school:'XX实验小学',title:'高级',major:'数学',district:'XX区'},{id:'T008',name:'郑红',school:'XX一中',title:'正高级',major:'数学',district:'XX区'},{id:'T019',name:'蒋峰',school:'XX中学',title:'高级',major:'数学',district:'XX区'},{id:'T002',name:'王芳',school:'XX实验小学',title:'高级',major:'语文',district:'XX区'}] }];
 let currentExtractionRecord = null, currentTaggingExpert = null, currentEvaluatingExpert = null, currentEvaluatingRecord = null;
 let currentBlacklistTarget = null, evaluations = [];
 let leaderPoolIds = []; // 手动选择的组长专家ID列表
@@ -725,7 +725,7 @@ function openDeptImportModal() { if (!currentSubPoolId) { alert('请先选择子
 function closeDeptImportModal() { document.getElementById('dept-import-modal').style.display = 'none'; }
 function downloadImportTemplate() {
     const headers = '编号,姓名,性别,出生年份,区县,学校,职称,正高年限,专业,学历,学历类型,岗位等级,人才项目,教龄,专家类别,证件类型,证件号码,手机号';
-    const sample = 'T001,张三,男,1975,渝中区,巴蜀中学,正高级,8,数学,博士,全日制,专技二级,万人计划,25,自然候选人,身份证,510000197501011234,13800001111';
+    const sample = 'T001,张三,男,1975,XX区,巴蜀中学,正高级,8,数学,博士,全日制,专技二级,万人计划,25,自然候选人,身份证,XXXXXX197501011234,13800001111';
     const csv = '\uFEFF' + headers + '\n' + sample;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -827,8 +827,8 @@ function openHRImportModal() { hrImportPreviewData = []; document.getElementById
 function closeHRImportModal() { document.getElementById('hr-import-modal').style.display = 'none'; }
 function downloadHRImportTemplate() {
     const headers = '编号,姓名,性别,出生年份,区县,学校,职称,正高年限,专业,学历,学历类型,岗位等级,人才项目,教龄,专家类别,证件类型,证件号码,手机号';
-    const s1 = 'T001,张三,男,1975,渝中区,巴蜀中学,正高级,8,数学,博士,全日制,专技二级,万人计划,25,自然候选人,身份证,510000197501011234,13800001111';
-    const s2 = 'T002,李四,男,1970,成都市,四川大学,正高级,12,基建工程,博士,全日制,专技二级,国家级人才,30,自主候选人,身份证,510000197001015678,13900002222';
+    const s1 = 'T001,张三,男,1975,XX区,巴蜀中学,正高级,8,数学,博士,全日制,专技二级,万人计划,25,自然候选人,身份证,XXXXXX197501011234,13800001111';
+    const s2 = 'T002,李四,男,1970,XX市,XX大学,正高级,12,基建工程,博士,全日制,专技二级,国家级人才,30,自主候选人,身份证,XXXXXX197001015678,13900002222';
     const csv = '\uFEFF' + headers + '\n' + s1 + '\n' + s2;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = '总库专家导入模板.csv'; a.click(); URL.revokeObjectURL(url);
@@ -1020,11 +1020,11 @@ function viewExpertDetail(eid) { const e = mockData.find(e => e.id === eid); if 
 function closeExpertDetailModal() { document.getElementById('expert-detail-modal').style.display = 'none'; }
 
 // === 同步数据 ===
-async function syncData() { const loading = document.getElementById('sync-loading'); loading.style.display = 'flex'; await new Promise(r => setTimeout(r, 2000)); const nt = [{ id:'CQ001',name:'刘洋',gender:'男',birthYear:1982,district:'渝北区',school:'渝北中学',title:'高级',titleYears:5,major:'数学',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:12,rating:4.8,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },{ id:'CQ002',name:'陈思',gender:'女',birthYear:1971,district:'沙坪坝区',school:'重庆一中',title:'正高级',titleYears:10,major:'语文',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['特级教师'],seniority:25,rating:5.0,serviceCount:0,status:'available',expertType:'自然候选人',autoTags:['名师','自然候选人'],manualTags:[],tags:[],participationHistory:[] },{ id:'CQ003',name:'杨光',gender:'男',birthYear:1990,district:'九龙坡区',school:'育才中学',title:'一级',titleYears:2,major:'物理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:6,rating:4.2,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] }]; let nc = 0; nt.forEach(n => { if (!mockData.find(m => m.id === n.id)) { n.tags = Array.from(new Set([...n.autoTags, ...n.manualTags])); mockData.push(n); nc++; } }); loading.style.display = 'none'; alert(`同步成功！拉取到 ${nt.length} 条教师信息，其中 ${nc} 名新专家已入库。`); if (currentRole === 'hr') { hrPage = 1; hrFilterExperts(); } renderTagCloud(); updateTagSelects(); }
+async function syncData() { const loading = document.getElementById('sync-loading'); loading.style.display = 'flex'; await new Promise(r => setTimeout(r, 2000)); const nt = [{ id:'XX001',name:'刘洋',gender:'男',birthYear:1982,district:'XX区',school:'XX中学',title:'高级',titleYears:5,major:'数学',education:'硕士',educationType:'全日制',postLevel:'专技五级',talentProjects:[],certificates:['骨干教师'],seniority:12,rating:4.8,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:['骨干专家'],manualTags:[],tags:[],participationHistory:[] },{ id:'XX002',name:'陈思',gender:'女',birthYear:1971,district:'XX区',school:'XX一中',title:'正高级',titleYears:10,major:'语文',education:'博士',educationType:'全日制',postLevel:'专技二级',talentProjects:['国家级人才'],certificates:['特级教师'],seniority:25,rating:5.0,serviceCount:0,status:'available',expertType:'自然候选人',autoTags:['名师','自然候选人'],manualTags:[],tags:[],participationHistory:[] },{ id:'XX003',name:'杨光',gender:'男',birthYear:1990,district:'XX区',school:'育才中学',title:'一级',titleYears:2,major:'物理',education:'本科',educationType:'全日制',postLevel:'专技七级',talentProjects:[],certificates:[],seniority:6,rating:4.2,serviceCount:0,status:'available',expertType:'自主候选人',autoTags:[],manualTags:[],tags:[],participationHistory:[] }]; let nc = 0; nt.forEach(n => { if (!mockData.find(m => m.id === n.id)) { n.tags = Array.from(new Set([...n.autoTags, ...n.manualTags])); mockData.push(n); nc++; } }); loading.style.display = 'none'; alert(`同步成功！拉取到 ${nt.length} 条教师信息，其中 ${nc} 名新专家已入库。`); if (currentRole === 'hr') { hrPage = 1; hrFilterExperts(); } renderTagCloud(); updateTagSelects(); }
 
 // === Multi-select ===
 const multiSelectState = {};
-const allCQDistricts = ['渝中区','大渡口区','江北区','沙坪坝区','九龙坡区','南岸区','北碚区','渝北区','巴南区','涪陵区','綦江区','大足区','长寿区','江津区','合川区','永川区','南川区','璧山区','铜梁区','潼南区','荣昌区','开州区','梁平区','武隆区','万州区','黔江区','城口县','丰都县','垫江县','忠县','云阳县','奉节县','巫山县','巫溪县','石柱县','秀山县','酉阳县','彭水县'];
+const allCQDistricts = ['XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX区','XX县','XX县','XX县','XX','XX县','XX县','XX县','XX县','XX县','XX县','XX县','XX县'];
 function initMultiSelect(id) { if (multiSelectState[id]) return; multiSelectState[id] = { selected: [] }; const dd = document.getElementById(id + '-dropdown'); if (dd) dd.innerHTML = allCQDistricts.map(d => `<label><input type="checkbox" value="${d}" onchange="toggleMultiSelectItem('${id}','${d}',this.checked)">${d}</label>`).join(''); }
 function toggleMultiSelect(id) { const dd = document.getElementById(id + '-dropdown'), io = dd.classList.contains('show'); document.querySelectorAll('.multi-select-dropdown.show').forEach(d => d.classList.remove('show')); if (!io) { initMultiSelect(id); dd.classList.add('show'); } }
 function toggleMultiSelectItem(id, value, checked) { const st = multiSelectState[id]; if (checked) { if (!st.selected.includes(value)) st.selected.push(value); } else { st.selected = st.selected.filter(v => v !== value); } updateMultiSelectTrigger(id); }

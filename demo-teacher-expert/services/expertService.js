@@ -165,17 +165,17 @@ class ExpertService {
     }
 
     /**
-     * 从人社局同步全量重庆教师信息 (模拟)
+     * 从人社局同步全量XX教师信息 (模拟)
      */
     async syncFromHRSSB() {
-        console.log('正在从重庆人社局拉取全量教师数据...');
+        console.log('正在从XX人社局拉取全量教师数据...');
         await new Promise(resolve => setTimeout(resolve, 1500));
         
         const cqTeachers = [
-            { id: 'CQ001', name: '刘洋', gender: '男', district: '渝北区', school: '渝北中学', title: '高级', certificates: ['骨干教师'], major: '数学', seniority: 12, rating: 4.8, serviceCount: 0 },
-            { id: 'CQ002', name: '陈思', gender: '女', district: '沙坪坝区', school: '重庆一中', title: '正高级', certificates: ['特级教师'], major: '语文', seniority: 25, rating: 5.0, serviceCount: 0 },
-            { id: 'CQ003', name: '杨光', gender: '男', district: '九龙坡区', school: '育才中学', title: '一级', certificates: [], major: '物理', seniority: 6, rating: 4.2, serviceCount: 0 },
-            { id: 'CQ004', name: '黄芳', gender: '女', district: '南岸区', school: '南开中学', title: '高级', certificates: ['市级名师'], major: '英语', seniority: 18, rating: 4.9, serviceCount: 0 }
+            { id: 'XX001', name: '刘洋', gender: '男', district: 'XX区', school: 'XX中学', title: '高级', certificates: ['骨干教师'], major: '数学', seniority: 12, rating: 4.8, serviceCount: 0 },
+            { id: 'XX002', name: '陈思', gender: '女', district: 'XX区', school: 'XX一中', title: '正高级', certificates: ['特级教师'], major: '语文', seniority: 25, rating: 5.0, serviceCount: 0 },
+            { id: 'XX003', name: '杨光', gender: '男', district: 'XX区', school: '育才中学', title: '一级', certificates: [], major: '物理', seniority: 6, rating: 4.2, serviceCount: 0 },
+            { id: 'XX004', name: '黄芳', gender: '女', district: 'XX区', school: '南开中学', title: '高级', certificates: ['市级名师'], major: '英语', seniority: 18, rating: 4.9, serviceCount: 0 }
         ];
 
         const importedCount = this.importTeachers(cqTeachers);

@@ -14,7 +14,7 @@ const extractionConfig = {
     count: 3,
     redundancy: 1.5, // 抽取 3 * 1.5 = 5 人供选
     major: '数学',
-    avoidDistricts: ['海淀区'], // 回避海淀区
+    avoidDistricts: ['XX区'], // 回避XX区
     layers: [
         { title: ['正高级', '高级'], ratio: 0.6 }, // 60% 高级
         { title: ['一级', '二级'], ratio: 0.4 }  // 40% 普通
