@@ -253,6 +253,10 @@ html, body {
   width: 100%; height: 100%;
   object-fit: cover;
 }
+/* 工作室背景图整体下移 2%：露出图片左上角文字 */
+#room-creator-studio .room-scene {
+  height: 104%;
+}
 
 /* 退出按钮 */
 .exit-btn {
@@ -316,8 +320,8 @@ html, body {
 
 /* 左侧墙：个人经历时间轴 */
 .hotspot-timeline {
-  top: 23%; left: 20.1%;
-  max-width: 15%;
+  top: 23%; left: 18.1%;
+  max-width: 13%;
 }
 .hotspot-timeline .section-label {
   font-size: clamp(11px, 1vw, 13px);
@@ -353,8 +357,8 @@ html, body {
 
 /* 右侧展柜：项目 */
 .hotspot-projects {
-  top: 17%; right: 15%;
-  max-width: 15%;
+  top: 15%; right: 12%;
+  max-width: 12%;
 }
 .hotspot-projects .section-label {
   font-size: clamp(11px, 1vw, 13px);
@@ -440,7 +444,7 @@ html, body {
 /* 桌面书本：纯视觉元素，无交互 */
 .book-pages {
   position: absolute;
-  bottom: 6.5%;
+  bottom: 4.5%;
   left: 48%;
   transform: translateX(-50%);
   display: flex;
@@ -625,7 +629,7 @@ html, body {
 /* 粉色 — 上线产品 */
 .sticky-pink {
   top: 26%; left: 2%;
-  width: 13%; height: 14%;
+  width: 14%; height: 15%;
   background: rgba(255,192,203,0.85);
 }
 .sticky-pink::before { background: rgba(255,192,203,0.85); }
@@ -640,8 +644,8 @@ html, body {
 
 /* 黄色 — 教育数字化 Demo */
 .sticky-yellow {
-  top: 26%; left: 76%;
-  width: 9%; height: 13%;
+  top: 26%; left: 63%;
+  width: 22%; height: 13%;
   background: rgba(255,245,157,0.9);
 }
 .sticky-yellow::before { background: rgba(255,245,157,0.9); }
@@ -1357,18 +1361,60 @@ html, body {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
+
+/* ============================================
+   语言切换按钮（右上角 中/EN 左右切换）
+   ============================================ */
+.lang-toggle {
+  position: fixed;
+  bottom: 18px; right: 18px;
+  z-index: 2000;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(245,240,232,0.88);
+  border: 1px solid rgba(200,155,91,0.5);
+  border-radius: 30px;
+  box-shadow: 0 4px 14px rgba(60,40,10,0.18);
+  backdrop-filter: blur(6px);
+}
+.lang-opt {
+  border: none;
+  background: transparent;
+  color: var(--stone-dark);
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+.lang-opt.active {
+  background: var(--red);
+  color: var(--cream);
+}
+.lang-opt:hover:not(.active) {
+  color: var(--ink);
+}
 </style>
 </head>
 <body>
 
 <div id="app">
+  <!-- 语言切换（右上角 中/EN 左右切换） -->
+  <div class="lang-toggle" id="langToggle">
+    <button class="lang-opt active" data-lang="zh">中</button>
+    <button class="lang-opt" data-lang="en">EN</button>
+  </div>
+
   <!-- 进入封面 -->
   <div class="enter-cover" id="enterCover">
     <div class="cover-title">Fei's Mental House</div>
-    <button class="enter-btn" id="enterBtn">进入</button>
+    <button class="enter-btn" id="enterBtn" data-i18n="enterBtn">进入</button>
     <div class="bead-curtain" id="beadCurtain"></div>
     <!-- 声音解锁提示：点击任意处唤起风铃 -->
-    <div class="chime-tip" id="chimeTip">点一下珠帘，唤起风铃的声音</div>
+    <div class="chime-tip" id="chimeTip" data-i18n="chimeTip">点一下珠帘，唤起风铃的声音</div>
   </div>
 
   <script src="vendor/three.min.js"></script>
@@ -1384,13 +1430,13 @@ html, body {
     <div class="facade-scene" id="facadeScene">
       <div class="facade-panel" data-room="main-hall">
         <div class="enter-zone" data-enter="main-hall">
-          <span class="enter-hint">进入房间</span>
+          <span class="enter-hint" data-i18n="enterHint">进入房间</span>
         </div>
         <div class="panel-name">About Me</div>
       </div>
       <div class="facade-panel" data-room="creator-studio">
         <div class="enter-zone" data-enter="creator-studio">
-          <span class="enter-hint">进入房间</span>
+          <span class="enter-hint" data-i18n="enterHint">进入房间</span>
         </div>
         <div class="panel-name">Creator Studio</div>
       </div>
@@ -1412,53 +1458,52 @@ html, body {
        ========================================== -->
   <div class="room" id="room-main-hall">
     <img class="room-scene" src="images/scene1-interior.png?v3" alt="Main Hall">
-    <button class="exit-btn" data-exit>退出房间</button>
+    <button class="exit-btn" data-exit data-i18n="exitBtn">退出房间</button>
 
     <!-- 左上 Slogan -->
     <div class="hotspot hotspot-slogan">
       <div class="label-title" style="font-size: clamp(11px, 1vw, 14px); letter-spacing: 3px; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-bottom: 4px; text-shadow: 0 1px 6px rgba(0,0,0,0.25);">ABOUT ME</div>
-      <div class="label-title" style="font-size: clamp(13px, 1.2vw, 16px); color: #fff; margin-bottom: 3px; text-shadow: 0 1px 6px rgba(0,0,0,0.25);">关于我</div>
-      <div class="label-sub" style="font-size: clamp(10px, 0.9vw, 12px); font-style: normal; color: rgba(255,255,255,0.85); text-shadow: 0 1px 6px rgba(0,0,0,0.25);">一个持续创造的人</div>
+      <div class="label-sub" style="font-size: clamp(10px, 0.9vw, 12px); font-style: normal; color: rgba(255,255,255,0.85); text-shadow: 0 1px 6px rgba(0,0,0,0.25);" data-i18n="sloganSub">一个持续创造的人</div>
     </div>
 
     <!-- 左侧墙：个人经历时间轴 -->
     <div class="hotspot hotspot-timeline">
-      <div class="section-label">我的来处</div>
+      <div class="section-label" data-i18n="timelineLabel">我的来处</div>
       <div class="timeline-item" data-info="exp1">
-        <div class="year">2020 — 至今</div>
-        <div class="org">中国移动 · 成都产业研究院</div>
-        <div class="role">教育数字化产品经理</div>
+        <div class="year" data-i18n="exp1Year">2020 — 至今</div>
+        <div class="org" data-i18n="exp1Org">中国移动 · 成都产业研究院</div>
+        <div class="role" data-i18n="exp1Role">教育数字化产品经理</div>
       </div>
       <div class="timeline-item" data-info="exp2">
         <div class="year">2018 — 2019</div>
-        <div class="org">曼彻斯特大学</div>
-        <div class="role">金融经济学硕士 一等学位</div>
+        <div class="org" data-i18n="exp2Org">曼彻斯特大学</div>
+        <div class="role" data-i18n="exp2Role">金融经济学硕士 一等学位</div>
       </div>
       <div class="timeline-item" data-info="exp3">
         <div class="year">2014-2018</div>
-        <div class="org">国立华侨大学</div>
-        <div class="role">经济学 国家奖学金</div>
+        <div class="org" data-i18n="exp3Org">国立华侨大学</div>
+        <div class="role" data-i18n="exp3Role">经济学 国家奖学金</div>
       </div>
     </div>
 
     <!-- 右侧展柜：项目 -->
     <div class="hotspot hotspot-projects">
-      <div class="section-label">做过的事</div>
+      <div class="section-label" data-i18n="projectsLabel">做过的事</div>
       <div class="project-item" data-info="proj1">
-        <div class="name">渝慧学</div>
-        <div class="desc">省级教育数字化平台<br>覆盖 37 个区县、650万用户</div>
+        <div class="name" data-i18n="proj1Name">渝慧学</div>
+        <div class="desc" data-i18n="proj1Desc">省级教育数字化平台<br>覆盖 37 个区县、650万用户</div>
       </div>
       <div class="project-item" data-info="proj2">
-        <div class="name">智慧高校权益产品</div>
-        <div class="desc">C端高职校师生家长权益<br>10万+付费用户 / 500万+收入</div>
+        <div class="name" data-i18n="proj2Name">智慧高校权益产品</div>
+        <div class="desc" data-i18n="proj2Desc">C端高职校师生家长权益<br>10万+付费用户 / 500万+收入</div>
       </div>
       <div class="project-item" data-info="proj3">
-        <div class="name">中移网大</div>
-        <div class="desc">移动集团在线学习平台<br>服务 50万+员工</div>
+        <div class="name" data-i18n="proj3Name">中移网大</div>
+        <div class="desc" data-i18n="proj3Desc">移动集团在线学习平台<br>服务 50万+员工</div>
       </div>
       <div class="project-item" data-info="proj4">
-        <div class="name">移动云渠道管理</div>
-        <div class="desc">产品订购全 SOP 制定<br>营收破千万 效率提升 58%</div>
+        <div class="name" data-i18n="proj4Name">移动云渠道管理</div>
+        <div class="desc" data-i18n="proj4Desc">产品订购全 SOP 制定<br>营收破千万 效率提升 58%</div>
       </div>
     </div>
 
@@ -1481,29 +1526,29 @@ html, body {
         <g class="ring rev"><g><circle cx="120" cy="120" r="76" fill="none" stroke="#c9abef" stroke-width="6" stroke-dasharray="12 10" opacity="0.8"/><circle cx="120" cy="120" r="58" fill="none" stroke="#e0cbf8" stroke-width="5" stroke-dasharray="9 8" opacity="0.85"/><circle cx="120" cy="120" r="42" fill="none" stroke="#f0e4ff" stroke-width="4" stroke-dasharray="6 7" opacity="0.9"/><circle cx="120" cy="120" r="28" fill="none" stroke="#f8f2ff" stroke-width="3.5" stroke-dasharray="5 6" opacity="0.95"/></g></g>
         <circle cx="120" cy="120" r="6" fill="#fff" opacity="0.95"/>
       </svg>
-      <div class="vortex-hint">点击进入</div>
+      <div class="vortex-hint" data-i18n="vortexHint">点击进入</div>
     </div>
     </div>
 
     <!-- 桌面书本：纯视觉元素，无交互 -->
     <div class="book-pages">
       <div class="book-page book-page-left">
-        <div class="book-heading">我相信</div>
-        <div class="book-text">生活可以是作品<br>创造可以是日常</div>
+        <div class="book-heading" data-i18n="bookLHeading">我相信</div>
+        <div class="book-text" data-i18n="bookLText">生活可以是作品<br>创造可以是日常</div>
         <div class="book-morse">.... . .-. .&nbsp;&nbsp; .. ...<br>.-&nbsp;&nbsp; ... . -.-. .-. . -<br>.-. --- --- --&nbsp;&nbsp; .. -.<br>- .... .&nbsp;&nbsp; .--. .- .. -. - .. -. --.</div>
       </div>
       <div class="book-page book-page-right">
-        <div class="book-heading">所以我在做</div>
-        <div class="book-list">
+        <div class="book-heading" data-i18n="bookRHeading">所以我在做</div>
+        <div class="book-list" data-i18n="bookRList">
           教育数字化产品、AI产品/skill<br>写故事、做音乐
         </div>
-        <div class="book-text">以及一切让我好奇的创造<br>把想法变成作品</div>
+        <div class="book-text" data-i18n="bookRText">以及一切让我好奇的创造<br>把想法变成作品</div>
       </div>
     </div>
 
     <!-- 正在读：书桌左下角的书 -->
     <div class="hotspot hotspot-books" data-info="reading">
-      <div class="books-hint">最近在读</div>
+      <div class="books-hint" data-i18n="booksHint">最近在读</div>
     </div>
   </div>
 
@@ -1512,30 +1557,30 @@ html, body {
        ========================================== -->
   <div class="room" id="room-creator-studio">
     <img class="room-scene" src="images/scene2-interior.png" alt="Creator Studio">
-    <button class="exit-btn" data-exit>退出房间</button>
+    <button class="exit-btn" data-exit data-i18n="exitBtn">退出房间</button>
 
     <!-- 粉色：上线产品 -->
     <div class="sticky-note sticky-pink" data-info="pink">
-      <div class="note-title">上线产品</div>
-      <div class="note-sub">点击体验我的作品</div>
+      <div class="note-title" data-i18n="pinkTitle">上线产品</div>
+      <div class="note-sub" data-i18n="pinkSub">点击体验我的作品</div>
     </div>
 
     <!-- 蓝色：自媒体探索 -->
     <div class="sticky-note sticky-blue" data-info="blue">
-      <div class="note-title">自媒体探索</div>
-      <div class="note-sub">记录想法 · 探索表达</div>
+      <div class="note-title" data-i18n="blueTitle">自媒体探索</div>
+      <div class="note-sub" data-i18n="blueSub">记录想法 · 探索表达</div>
     </div>
 
     <!-- 黄色：教育数字化 Demo -->
     <div class="sticky-note sticky-yellow" data-info="yellow">
-      <div class="note-title">教育数字化<br>Demo</div>
-      <div class="note-sub">把 6 年产品经验<br>重新做成可以被看见的作品</div>
+      <div class="note-title" data-i18n="yellowTitle">教育数字化<br>Demo</div>
+      <div class="note-sub" data-i18n="yellowSub">把 6 年产品经验<br>重新做成可以被看见的作品</div>
     </div>
 
     <!-- 绿色：AI Skills -->
     <div class="sticky-note sticky-green" data-info="green">
       <div class="note-title">AI Skills</div>
-      <div class="note-sub">把方法变成<br>可以复用的工具</div>
+      <div class="note-sub" data-i18n="greenSub">把方法变成<br>可以复用的工具</div>
     </div>
   </div>
 
@@ -1564,8 +1609,8 @@ html, body {
         <div class="mole-cup"></div>
       </div>
 
-      <div class="mole-cavern-label">秘密小屋 · Secret Burrow</div>
-      <button class="mole-back-btn">回到房间</button>
+      <div class="mole-cavern-label" data-i18n="moleLabel">秘密小屋 · Secret Burrow</div>
+      <button class="mole-back-btn" data-i18n="moleBack">回到房间</button>
     </div>
   </div>
 
@@ -1579,14 +1624,14 @@ html, body {
 
   <!-- 密码锁面板 -->
   <div class="password-panel" id="passwordPanel">
-    <h2>秘密入口</h2>
+    <h2 data-i18n="pwTitle">秘密入口</h2>
     <div class="hint">Morse knows it.</div>
-    <input type="text" id="pwInput" placeholder="输入密码…" autocomplete="off">
+    <input type="text" id="pwInput" placeholder="输入密码…" autocomplete="off" data-i18n-placeholder="pwPlaceholder">
     <div class="pw-actions">
-      <button class="pw-go" id="pwGo">进入</button>
-      <button class="pw-cancel" id="pwCancel">取消</button>
+      <button class="pw-go" id="pwGo" data-i18n="pwGo">进入</button>
+      <button class="pw-cancel" id="pwCancel" data-i18n="pwCancel">取消</button>
     </div>
-    <div class="pw-error" id="pwError">密码不对，再试试</div>
+    <div class="pw-error" id="pwError" data-i18n="pwError">密码不对，再试试</div>
   </div>
 
   <!-- 全局唱片机（全站可见，支持切歌） -->
@@ -1599,7 +1644,7 @@ html, body {
     </button>
     <div class="music-info">
       <div class="music-title" id="musicTitle">luv yourself</div>
-      <div class="music-credit">作词：Fei　作曲：SUNO</div>
+      <div class="music-credit" data-i18n="musicCredit">作词：Fei　作曲：SUNO</div>
     </div>
   </div>
 
@@ -1765,7 +1810,7 @@ const infoData = {
     content: `<div class="demo-item">
       <div class="demo-name"> AI 智能命题助手</div>
       <div class="demo-desc"><strong>S:</strong> 省考试院命题依赖人工，效率低、质量波动大。<br><strong>T:</strong> 设计 AI 智能体辅助命题全流程。<br><strong>A:</strong> 构建命题智能体平台，集成知识图谱、智能组卷、质量校验。<br><strong>R:</strong> 命题效率提升 60%，质量一致性显著提高。</div>
-      <a class="demo-link" href="demo-ai-problem-setter.html" target="_blank">立即体验 →</a>
+      <a class="demo-link" href="demo-ai-problem-setter.html?v=2" target="_blank">立即体验 →</a>
     </div>
     <div class="demo-item">
       <div class="demo-name">② 市级教辅监管平台</div>
@@ -1847,6 +1892,355 @@ const infoData = {
     </div>`
   }
 };
+
+// ============================================
+// 英文展签数据（infoData 的英文镜像）
+// ============================================
+const infoDataEn = {
+  character: {
+    title: 'About Me',
+    subtitle: '',
+    content: `<p>I'm a product manager and someone who keeps exploring personal creation.</p>
+    <p>For the past 6 years, I've been working on B2B products and education digitalization;<br>now I'm slowly turning AI, products, content, personal growth and aesthetics<br>into my own creative experiments.</p>
+    <p>I don't want to define myself by a fixed job title.<br>I'd rather become someone who:<br><strong>"designs a better life by creating works."</strong></p>
+    <p style="margin-top: 20px; font-size: 11px; color: var(--stone-dark); letter-spacing: 2px;">Creation × Impact</p>`
+  },
+
+  exp1: {
+    title: 'China Mobile · Chengdu Research Institute',
+    subtitle: '2020 — Present · B2B Education Digitalization Product Manager',
+    content: `<p>Responsible for planning and delivering B2B education digitalization products.</p>
+    <h3>Core Work</h3>
+    <ul>
+      <li>Education digitalization platform design &amp; iteration</li>
+      <li>AI-native product exploration &amp; practice</li>
+      <li>Cross-team coordination &amp; project management</li>
+      <li>End-to-end ownership from insight to launch</li>
+    </ul>`
+  },
+
+  exp2: {
+    title: 'University of Manchester',
+    subtitle: '2018 — 2019 · MSc Financial Economics, Distinction',
+    content: `<p>Systematically studied financial economics theory and analysis methods.</p>
+    <h3>Highlights</h3>
+    <ul>
+      <li>Economic thinking framework</li>
+      <li>Data analysis &amp; quantitative research skills</li>
+      <li>Cross-cultural perspective &amp; independent thinking</li>
+    </ul>`
+  },
+
+  exp3: {
+    title: 'Huaqiao University',
+    subtitle: '2014-2018 · B.A. Economics · National Scholarship',
+    content: `<p>Fundamental economics training, building a basic understanding of the business world.</p>`
+  },
+
+  proj1: {
+    title: 'Yu Hui Xue',
+    subtitle: 'Provincial education digitalization platform',
+    content: `<p>A digitalization platform for provincial education scenarios.</p>
+    <h3>Results</h3>
+    <ul>
+      <li>Covering 37 districts/counties</li>
+      <li>Serving 6.5 million users</li>
+      <li>From 0 to 1 product design &amp; delivery</li>
+    </ul>`
+  },
+
+  proj2: {
+    title: 'Smart Campus Benefits Product',
+    subtitle: 'C-end benefits for vocational college students, teachers &amp; parents',
+    content: `<p>A C-end benefits product for vocational college students, teachers and parents.</p>
+    <h3>Results</h3>
+    <ul>
+      <li>100,000+ paying users</li>
+      <li>5M+ revenue</li>
+      <li>A complete loop connecting students with career opportunities</li>
+    </ul>`
+  },
+
+  proj3: {
+    title: 'CMCC Online University',
+    subtitle: 'China Mobile group online learning platform',
+    content: `<p>China Mobile's internal corporate learning platform.</p>
+    <h3>Results</h3>
+    <ul>
+      <li>Serving 500,000+ employees</li>
+      <li>Digitalized corporate knowledge management &amp; training system</li>
+    </ul>`
+  },
+
+  proj4: {
+    title: 'Mobile Cloud Channel Management',
+    subtitle: 'Enterprise business process optimization',
+    content: `<p>Optimization of enterprise cloud business channel management processes.</p>
+    <h3>Results</h3>
+    <ul>
+      <li>58% improvement in order flow efficiency</li>
+      <li>Digital restructuring of business processes</li>
+    </ul>`
+  },
+
+  // Room 2
+  pink: {
+    title: 'Launched Products',
+    subtitle: 'Click to try my works',
+    content: `<div class="demo-item">
+      <div class="demo-name">① See Me · AI Creation Insight Assistant</div>
+      <div class="demo-desc">Through a series of questions, it helps you see your experiences, interests, abilities and creative desires, and find the first AI creation experiment you can truly start. About 20 minutes · 7 life chapters · 17 questions</div>
+      <a class="demo-link" href="https://see-me-growth-assistant.onrender.com" target="_blank" rel="noopener">Try it now →</a>
+    </div>
+    <div class="demo-item">
+      <div class="demo-name">② IELTS 7 Vocabulary</div>
+      <div class="demo-desc">A word-memorization tool designed specifically for IELTS band 7 — scientific memory curves plus high-frequency vocabulary to help you efficiently break through the vocabulary barrier.</div>
+      <a class="demo-link" href="https://ielts-7-vocabulary.onrender.com" target="_blank" rel="noopener">Try it now →</a>
+    </div>
+    <div class="demo-item">
+      <div class="demo-name">③ Star Skill Swipe</div>
+      <div class="demo-desc">Swipe left or right to browse high-star GitHub skill tools — quickly browse, bookmark, and discover quality skills and projects worth learning.</div>
+      <a class="demo-link" href="https://star-skill-swipe.onrender.com" target="_blank" rel="noopener">Try it now →</a>
+    </div>`
+  },
+
+  blue: {
+    title: 'Self-media Exploration',
+    subtitle: 'Recording ideas · exploring expression',
+    content: `<p>I'm exploring how to turn AI, personal growth, creation and product methodology into content.</p>
+    <h3>Content Formats</h3>
+    <ul>
+      <li>Xiaohongshu (RED)</li>
+      <li>Podcast</li>
+      <li>AI video</li>
+      <li>Methodology content</li>
+    </ul>
+    <p>Not to build a content account, but to experiment: how can I keep expressing myself.</p>`
+  },
+
+  yellow: {
+    title: 'Education Digitalization Demo',
+    subtitle: 'Turning 6 years of product experience into visible works',
+    content: `<div class="demo-item">
+      <div class="demo-name">① AI Smart Question-Setting Assistant</div>
+      <div class="demo-desc"><strong>S:</strong> Provincial exam question-setting relies on manual work — inefficient and inconsistent in quality.<br><strong>T:</strong> Design an AI agent to assist the full question-setting process.<br><strong>A:</strong> Build a question-setting agent platform integrating knowledge graphs, smart paper assembly, and quality checks.<br><strong>R:</strong> 60% efficiency gain, significantly improved consistency.</div>
+      <a class="demo-link" href="demo-ai-problem-setter.html?v=2" target="_blank">Try it now →</a>
+    </div>
+    <div class="demo-item">
+      <div class="demo-name">② Municipal Teaching-Aid Supervision Platform</div>
+      <div class="demo-desc"><strong>S:</strong> Teaching-aid material supervision is fragmented with severe data silos.<br><strong>T:</strong> Build a unified municipal supervision and data analysis platform.<br><strong>A:</strong> Design a dual-end architecture (admin + parent) for full-chain digitalization of ordering, usage and feedback.<br><strong>R:</strong> 100% supervision coverage, 40% increase in parent satisfaction.</div>
+      <a class="demo-link" href="demo-edu-supervision/index.html" target="_blank">Try it now →</a>
+    </div>
+    <div class="demo-item">
+      <div class="demo-name">③ Teacher Expert Database</div>
+      <div class="demo-desc"><strong>S:</strong> Teacher resources are scattered and matching is inefficient.<br><strong>T:</strong> Build a teacher expert database with smart matching.<br><strong>A:</strong> Design teacher profiles, capability tags, and smart recommendation algorithms.<br><strong>R:</strong> 85% matching accuracy, 70% shorter response time.</div>
+      <a class="demo-link" href="demo-teacher-expert/previewV2.html" target="_blank">Try it now →</a>
+    </div>`
+  },
+
+  green: {
+    title: 'AI Skills',
+    subtitle: 'Turning methods into reusable tools',
+    content: `<h3>Content Creation</h3>
+
+    <div class="skill-item">
+      <div class="skill-name">See Me · AI Creation Insight Assistant</div>
+      <div class="skill-desc">A 4-chapter guided self-discovery conversation to find your first AI creation opportunity</div>
+    </div>
+
+    <div class="skill-item">
+      <div class="skill-name">Video Knowledge Snapshot</div>
+      <div class="skill-desc">Public lectures / interviews / documentaries → transcripts · keyframes · vertical knowledge cards, ready to share on social media</div>
+    </div>
+
+    <div class="skill-item">
+      <div class="skill-name">Game Reverse-Engineering Breakdown</div>
+      <div class="skill-desc">9-module breakdown of any game: positioning / Core Loop / system architecture / mechanics / numeric economy / experience / competitors / methodology → 16-chapter analysis report</div>
+    </div>
+
+    <div class="skill-item">
+      <div class="skill-name">Content Creation Prediction Loop</div>
+      <div class="skill-desc">A 16-command creation calibration system: scoring → blind prediction → T+3 review → rubric evolution</div>
+    </div>
+
+    <h3>Work Efficiency</h3>
+
+    <div class="skill-item">
+      <div class="skill-name">Research Interview Notes</div>
+      <div class="skill-desc">Interview transcripts + research outline → formal research notes, separating facts from opinions with explicit omission flags</div>
+    </div>
+
+    <div class="skill-item">
+      <div class="skill-name">Policy Product Designer</div>
+      <div class="skill-desc">Policy documents → digital platform proposals: policy understanding · business process · digitalization opportunities · provincial benchmarking · platform design</div>
+    </div>
+
+    <div class="skill-item">
+      <div class="skill-name">H2PRD Page-to-Requirements</div>
+      <div class="skill-desc">Platform page feature annotations → generate "Functional Requirements Specification" documents</div>
+    </div>
+
+    <p style="margin-top:16px;font-size:12px;color:var(--stone-dark);">Continuously distilling methods and experience into reusable AI Skills.</p>`
+  },
+
+  reading: {
+    title: 'Currently Reading',
+    subtitle: 'Books on the desk · recently reading',
+    content: `<div class="reading-item">
+      <div class="reading-name">Escape from Freedom (Fromm)</div>
+      <div class="reading-meta">Erich Fromm · Reading progress 83%</div>
+      <div class="reading-progress"><span style="width:83%"></span></div>
+      <div class="reading-desc">Social psychologist Fromm's classic work exploring the social-psychological roots of totalitarianism — why people, in gaining freedom, simultaneously yearn to escape it. It analyzes the relationship between "human nature" and "freedom" through history, regarded as an immortal classic applying psychoanalysis to sociology.</div>
+    </div>
+    <div class="reading-item">
+      <div class="reading-name">Story: Substance, Structure, Style, and the Principles of Screenwriting</div>
+      <div class="reading-meta">Robert McKee · Reading progress 51%</div>
+      <div class="reading-progress"><span style="width:51%"></span></div>
+      <div class="reading-desc">"Hollywood's screenwriting godfather" McKee's 30 years of teaching distilled — a must-read classic for screenwriters worldwide. Through analyses of films like The Godfather, Forrest Gump, and Star Wars, it explains the core principles of story creation, equally applicable to novel writing, advertising and copywriting.</div>
+    </div>
+    <div class="reading-item">
+      <div class="reading-name">The Almanack of Naval Ravikant</div>
+      <div class="reading-meta">Eric Jorgenson · Reading progress 24%</div>
+      <div class="reading-progress"><span style="width:24%"></span></div>
+      <div class="reading-desc">Silicon Valley investor Naval's decade of wisdom, sharing principles and methods for wealth accumulation and a happy life — getting rich is not luck, but a learnable skill.</div>
+    </div>`
+  }
+};
+
+// ============================================
+// 语言切换（中 / EN）
+// ============================================
+const I18N = {
+  zh: {
+    enterBtn: '进入',
+    chimeTip: '点一下珠帘，唤起风铃的声音',
+    enterHint: '进入房间',
+    exitBtn: '退出房间',
+    sloganSub: '一个持续创造的人',
+    timelineLabel: '我的来处',
+    exp1Year: '2020 — 至今',
+    exp1Org: '中国移动 · 成都产业研究院',
+    exp1Role: '教育数字化产品经理',
+    exp2Org: '曼彻斯特大学',
+    exp2Role: '金融经济学硕士 一等学位',
+    exp3Org: '国立华侨大学',
+    exp3Role: '经济学 国家奖学金',
+    projectsLabel: '做过的事',
+    proj1Name: '渝慧学',
+    proj1Desc: '省级教育数字化平台<br>覆盖 37 个区县、650万用户',
+    proj2Name: '智慧高校权益产品',
+    proj2Desc: 'C端高职校师生家长权益<br>10万+付费用户 / 500万+收入',
+    proj3Name: '中移网大',
+    proj3Desc: '移动集团在线学习平台<br>服务 50万+员工',
+    proj4Name: '移动云渠道管理',
+    proj4Desc: '产品订购全 SOP 制定<br>营收破千万 效率提升 58%',
+    bookLHeading: '我相信',
+    bookLText: '生活可以是作品<br>创造可以是日常',
+    bookRHeading: '所以我在做',
+    bookRList: '教育数字化产品、AI产品/skill<br>写故事、做音乐',
+    bookRText: '以及一切让我好奇的创造<br>把想法变成作品',
+    booksHint: '最近在读',
+    vortexHint: '点击进入',
+    pinkTitle: '上线产品',
+    pinkSub: '点击体验我的作品',
+    blueTitle: '自媒体探索',
+    blueSub: '记录想法 · 探索表达',
+    yellowTitle: '教育数字化 Demo',
+    yellowSub: '把 6 年产品经验<br>重新做成可以被看见的作品',
+    greenSub: '把方法变成<br>可以复用的工具',
+    moleLabel: '秘密小屋 · Secret Burrow',
+    moleBack: '回到房间',
+    pwTitle: '秘密入口',
+    pwPlaceholder: '输入密码…',
+    pwGo: '进入',
+    pwCancel: '取消',
+    pwError: '密码不对，再试试',
+    musicCredit: '作词：Fei　作曲：SUNO',
+    playMusic: '播放音乐',
+    pauseMusic: '暂停音乐',
+    nextTrack: '切歌'
+  },
+  en: {
+    enterBtn: 'Enter',
+    chimeTip: 'Touch the bead curtain to hear the wind chime',
+    enterHint: 'Enter Room',
+    exitBtn: 'Exit Room',
+    sloganSub: 'A person who keeps creating',
+    timelineLabel: 'Where I come from',
+    exp1Year: '2020 — Present',
+    exp1Org: 'China Mobile · Chengdu Research Institute',
+    exp1Role: 'Education Digitalization Product Manager',
+    exp2Org: 'University of Manchester',
+    exp2Role: 'MSc Financial Economics, Distinction',
+    exp3Org: 'Huaqiao University',
+    exp3Role: 'Economics, National Scholarship',
+    projectsLabel: 'What I\'ve done',
+    proj1Name: 'Yu Hui Xue',
+    proj1Desc: 'Provincial education digitalization platform<br>Covering 37 districts, 6.5M users',
+    proj2Name: 'Smart Campus Benefits Product',
+    proj2Desc: 'C-end benefits for vocational students, teachers &amp; parents<br>100K+ paying users / 5M+ revenue',
+    proj3Name: 'CMCC Online University',
+    proj3Desc: 'China Mobile group online learning platform<br>Serving 500K+ employees',
+    proj4Name: 'Mobile Cloud Channel Management',
+    proj4Desc: 'Full SOP for product ordering<br>Revenue over 10M, 58% efficiency gain',
+    bookLHeading: 'I believe',
+    bookLText: 'Life can be a work of art<br>Creation can be daily life',
+    bookRHeading: 'So I\'m making',
+    bookRList: 'Education digitalization products, AI products/skills<br>Writing stories, making music',
+    bookRText: 'And everything I\'m curious about creating<br>Turning ideas into works',
+    booksHint: 'Currently Reading',
+    vortexHint: 'Click to enter',
+    pinkTitle: 'Launched Products',
+    pinkSub: 'Click to try my works',
+    blueTitle: 'Self-media Exploration',
+    blueSub: 'Recording ideas · exploring expression',
+    yellowTitle: 'Education Digitalization Demo',
+    yellowSub: 'Turning 6 years of product experience<br>into visible works',
+    greenSub: 'Turning methods into<br>reusable tools',
+    moleLabel: 'Secret Burrow',
+    moleBack: 'Back to Room',
+    pwTitle: 'Secret Entrance',
+    pwPlaceholder: 'Enter password…',
+    pwGo: 'Enter',
+    pwCancel: 'Cancel',
+    pwError: 'Wrong password, try again',
+    musicCredit: 'Lyrics: Fei　Music: SUNO',
+    playMusic: 'Play music',
+    pauseMusic: 'Pause music',
+    nextTrack: 'Next track'
+  }
+};
+
+let currentLang = 'zh';
+try { currentLang = localStorage.getItem('mh-lang') || 'zh'; } catch (e) {}
+const t = (k) => (I18N[currentLang] && I18N[currentLang][k] !== undefined) ? I18N[currentLang][k] : k;
+let currentInfoData = infoData;
+
+function applyLang() {
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+  });
+  welcomeMsg = currentLang === 'en' ? WELCOME_EN : WELCOME_ZH;
+  currentInfoData = currentLang === 'en' ? infoDataEn : infoData;
+  document.querySelectorAll('.lang-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+  if (musicToggle) musicToggle.setAttribute('aria-label', t('playMusic'));
+  if (musicSwitch) musicSwitch.setAttribute('aria-label', t('nextTrack'));
+}
+
+document.querySelectorAll('.lang-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.lang === currentLang) return;
+    currentLang = btn.dataset.lang;
+    try { localStorage.setItem('mh-lang', currentLang); } catch (e) {}
+    applyLang();
+  });
+});
 
 // ============================================
 // FACADE NAVIGATION
@@ -1995,7 +2389,9 @@ document.querySelector('#room-mole .mole-back-btn').addEventListener('click', ()
 });
 const welcomeText = document.getElementById('welcomeText');
 const welcomeBubble = document.getElementById('welcomeBubble');
-const welcomeMsg = '你好，我是Fei\n欢迎来到我的小屋\n这3个...哦不2个房间都很精彩哦|･ω･｀)';
+const WELCOME_ZH = '你好，我是Fei\n欢迎来到我的小屋\n这3个...哦不2个房间都很精彩哦|･ω･｀)';
+const WELCOME_EN = "Hi, I'm Fei\nWelcome to my little house\nThese 3... wait, 2 rooms are all wonderful|･ω･｀)";
+let welcomeMsg = WELCOME_ZH;
 let welcomeTimer = null;
 let welcomeHideTimer = null;
 
@@ -2043,7 +2439,7 @@ document.querySelectorAll('[data-info]').forEach(el => {
     // 防止点击子元素时重复触发
     if (e.target.closest('[data-info]') !== el) return;
     const key = el.dataset.info;
-    const data = infoData[key];
+    const data = currentInfoData[key];
     if (data) {
       infoContent.innerHTML = `
         <h2>${data.title}</h2>
@@ -2120,7 +2516,7 @@ function startMusic() {
   }
   musicAudio.play().then(() => {
     musicToggle.classList.add('playing');
-    musicToggle.setAttribute('aria-label', '暂停音乐');
+    musicToggle.setAttribute('aria-label', t('pauseMusic'));
   }).catch(() => {});
 }
 
@@ -2130,7 +2526,7 @@ musicToggle.addEventListener('click', () => {
   } else {
     musicAudio.pause();
     musicToggle.classList.remove('playing');
-    musicToggle.setAttribute('aria-label', '播放音乐');
+    musicToggle.setAttribute('aria-label', t('playMusic'));
   }
 });
 
@@ -2154,7 +2550,7 @@ musicAudio.addEventListener('ended', () => {
     loadTrack(trackIndex + 1);
     musicAudio.play().then(() => {
       musicToggle.classList.add('playing');
-      musicToggle.setAttribute('aria-label', '暂停音乐');
+      musicToggle.setAttribute('aria-label', t('pauseMusic'));
     }).catch(() => {});
   };
   // 下一首已预加载好再切换；等待超时 3s 兜底（避免慢网下开局即卡）
@@ -2665,6 +3061,8 @@ function destroyCurtain() {
 // ============================================
 // INIT
 // ============================================
+// 应用已保存的语言偏好（先于珠帘构建，确保即使珠帘失败语言也生效）
+applyLang();
 // 立即构建珠帘（不等 window.load，观众一进网页就能看到）
 buildCurtain();
 window.addEventListener('resize', onResizeBeads);

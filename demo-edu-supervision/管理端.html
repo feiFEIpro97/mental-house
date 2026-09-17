@@ -137,26 +137,35 @@ tr:hover{background:#e3f2fd}
 .dash-dark .dash-select{background:#0a2042;color:#c6e2ff;border:1px solid #255994;padding:2px 4px;font-size:13px}
 .dash-dark .dash-btn{background:#103468;border:1px solid #266099;color:#fff;padding:5px 12px;border-radius:3px;cursor:pointer;font-size:13px}
 .dash-dark .dash-btn-alt{background:#081c38;border:1px solid #1c4475;color:#88aacc;padding:3px 6px;cursor:pointer;font-size:13px}
+/* 语言切换按钮（右下角 中/EN，与主站一致） */
+.lang-toggle{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;gap:2px;padding:3px;background:rgba(255,255,255,.9);border:1px solid rgba(26,60,110,.4);border-radius:30px;box-shadow:0 4px 14px rgba(0,0,0,.18);backdrop-filter:blur(6px)}
+.lang-opt{border:none;background:transparent;color:#5a7ca6;font-size:13px;letter-spacing:1px;padding:5px 14px;border-radius:24px;cursor:pointer;transition:all .3s ease;font-family:inherit}
+.lang-opt.active{background:var(--blue);color:#fff}
+.lang-opt:hover:not(.active){color:var(--blue)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 <body>
+<div class="lang-toggle" id="langToggle">
+  <button class="lang-opt active" data-lang="zh">中</button>
+  <button class="lang-opt" data-lang="en">EN</button>
+</div>
 <div class="sidebar">
-  <div class="logo">教辅监管平台</div>
-  <div style="padding:10px 12px;font-size:11px;color:#8fb7e0;text-align:center;opacity:.85;border-bottom:1px solid rgba(255,255,255,.15)">demo数据均为模拟测试数据</div>
-  <div class="nav-item active" onclick="nav('dashboard',event)"><span class="nav-icon">&#9776;</span> 驾驶舱</div>
-  <div class="nav-item" onclick="nav('catalog',event)"><span class="nav-icon">&#128218;</span> 教辅目录</div>
-  <div class="nav-item" onclick="nav('orders',event)"><span class="nav-icon">&#128230;</span> 征订管理</div>
-  <div class="nav-item" onclick="nav('feedback',event)"><span class="nav-icon">&#128172;</span> 意见反馈</div>
-  <div class="nav-item" onclick="nav('satisfaction',event)"><span class="nav-icon">&#11088;</span> 满意度管理</div>
+  <div class="logo" data-i18n="logo">教辅监管平台</div>
+  <div style="padding:10px 12px;font-size:11px;color:#8fb7e0;text-align:center;opacity:.85;border-bottom:1px solid rgba(255,255,255,.15)" data-i18n="demoNote">demo数据均为模拟测试数据</div>
+  <div class="nav-item active" onclick="nav('dashboard',event)"><span class="nav-icon">&#9776;</span> <span data-i18n="navDashboard">驾驶舱</span></div>
+  <div class="nav-item" onclick="nav('catalog',event)"><span class="nav-icon">&#128218;</span> <span data-i18n="navCatalog">教辅目录</span></div>
+  <div class="nav-item" onclick="nav('orders',event)"><span class="nav-icon">&#128230;</span> <span data-i18n="navOrders">征订管理</span></div>
+  <div class="nav-item" onclick="nav('feedback',event)"><span class="nav-icon">&#128172;</span> <span data-i18n="navFeedback">意见反馈</span></div>
+  <div class="nav-item" onclick="nav('satisfaction',event)"><span class="nav-icon">&#11088;</span> <span data-i18n="navSatisfaction">满意度管理</span></div>
 </div>
 <div class="main">
   <div class="topbar">
     <div class="page-title" id="pageTitle">驾驶舱</div>
     <div class="role-switch">
-      <button class="active" onclick="switchRole('shiwei',this)">市教委</button>
-      <button onclick="switchRole('quxian',this)">区县教委</button>
-      <button onclick="switchRole('school',this)">学校</button>
+      <button class="active" onclick="switchRole('shiwei',this)" data-i18n="roleShiwei">市教委</button>
+      <button onclick="switchRole('quxian',this)" data-i18n="roleQuxian">区县教委</button>
+      <button onclick="switchRole('school',this)" data-i18n="roleSchool">学校</button>
     </div>
   </div>
   <div class="content" id="content"></div>
@@ -173,9 +182,190 @@ var titles = {dashboard:'驾驶舱',catalog:'教辅目录管理',orders:'征订�
 var fbCurStatus = '全部';
 var rankOrder = 'desc';
 
+// ============================================
+// 语言切换（中 / EN）— 与主站共享 localStorage 'mh-lang'
+// ============================================
+var currentLang = 'zh';
+try { currentLang = localStorage.getItem('mh-lang') || 'zh'; } catch(e) {}
+var TITLE_KEYS = {dashboard:'pageDashboard',catalog:'pageCatalog',orders:'pageOrders',feedback:'pageFeedback',satisfaction:'pageSatisfaction'};
+var I18N = {
+  zh: { logo:'教辅监管平台', demoNote:'demo数据均为模拟测试数据', navDashboard:'驾驶舱', navCatalog:'教辅目录', navOrders:'征订管理', navFeedback:'意见反馈', navSatisfaction:'满意度管理', roleShiwei:'市教委', roleQuxian:'区县教委', roleSchool:'学校', pageDashboard:'驾驶舱', pageCatalog:'教辅目录管理', pageOrders:'征订管理', pageFeedback:'意见反馈', pageSatisfaction:'满意度管理', docTitle:'教辅监管平台 管理端' },
+  en: { logo:'Material Supervision Platform', demoNote:'All demo data is simulated test data', navDashboard:'Dashboard', navCatalog:'Catalog', navOrders:'Ordering', navFeedback:'Feedback', navSatisfaction:'Satisfaction', roleShiwei:'Municipal', roleQuxian:'District', roleSchool:'School', pageDashboard:'Dashboard', pageCatalog:'Material Catalog', pageOrders:'Ordering Management', pageFeedback:'Feedback Management', pageSatisfaction:'Satisfaction Management', docTitle:'Supervision Platform - Admin' }
+};
+var t = function(k){ return (I18N[currentLang] && I18N[currentLang][k] !== undefined) ? I18N[currentLang][k] : (I18N.zh[k] !== undefined ? I18N.zh[k] : k); };
+// 数据字典：mock 数据 / 动态生成中文文案 → 英文（渲染时经 trText 取值）
+var DT = {
+  '待订购':'Pending','已订购':'Ordered','待处理':'Pending','处理中':'In Progress','已超时':'Overdue','已解决':'Resolved','无需处理':'Not Required','待填写':'To Fill','已收货':'Received','待收货':'Awaiting Delivery','免费':'Free','收费':'Paid','启用':'Active','禁用':'Disabled','征订中':'Ordering','已完成':'Completed','进行中':'Ongoing','已结束':'Ended','未订购':'Not Ordered','待确认':'Unconfirmed','已缴费':'Paid','未缴费':'Unpaid','未收货':'Not Received','全部':'All','是':'Yes','否':'No',
+  '小学':'Primary','初中':'Junior High','三年级':'Grade 3','四年级':'Grade 4','五年级':'Grade 5','七年级':'Grade 7','八年级':'Grade 8','九年级':'Grade 9','高一':'Senior 1','高二':'Senior 2',
+  '语文':'Chinese','数学':'Math','英语':'English','综合':'General','地理':'Geography',
+  '同步练习册':'Workbook','中考复习':'Exam Review','寒暑假作业':'Holiday Workbook','同步练习':'Workbook','学习辅助':'Learning Aids','中考复习资料':'Exam Review Materials','高考复习资料':'College Exam Materials','寒假作业':'Winter Workbook','暑假作业':'Summer Workbook',
+  '春季':'Spring','秋季':'Fall','全市':'Citywide',
+  '人民教育出版社':'PEP','XX出版社':'XX Press','外研社':'FLTRP','人民教育':'PEP',
+  'XX区':'XX District','XX县':'XX County','市教委':'Municipal Education Commission','XX区教委':'XX District Education Commission','XX县教委':'XX County Education Commission',
+  'XX区第一小学':'XX District No.1 Primary School','XX区求精中学':'XX District Qiujing Middle School','XX区华新小学':'XX District Huaxin Primary School','XX区字水中学':'XX District Zishui Middle School','XX小学':'XX Primary School','XX区七中':'XX District No.7 Middle School','XX县第一初级中学':'XX County No.1 Junior High School','XX县紫金小学':'XX County Zijin Primary School','XXXX盘石中学校':'XXXX Panshi Middle School','XXXX盘石中学':'XXXX Panshi Middle School','XXXX双江中学':'XXXX Shuangjiang Middle School','XX县第三初级中学黄石校区':'XX County No.3 Junior High (Huangshi Campus)','XX县凤鸣中学':'XX County Fengming Middle School','z测试学校':'z Test School','XX县红狮初级中学':'XX County Hongshi Junior High School','XXXX高级中学':'XXXX Senior High School','XX县第二初级中学':'XX County No.2 Junior High School','XX中山外国语学校':'XX Zhongshan Foreign Language School','XXXX盐渠中学':'XXXX Yanqu Middle School','XX县龙洞镇龙洞九年制学校':'XX County Longdong Nine-Year School',
+  '语文同步练习册(三年级)':'Chinese Workbook (Grade 3)','数学同步练习册(三年级)':'Math Workbook (Grade 3)','数学同步练习册(七年级)':'Math Workbook (Grade 7)','数学同步练习册(八年级)':'Math Workbook (Grade 8)','语文同步练习册(四年级)':'Chinese Workbook (Grade 4)','语文同步练习册(七年级)':'Chinese Workbook (Grade 7)','英语同步练习册(五年级)':'English Workbook (Grade 5)','中考数学复习资料':'Math Exam Review Material','中考语文复习资料':'Chinese Exam Review Material','暑假作业(四年级)':'Summer Workbook (Grade 4)',
+  '2026春高中地理思维练习册 选择性...':'2026 Spring Geography Thinking Workbook (Selective)...','高中地理思维练习册(选择性必修2...':'Geography Thinking Workbook (Selective Compulsory 2)...','2026春高中地理思维练习册 选择...':'2026 Spring Geography Thinking Workbook (Sel)...','2026春高中地理思维练习册 必修第...':'2026 Spring Geography Thinking Workbook (Compulsory)...',
+  '2026秋季三年级语文教辅征订':'2026 Fall Grade 3 Chinese Material Ordering','2026秋季三年级数学教辅征订':'2026 Fall Grade 3 Math Material Ordering','2026秋季七年级数学教辅征订':'2026 Fall Grade 7 Math Material Ordering','2026秋季五年级英语教辅征订':'2026 Fall Grade 5 English Material Ordering',
+  '免费教辅，市级财政全额买单':'Free materials, fully funded by municipal finance',
+  '教辅投诉':'Complaint','教辅咨询':'Inquiry','一级':'Level 1','二级':'Level 2',
+  '张小明家长':'Zhang Xiaoming (Parent)','李小红家长':'Li Xiaohong (Parent)','王大伟家长':'Wang Dawei (Parent)','刘思雨家长':'Liu Siyu (Parent)','杨子涵家长':'Yang Zihan (Parent)','赵欣怡家长':'Zhao Xinyi (Parent)','黄宇轩家长':'Huang Yuxuan (Parent)','监督员张三':'Supervisor Zhang San',
+  '学校管理员':'School Admin','家长':'Parent','系统':'System','管理员':'Admin',
+  '教辅纸张质量差，偏薄透字':'Poor paper quality, too thin and see-through','咨询订购缴费截止时间是什么时候':'When is the payment deadline for ordering?','数学练习册第三页答案有误，影响孩子学习':'The answers on page 3 of the math workbook are wrong, affecting the study of my child','教辅价格高于市场同类产品':'The material is priced higher than similar products on the market','订购数量超出班级实际人数':'The ordered quantity exceeds the actual class size','一科多辅，语文配了两本练习册':'Multiple materials for one subject, two Chinese workbooks assigned','咨询教辅是否可以自愿购买，不订购会有什么影响':'Is purchasing voluntary? What happens if we choose not to order?','教辅封面印刷模糊，影响使用':'The cover printing is blurry, affecting use',
+  '回复':'Reply','再次提交':'Resubmitted','自动升级':'Auto-escalated','督办':'Supervised','处理':'Handled','升级市教委':'Escalated to Municipal Commission',
+  '订购缴费截止8月15日，请尽快完成。':'The payment deadline is Aug 15. Please complete it soon.','已联系出版社核实，请耐心等待。':'The publisher has been contacted for verification. Please wait patiently.','仍未解决，答案依旧有误。':'Still unresolved. The answers remain incorrect.','同一诉求提交3次，自动转派至区县教委。':'The same request was submitted 3 times and has been automatically transferred to the district education commission.','请学校管理员尽快对接出版社更换，限3日内反馈。':'School admins should contact the publisher for a replacement ASAP; feedback is required within 3 days.','价格为市级目录定价。':'The price follows the municipal catalog pricing.','请学校向家长解释定价依据，并记录反馈。':'The school should explain the pricing basis to parents and record the feedback.','经核实为预征订数，实际按订购数发货，已向家长说明。':'Verified as a pre-order count; delivery is based on actual orders. Parents have been informed.','一本为区县定版，一本为学校自主选品。':'One is the district-designated edition; the other is chosen by the school.','请学校核实是否违规，暂停自主选品。':'The school should verify compliance and suspend independent selection.','区县无法处理，升级至市教委。':'The district could not resolve it; escalated to the Municipal Education Commission.','经核实为运输磨损，已联系新华书店更换。':'Verified as transport wear; Xinhua Bookstore has been contacted for a replacement.',
+  '教辅照片1.jpg':'Material photo 1.jpg','教辅照片2.jpg':'Material photo 2.jpg','答案错误照片.jpg':'Wrong-answer photo.jpg','价格对比截图.png':'Price comparison screenshot.png','教辅清单照片.jpg':'Material list photo.jpg','封面照片.jpg':'Cover photo.jpg',
+  '2026年秋季教辅满意度调查':'2026 Fall Material Satisfaction Survey','同步练习册质量专项问卷':'Workbook Quality Special Survey',
+  '教辅内容质量评分':'Content quality rating','教辅印刷质量评分':'Print quality rating','教辅价格合理性评分':'Price reasonableness rating','整体满意度评分':'Overall satisfaction rating','内容质量评分':'Content quality rating','印刷质量评分':'Print quality rating','难度适宜度评分':'Difficulty suitability rating',
+  '关于2026年秋季教辅征订工作的通知':'Notice on 2026 Fall Material Ordering','XX区教辅征订结果公示':'XX District Ordering Results Publicity','教辅满意度调查问卷发放通知':'Satisfaction Survey Distribution Notice',
+  '非常满意':'Very Satisfied','满意':'Satisfied','基本满意':'Neutral','较不满意':'Dissatisfied','不满意':'Very Dissatisfied','参评人数':'Participants','人均经费':'Per-student Funding','平均值':'Average','未整改':'Unresolved',
+  '1月':'Jan','2月':'Feb','3月':'Mar','4月':'Apr','5月':'May','6月':'Jun','7月':'Jul','8月':'Aug','9月':'Sep','10月':'Oct','11月':'Nov',
+  'XX县龙洞镇龙洞九年制学校【超数量】':'XX County Longdong Nine-Year School [Over-quantity]','XX县龙洞镇龙洞九年制学校【价格虚高】':'XX County Longdong Nine-Year School [Inflated Price]','XX县龙洞镇龙洞九年制学校的五年级出现了一科多辅':'Multiple workbooks for one subject found in Grade 5 of XX County Longdong Nine-Year School','XX县龙洞镇龙洞九年制学校的五年级合订本科目价格高于平均价格':'The combined-volume subject price in Grade 5 of XX County Longdong Nine-Year School is above average',
+  '待处理 2｜无风险 4':'Pending 2 | No risk 4','低风险 6｜中风险 4｜高风险 1':'Low risk 6 | Medium risk 4 | High risk 1',
+  '超数量':'Over-quantity','超范围':'Out of Scope','价格虚高':'Inflated Price','利益输送':'Interest Transfer','指定购买':'Designated Purchase','资料不完善':'Incomplete Info','程序不规范':'Irregular Procedure','强制/变相强制购买':'Forced / Disguised Forced Purchase','满意度低于80%':'Satisfaction below 80%','家委会组织购买':'Parent Committee Purchase','处理反馈情况':'Handling Status',
+  '教辅合规准入基础数据库，全校教辅征订的前置依据。仅目录中':'The compliance database is the basis of all material ordering. Only materials marked ','状态的合规教辅，学校方可发起征订申请。':' as compliant in the catalog can be ordered by schools.',
+  '征订管理统一管控全校各学期、各年级教辅征订单据及审批流程。区县选用教辅、发起征订均在此模块完成。':'Ordering management centrally controls order documents and approval workflows for all semesters and grades. District material selection and order initiation are completed here.',
+  '免费教辅由市级财政全额买单，收费教辅由家长在线缴费。':'Free materials are fully funded by municipal finance; paid materials are paid online by parents.',
+  '免费教辅，由市级财政全额买单，家长无需缴费。':'Free materials are fully funded by municipal finance; no payment is required from parents.',
+  '满意度以书籍为维度统计，支持按教辅类型、科目、学段筛选查看。':'Satisfaction is measured per book and can be filtered by material type, subject and stage.',
+  '请选择已填好的CSV模板文件上传，系统将自动解析并导入。':'Please upload the completed CSV template; the system will parse and import it automatically.',
+  '预计导入3条，成功3条，失败0条':'3 records expected to import: 3 succeeded, 0 failed',
+  '订购人群缴费维度（仅统计已订购':'Payment of ordered group (','缴费人群收货维度（仅统计已缴费':'Delivery of paid group (','人）':' people)','筛选出 ':'Filtered: ',' 人':' people','筛选出':'Filtered',
+  '征订详情 - ':'Order Details - ','教辅详情 - ':'Material Details - ','编辑教辅 - ':'Edit Material - ','反馈详情 - ':'Feedback Details - ','缴费明细 - ':'Payment Details - ',
+  '免费（财政买单）':'Free (funded by finance)','在线缴费':'Online Payment','市级财政买单':'Funded by municipal finance','无匹配的合规教辅':'No matching compliant materials','暂无数据':'No data','暂无处理记录':'No handling records yet','该工单已关闭':'This ticket is closed','无附件':'No attachments','展示前10':'Top 10','万元':'×10K CNY','所':'schools','人':'people',
+  '第1页 / 共2页':'Page 1 / 2','上一页':'Prev','下一页':'Next',
+  '学校/年级':'School / Grade','征订次数':'Order Count','总金额':'Total Amount','材料名称':'Material Name','出版社':'Publisher','教辅类型':'Type','适用年级':'Grade','科目':'Subject','价格':'Price','启用状态':'Status','操作':'Actions','学校名称':'School','征订年份':'Year','学期':'Semester','征订总价':'Total','征订人数':'Students','状态':'Status','教辅':'Material','金额':'Amount','备注':'Remark','单号':'Order No.',
+  '征订列表':'Order List','订购监控':'Order Monitor','缴费明细':'Payment Details','反馈管理':'Feedback Management','反馈编号':'Ticket No.','反馈人':'Reporter','联系电话':'Phone','所属学校':'School','问题类型':'Type','提交时间':'Submitted','工单状态':'Status',
+  '满意度统计':'Satisfaction Statistics','满意度排行榜':'Satisfaction Ranking','回收量':'Collected','目标量':'Target','进度':'Progress','日期':'Date','问卷题目':'Questions','教辅书籍':'Material','平均评分':'Avg. Score','应参评人数':'Expected Participants','参评率':'Participation Rate','覆盖学校数':'Schools Covered',
+  '教辅名称':'Material Name','学段':'Stage','售价':'Price','标题':'Title','范围':'Scope','回收/目标':'Collected / Target','问卷标题':'Survey Title','调查范围':'Scope','题目设置':'Questions','征订标题':'Order Title','征订学段':'Stage','班级数量':'Classes','年份':'Year','教辅选型':'Material Selection','单价':'Unit Price','应缴金额':'Amount Due','已缴金额':'Amount Paid','缴费方式':'Payment Method',
+  '征订总范围':'Total Scope','待缴费人数':'Awaiting Payment','待收货人数':'Awaiting Delivery','已缴费人数':'Paid','已收货人数':'Received','征订总范围维度':'Total Scope','订购率':'Ordering Rate','缴费率':'Payment Rate','收货率':'Delivery Rate','学生购买明细':'Student Purchase Details','班级':'Class','是否订购':'Ordered','是否缴费':'Paid','是否收货':'Received',
+  '全部班级':'All Classes','全部订购状态':'All Order Status','全部缴费状态':'All Payment Status','全部收货状态':'All Delivery Status','全部学段':'All Stages','全部年级':'All Grades','全部科目':'All Subjects','全部出版社':'All Publishers','全部类型':'All Types','全部状态':'All Status','全部学校':'All Schools','全部学期':'All Semesters','全部年份':'All Years','全部单号':'All Order No.',
+  '对应年级':'Grades','班级数':'Classes','人数':'Students','学校数':'Schools','区县':'District','学校':'School','年级':'Grade',
+  '各区县征订情况统计':'Ordering by District','本区县各学校征订情况统计':'Ordering by School in District','本校各年级征订情况统计':'Ordering by Grade in School','征订金额':'Amount','征订内容':'Materials',
+  '已订购(人/额/占比)':'Ordered (people/amount/rate)','已缴费(人/额/占比)':'Paid (people/amount/rate)','已收货(人/额/占比)':'Received (people/amount/rate)',
+  '预警信息':'Alerts','经费分析':'Funding Analysis','问题整改':'Issue Rectification','目录清单':'Catalog List','征订情况':'Ordering Overview','征订漏斗总览':'Ordering Funnel','征订管理':'Ordering Management','征订记录列表':'Order Records','教辅目录列表':'Material Catalog','教辅目录管理':'Material Catalog',
+  '柱状图':'Bar','折线图':'Line','问题清单':'Issue List','整改清单':'Rectification List','学校总数':'Total Schools','学生总人数':'Total Students','征订台账':'Ordering Ledger','累计金额':'Total Amount',
+  '基本信息':'Basic Info','家长信息':'Parent Info','子女信息':'Child Info','学生姓名':'Student Name','身份证号':'ID Number','就读学校':'School','问题描述':'Issue Description','证明材料':'Attachments','处理操作':'Actions','处理状态':'Status','处理回复':'Reply','处理记录':'Records',
+  '选择文件':'Select File','导入预览':'Import Preview','新增教辅目录':'Add Material','新增征订申请':'New Order Request','新建满意度问卷':'New Survey','批量导入教辅目录':'Batch Import Catalog',
+  '材料名称关键词':'Material name keyword','反馈编号/反馈人':'Ticket No. / Reporter','必填':'Required','选填':'Optional','如三年级':'e.g. Grade 3','选学段+年级自动带出':'Auto-filled from stage + grade','请先选择学段、年级和类型':'Select stage, grade and type first','每行一道题':'One question per line','如：2026秋季教辅满意度调查':'e.g. 2026 Fall Satisfaction Survey','如2026秋季三年级语文教辅征订':'e.g. 2026 Fall Grade 3 Chinese Ordering','请输入处理回复内容...':'Enter handling reply...','开始日期':'Start date','结束日期':'End date',
+  '倒序':'Descending','正序':'Ascending','+ 新建问卷':'+ New Survey','+ 新增教辅':'+ Add Material','+ 新增征订申请':'+ New Order Request','确认发起':'Confirm',
+  '项':'items','已确认订购':'Confirmed Order','问卷管理':'Survey Management','类型':'Type','（免费）':' (Free)',
+  '选择征订学段、适用年级后，系统自动带出班级数量和征订人数（学籍数据只读）。选择教辅类型后筛选合规教辅，选中后自动带出单价并核算总价。确认发起直接保存，无审批流程。':'After selecting the stage and grade, class count and headcount are filled automatically (enrollment data is read-only). After selecting the material type, compliant materials are filtered; selecting one brings in the unit price and calculates the total. Confirming saves directly with no approval workflow.'
+};
+var TITLE_FRAGS = [
+  [/^教辅详情 - (.+)$/, function(m, n){ return 'Material Details - ' + dt(n); }],
+  [/^编辑教辅 - (.+)$/, function(m, n){ return 'Edit Material - ' + dt(n); }],
+  [/^征订详情 - (.+)$/, function(m, n){ return 'Order Details - ' + dt(n); }],
+  [/^反馈详情 - (.+)$/, function(m, n){ return 'Feedback Details - ' + dt(n); }],
+  [/^缴费明细 - (.+)$/, function(m, n){ return 'Payment Details - ' + dt(n); }],
+  [/^订购人群缴费维度（仅统计已订购(\d+)人）$/, 'Payment of ordered group ($1 people)'],
+  [/^缴费人群收货维度（仅统计已缴费(\d+)人）$/, 'Delivery of paid group ($1 people)'],
+  [/^(.+?)\s*\|\s*(.+?)\s*\|\s*¥([\d.]+)（免费）?$/, function(m, a, b, p, f){ return dt(a) + ' | ' + dt(b) + ' | ¥' + p + (f ? dt('（免费）') : ''); }],
+  [/^¥([\d.]+)（免费）$/, '¥$1 (Free)']
+];
+// 按钮文案（<button> 内优先取 DTB，避免与状态/动作词条冲突）
+var DTB = { '启用':'Enable','禁用':'Disable','处理':'Handle','查看':'View','明细':'Details','编辑':'Edit','删除':'Delete','保存':'Save','提交处理':'Submit','发布问卷':'Publish','确认新增':'Confirm','确认导入':'Confirm','导出明细':'Export','下载模板':'Download Template','批量导入':'Batch Import','关闭':'Close','取消':'Cancel','详情':'Details' };
+var CN = /[\u4e00-\u9fff]/;
+var RULES = [
+  [/¥([\d.]+)万元/, function(m, n){ return '¥' + (Math.round(parseFloat(n) * 100) / 10) + 'K'; }],
+  [/^(\d+)人$/, '$1'],
+  [/^(\d+)所$/, '$1 schools'],
+  [/^(\d+)个班$/, '$1 classes'],
+  [/^([\u4e00-\u9fff]+?年级)(\d+)(?:-(\d+))?个班$/, function(m, g1, g2, g3){ return dt(g1) + ' Classes ' + g2 + (g3 ? '-' + g3 : ''); }],
+  [/^([\u4e00-\u9fff]+?年级)(\d+)(?:-(\d+))?班$/, function(m, g1, g2, g3){ return dt(g1) + ' Class ' + g2 + (g3 ? '-' + g3 : ''); }],
+  [/^↓\s*(订购率|缴费率|收货率)\s*(\d+)%$/, function(m, w, p){ return '↓ ' + dt(w) + ' ' + p + '%'; }],
+  [/^(\d+)人\s*\|\s*¥([\d.]+)\s*\|\s*(\d+)%$/, '$1 people | ¥$2 | $3%'],
+  [/^筛选出\s*(\d+)\s*人$/, '$1 filtered'],
+  [/^(\d{4})年(春季|秋季)$/, function(m, y, sm){ return y + ' ' + dt(sm); }]
+];
+Array.prototype.push.apply(RULES, TITLE_FRAGS);
+function trText(v, isBtn){
+  if(currentLang !== 'en' || !v || !CN.test(v)) return v;
+  var tv = String(v).trim();
+  if(isBtn && tv && Object.prototype.hasOwnProperty.call(DTB, tv)) return v.replace(tv, DTB[tv]);
+  if(tv && Object.prototype.hasOwnProperty.call(DT, tv)) return v.replace(tv, DT[tv]);
+  for(var i = 0; i < RULES.length; i++){ if(RULES[i][0].test(v)) return v.replace(RULES[i][0], RULES[i][1]); }
+  if(v.indexOf('、') >= 0){ var parts = v.split('、'); var np = parts.map(function(p){ return trText(p, isBtn); }); if(np.join('、') !== v) return np.join(', '); }
+  return v;
+}
+function dt(s){ return (currentLang === 'en' && Object.prototype.hasOwnProperty.call(DT, String(s))) ? DT[s] : s; }
+function dtCSV(csv){
+  if(currentLang !== 'en') return csv;
+  return csv.split('\n').map(function(line){ return line.split(',').map(function(c){ return trText(c); }).join(','); }).join('\n');
+}
+// 渲染后翻译：遍历文本节点 + placeholder/title 属性；为无 value 的 <option> 固定中文值（保证筛选逻辑不变）
+function applyDomLang(root){
+  if(currentLang !== 'en' || !root || root.nodeType !== 1) return;
+  root.querySelectorAll('option').forEach(function(o){ if(!o.hasAttribute('value')) o.setAttribute('value', o.textContent.trim()); });
+  root.querySelectorAll('[placeholder]').forEach(function(el){ var p = el.getAttribute('placeholder'); if(CN.test(p)) el.setAttribute('placeholder', trText(p)); });
+  root.querySelectorAll('[title]').forEach(function(el){ var p = el.getAttribute('title'); if(CN.test(p)) el.setAttribute('title', trText(p)); });
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  var nodes = []; while(w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(function(n){
+    var val = n.nodeValue; if(!val || !CN.test(val)) return;
+    var isBtn = !!(n.parentElement && n.parentElement.closest('button'));
+    var nv = trText(val, isBtn); if(nv !== val) n.nodeValue = nv;
+  });
+}
+// alert / confirm 文案翻译
+var AT = {
+  '请填写必填项':'Please fill in the required fields',
+  '教辅已新增到目录':'Material added to the catalog',
+  '确认删除该教辅？删除后无法恢复。':'Delete this material? This action cannot be undone.',
+  '模板已下载，请填写后点击批量导入':'Template downloaded. Fill it in and click Batch Import.',
+  '批量导入成功：3条教辅已纳入目录':'Batch import successful: 3 materials added to the catalog',
+  '请先选择征订单号再导出':'Please select an order number before exporting',
+  '该订单暂无学生明细数据':'No student detail data for this order',
+  '请先选择学段和年级，系统自动带出班级数量和征订人数':'Please select stage and grade first; class count and headcount will be filled automatically',
+  '请先选择教辅':'Please select a material first',
+  '已保存修改':'Changes saved',
+  '请输入处理回复':'Please enter a handling reply',
+  '问卷已创建并发放':'Survey created and distributed'
+};
+var AT_RULES = [
+  [/^征订记录已保存！征订单(.+?)已创建，无审批流程。$/, 'Order record saved! Order $1 has been created. No approval workflow required.'],
+  [/^已导出(.+?)的缴费明细（(\d+)人）$/, 'Payment details of $1 exported ($2 people).'],
+  [/^处理成功！工单状态已更新为(.+?)，处理结果已同步反馈给诉求人。$/, function(m, st){ st = st.replace(/^["']|["']$/g, ''); return 'Processed successfully! Ticket status updated to "' + dt(st) + '". The result has been synced to the requester.'; }]
+];
+function at(s){
+  if(currentLang !== 'en' || !s || !CN.test(s)) return s;
+  if(Object.prototype.hasOwnProperty.call(AT, s)) return AT[s];
+  for(var i = 0; i < AT_RULES.length; i++){ if(AT_RULES[i][0].test(s)) return s.replace(AT_RULES[i][0], AT_RULES[i][1]); }
+  return s;
+}
+var _alert = window.alert, _confirm = window.confirm;
+window.alert = function(m){ _alert(at(m)); };
+window.confirm = function(m){ return _confirm(at(m)); };
+// 动态插入内容自动翻译（render/showModal/筛选函数等无需逐一改造）
+var _mo = new MutationObserver(function(muts){
+  for(var i = 0; i < muts.length; i++){
+    var added = muts[i].addedNodes;
+    for(var j = 0; j < added.length; j++){
+      var n = added[j];
+      if(n.nodeType === 1) applyDomLang(n);
+      else if(n.nodeType === 3){ var nv = trText(n.nodeValue); if(nv !== n.nodeValue) n.nodeValue = nv; }
+    }
+  }
+});
+_mo.observe(document.getElementById('content'), {childList:true, subtree:true});
+_mo.observe(document.getElementById('modalBox'), {childList:true, subtree:true});
+function applyLang(){
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+  document.title = t('docTitle');
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
+  document.querySelectorAll('.lang-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.lang === currentLang); });
+  var pt = document.getElementById('pageTitle'); if(pt) pt.textContent = t(TITLE_KEYS[curPage] || curPage);
+  document.getElementById('modalOverlay').classList.remove('show');
+  render();
+  if(curPage === 'feedback'){ // 恢复反馈状态子页签选中态（render 后为新渲染的中文文案）
+    var tabs = document.querySelectorAll('.sub-tab');
+    tabs.forEach(function(tb){ if(tb.textContent.trim() === fbCurStatus){ tabs.forEach(function(x){ x.classList.remove('active'); }); tb.classList.add('active'); } });
+  }
+}
+
 function nav(page, ev) {
   curPage = page;
-  document.getElementById('pageTitle').textContent = titles[page];
+  document.getElementById('pageTitle').textContent = t(TITLE_KEYS[page] || titles[page]);
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
   ev.target.closest('.nav-item').classList.add('active');
   render();
@@ -204,9 +394,9 @@ function initDashboardCharts(){
     _dashCharts.sat.setOption({
       backgroundColor:'transparent',textStyle:{color:'#c6e2ff'},tooltip:{trigger:'axis'},
       grid:{left:50,right:20,top:40,bottom:40},
-      xAxis:{type:'category',data:['非常满意','满意','基本满意','较不满意','不满意'],axisLine:{lineStyle:{color:'#245488'}},axisLabel:{color:'#87b8e8'}},
+      xAxis:{type:'category',data:['非常满意','满意','基本满意','较不满意','不满意'].map(dt),axisLine:{lineStyle:{color:'#245488'}},axisLabel:{color:'#87b8e8'}},
       yAxis:{type:'value',axisLine:{lineStyle:{color:'#245488'}},splitLine:{lineStyle:{color:'#183860'}},axisLabel:{color:'#87b8e8'}},
-      series:[{name:'参评人数',type:'bar',data:[0,0,0,0,0],itemStyle:{color:'#00a8ff'}}]
+      series:[{name:dt('参评人数'),type:'bar',data:[0,0,0,0,0],itemStyle:{color:'#00a8ff'}}]
     });
   }
   var el2 = document.getElementById('chart-fund');
@@ -215,9 +405,9 @@ function initDashboardCharts(){
     _dashCharts.fund.setOption({
       backgroundColor:'transparent',textStyle:{color:'#c6e2ff'},tooltip:{trigger:'axis'},
       grid:{left:50,right:20,top:40,bottom:40},
-      xAxis:{type:'category',data:["XXXX盘石中学","XX中山外国语学校","XXXX盐渠中学"],axisLabel:{color:'#87b8e8',rotate:15},axisLine:{lineStyle:{color:'#245488'}}},
+      xAxis:{type:'category',data:["XXXX盘石中学","XX中山外国语学校","XXXX盐渠中学"].map(dt),axisLabel:{color:'#87b8e8',rotate:15},axisLine:{lineStyle:{color:'#245488'}}},
       yAxis:{type:'value',axisLine:{lineStyle:{color:'#245488'}},splitLine:{lineStyle:{color:'#183860'}},axisLabel:{color:'#87b8e8'}},
-      series:[{name:'人均经费',type:'bar',data:[142,122,115],itemStyle:{color:'#00a8ff'}},{name:'平均值',type:'line',data:[107.55,107.55,107.55],lineStyle:{color:'#ffcc00'},symbol:'none'}]
+      series:[{name:dt('人均经费'),type:'bar',data:[142,122,115],itemStyle:{color:'#00a8ff'}},{name:dt('平均值'),type:'line',data:[107.55,107.55,107.55],lineStyle:{color:'#ffcc00'},symbol:'none'}]
     });
   }
   var el3 = document.getElementById('chart-problem');
@@ -226,9 +416,9 @@ function initDashboardCharts(){
     _dashCharts.prob.setOption({
       backgroundColor:'transparent',textStyle:{color:'#c6e2ff'},tooltip:{trigger:'axis'},
       grid:{left:40,right:10,top:20,bottom:30},
-      xAxis:{type:'category',data:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月"],axisLine:{lineStyle:{color:'#245488'}},axisLabel:{color:'#87b8e8'}},
+      xAxis:{type:'category',data:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月"].map(dt),axisLine:{lineStyle:{color:'#245488'}},axisLabel:{color:'#87b8e8'}},
       yAxis:{type:'value',axisLine:{lineStyle:{color:'#245488'}},splitLine:{lineStyle:{color:'#183860'}},axisLabel:{color:'#87b8e8'}},
-      series:[{name:'已解决',type:'bar',stack:'total',data:[1,0,0,0,0,0,3,0,0,0,0],itemStyle:{color:'#00bbbb'}},{name:'未整改',type:'bar',stack:'total',data:[0,0,0,0,0,0,1,0,0,0,0],itemStyle:{color:'#ff5555'}}]
+      series:[{name:dt('已解决'),type:'bar',stack:'total',data:[1,0,0,0,0,0,3,0,0,0,0],itemStyle:{color:'#00bbbb'}},{name:dt('未整改'),type:'bar',stack:'total',data:[0,0,0,0,0,0,1,0,0,0,0],itemStyle:{color:'#ff5555'}}]
     });
   }
 }
@@ -341,7 +531,7 @@ function showCatalogDetail(id){var t=D.textbooks.find(function(x){return x.id==i
 function editCatalog(id){var t=D.textbooks.find(function(x){return x.id==id});showModal('<div class="modal-title">编辑教辅 - '+t.name+'</div><div class="form-row"><div class="form-label">教辅名称</div><input class="form-input" id="ed_name" value="'+t.name+'"></div><div class="form-row"><div class="form-label">出版社</div><input class="form-input" id="ed_publisher" value="'+t.publisher+'"></div><div class="form-row"><div class="form-label">售价</div><input class="form-input" id="ed_price" type="number" value="'+t.price+'"></div><div class="form-row"><div class="form-label">ISBN</div><input class="form-input" id="ed_isbn" value="'+(t.isbn||'')+'"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="closeModal(event);alert(\'已保存修改\')">保存</button></div>');}
 function toggleCatalog(id){var t=D.textbooks.find(function(x){return x.id==id});t.status=t.status==='启用'?'禁用':'启用';render();}
 function delCatalog(id){if(confirm('确认删除该教辅？删除后无法恢复。')){D.textbooks=D.textbooks.filter(function(x){return x.id!=id});render();}}
-function downloadTemplate(){var csv='教辅名称,出版社,学段,适用年级,科目,教辅类型,售价,ISBN,免费,状态\n语文同步练习册(四年级),人民教育出版社,小学,四年级,语文,同步练习册,15.5,9787107333210,收费,启用\n数学同步练习册(八年级),XX出版社,初中,八年级,数学,同步练习册,18.0,9787112345678,免费,启用\n';var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='教辅目录上传模板.csv';a.click();alert('模板已下载，请填写后点击批量导入');}
+function downloadTemplate(){var csv='教辅名称,出版社,学段,适用年级,科目,教辅类型,售价,ISBN,免费,状态\n语文同步练习册(四年级),人民教育出版社,小学,四年级,语文,同步练习册,15.5,9787107333210,收费,启用\n数学同步练习册(八年级),XX出版社,初中,八年级,数学,同步练习册,18.0,9787112345678,免费,启用\n';var blob=new Blob(['\ufeff'+dtCSV(csv)],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=dt('教辅目录上传模板.csv');a.click();alert('模板已下载，请填写后点击批量导入');}
 function batchUpload(){showModal('<div class="modal-title">批量导入教辅目录</div><div class="notice-blue">请选择已填好的CSV模板文件上传，系统将自动解析并导入。</div><div class="form-row"><div class="form-label">选择文件</div><input type="file" accept=".csv" class="form-input"></div><div class="form-row"><div class="form-label">导入预览</div><div class="form-input" style="border:none;color:#666">预计导入3条，成功3条，失败0条</div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="closeModal(event);alert(\'批量导入成功：3条教辅已纳入目录\')">确认导入</button></div>');}
 function pageOrders() {
   var html='<div class="notice-blue">征订管理统一管控全校各学期、各年级教辅征订单据及审批流程。区县选用教辅、发起征订均在此模块完成。</div>';
@@ -378,7 +568,7 @@ function getMonitorData(){var orders=scopedOrders();var groups={};orders.forEach
 function renderMonitor(){var data=getMonitorData();var tp=0,ta=0,op=0,oa=0,pp=0,pa=0,rp=0,ra=0;data.forEach(function(d){tp+=d.totalPeople;ta+=d.totalAmount;op+=d.orderedPeople;oa+=d.orderedAmount;pp+=d.paidPeople;pa+=d.paidAmount;rp+=d.receivedPeople;ra+=d.receivedAmount;});var html='<div class="card"><div class="card-title">征订漏斗总览</div>';html+='<div class="funnel-container">';var w1=100,w2=tp>0?Math.round(op/tp*100):0,w3=tp>0?Math.round(pp/tp*100):0,w4=tp>0?Math.round(rp/tp*100):0;html+='<div class="funnel-bar" style="width:'+w1+'%;background:var(--blue)"><span>征订总范围</span><span>'+tp+'人 | \u00a5'+ta.toFixed(0)+' | 100%</span></div>';html+='<div class="funnel-arrow">\u2193 订购率 '+w2+'%</div>';html+='<div class="funnel-bar" style="width:'+Math.max(w2,30)+'%;background:var(--green)"><span>已确认订购</span><span>'+op+'人 | \u00a5'+oa.toFixed(0)+' | '+w2+'%</span></div>';html+='<div class="funnel-arrow">\u2193 缴费率 '+(op>0?Math.round(pp/op*100):0)+'%</div>';html+='<div class="funnel-bar" style="width:'+Math.max(w3,25)+'%;background:var(--orange)"><span>已缴费</span><span>'+pp+'人 | \u00a5'+pa.toFixed(0)+' | '+w3+'%</span></div>';html+='<div class="funnel-arrow">\u2193 收货率 '+(pp>0?Math.round(rp/pp*100):0)+'%</div>';html+='<div class="funnel-bar" style="width:'+Math.max(w4,20)+'%;background:var(--red)"><span>已收货</span><span>'+rp+'人 | \u00a5'+ra.toFixed(0)+' | '+w4+'%</span></div>';html+='</div></div>';var unitLabel=role==='shiwei'?'区县':(role==='quxian'?'学校':'年级');var title=role==='shiwei'?'各区县征订情况统计':(role==='quxian'?'本区县各学校征订情况统计':'本校各年级征订情况统计');var headers=[unitLabel,'征订内容','征订金额'];if(role==='shiwei')headers.push('学校数');headers=headers.concat(['对应年级','班级数','人数','已订购(人/额/占比)','已缴费(人/额/占比)','已收货(人/额/占比)']);var rows=data.map(function(d){var row=[d.name,d.textbooks.join('、'),'\u00a5'+d.totalAmount.toFixed(0)];if(role==='shiwei')row.push(d.schoolCount);row=row.concat([d.grades.join('、'),d.totalClasses,d.totalPeople,d.orderedPeople+'人<br>\u00a5'+d.orderedAmount.toFixed(0)+'<br>'+(d.totalPeople>0?Math.round(d.orderedPeople/d.totalPeople*100):0)+'%',d.paidPeople+'人<br>\u00a5'+d.paidAmount.toFixed(0)+'<br>'+(d.orderedPeople>0?Math.round(d.paidPeople/d.orderedPeople*100):0)+'%',d.receivedPeople+'人<br>\u00a5'+d.receivedAmount.toFixed(0)+'<br>'+(d.paidPeople>0?Math.round(d.receivedPeople/d.paidPeople*100):0)+'%']);return row;});html+='<div class="card"><div class="card-title">'+title+'</div>';html+=tbl(headers,rows);html+='</div>';return html;}
 function filterPayment(){document.getElementById('paymentTable').innerHTML=renderPaymentTable();}
 function renderPaymentTable(){var yr=document.getElementById('p_year')?document.getElementById('p_year').value:'',se=document.getElementById('p_semester')?document.getElementById('p_semester').value:'',sc=document.getElementById('p_school')?document.getElementById('p_school').value:'',st=document.getElementById('p_stage')?document.getElementById('p_stage').value:'',ps=document.getElementById('p_payStatus')?document.getElementById('p_payStatus').value:'',oi=document.getElementById('p_orderId')?document.getElementById('p_orderId').value:'';var rows=scopedOrders().filter(function(o){return(!yr||o.year===yr)&&(!se||o.semester===se)&&(!sc||o.school===sc)&&(!st||o.stage===st)&&(!oi||o.id===oi)&&(!ps||o.status===ps)});return tbl(['单号','学校','教辅','金额','状态','备注','操作'],rows.map(function(o){return[o.id,o.school,o.textbook,o.free?'-':'\u00a5'+o.amount,badge(o.status),o.free?'市级财政买单':'在线缴费','<button class="btn btn-outline btn-sm" onclick="showPayDetail(\''+o.id+'\')">明细</button>']}));}
-function exportPayDetail(){var oi=document.getElementById('p_orderId')?document.getElementById('p_orderId').value:'';if(!oi){alert('请先选择征订单号再导出');return;}var o=D.orders.find(function(x){return x.id===oi});var students=D.orderStudents.filter(function(s){return s.orderId===oi});if(students.length===0){alert('该订单暂无学生明细数据');return;}var csv='学生姓名,班级,是否订购,是否缴费,是否收货,金额\n';students.forEach(function(s){csv+=[s.name,s.cls,s.ordered?'已订购':(s.notOrdered?'未订购':'待确认'),s.paid?'是':'否',s.received?'是':'否',o.free?'-':'\u00a5'+s.amount].join(',')+'\n';});var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='缴费明细_'+oi+'.csv';a.click();alert('已导出'+oi+'的缴费明细（'+students.length+'人）');}
+function exportPayDetail(){var oi=document.getElementById('p_orderId')?document.getElementById('p_orderId').value:'';if(!oi){alert('请先选择征订单号再导出');return;}var o=D.orders.find(function(x){return x.id===oi});var students=D.orderStudents.filter(function(s){return s.orderId===oi});if(students.length===0){alert('该订单暂无学生明细数据');return;}var csv='学生姓名,班级,是否订购,是否缴费,是否收货,金额\n';students.forEach(function(s){csv+=[s.name,s.cls,s.ordered?'已订购':(s.notOrdered?'未订购':'待确认'),s.paid?'是':'否',s.received?'是':'否',o.free?'-':'\u00a5'+s.amount].join(',')+'\n';});var blob=new Blob(['\ufeff'+dtCSV(csv)],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=dt('缴费明细')+'_'+oi+'.csv';a.click();alert('已导出'+oi+'的缴费明细（'+students.length+'人）');}
 function renderOrderTable(){var yr=document.getElementById('o_year')?document.getElementById('o_year').value:'',se=document.getElementById('o_semester')?document.getElementById('o_semester').value:'',sc=document.getElementById('o_school')?document.getElementById('o_school').value:'',st=document.getElementById('o_stage')?document.getElementById('o_stage').value:'';var rows=scopedOrders().filter(function(o){return(!yr||o.year===yr)&&(!se||o.semester===se)&&(!sc||o.school===sc)&&(!st||o.stage===st)});return tbl(['学校名称','教辅类型','适用年级','征订年份','学期','征订总价','征订人数','状态','操作'],rows.map(function(o){return[o.school,o.type,o.grade,o.year,o.semester,o.free?'<span class="text-green">免费</span>':'\u00a5'+o.amount,o.count,badge(o.status),'<button class="btn btn-outline btn-sm" onclick="showOrderDetail(\''+o.id+'\')">详情</button>']}));}
 function showNewOrder(){showModal('<div class="modal-title">新增征订申请</div><div class="notice-blue">选择征订学段、适用年级后，系统自动带出班级数量和征订人数（学籍数据只读）。选择教辅类型后筛选合规教辅，选中后自动带出单价并核算总价。确认发起直接保存，无审批流程。</div><div class="form-row"><div class="form-label">征订标题<span class="text-red">*</span></div><input class="form-input" id="ord_title" placeholder="如2026秋季三年级语文教辅征订"></div><div class="form-row"><div class="form-label">征订学段<span class="text-red">*</span></div><select class="form-select" id="ord_stage" onchange="autoFillEnrollment();updateOrderBookOptions()"><option>小学</option><option>初中</option></select></div><div class="form-row"><div class="form-label">适用年级<span class="text-red">*</span></div><input class="form-input" id="ord_grade" placeholder="如三年级" oninput="autoFillEnrollment();updateOrderBookOptions()"></div><div class="form-row"><div class="form-label">教辅类型<span class="text-red">*</span></div><select class="form-select" id="ord_type" onchange="updateOrderBookOptions()"><option>同步练习册</option><option>中考复习</option><option>寒暑假作业</option></select></div><div class="form-row"><div class="form-label">班级数量</div><input class="form-input" id="ord_classes" readonly placeholder="选学段+年级自动带出" style="background:#f5f5f5"></div><div class="form-row"><div class="form-label">征订人数</div><input class="form-input" id="ord_count" type="number" readonly placeholder="选学段+年级自动带出" style="background:#f5f5f5"></div><div class="form-row"><div class="form-label">年份<span class="text-red">*</span></div><input class="form-input" id="ord_year" value="2026"></div><div class="form-row"><div class="form-label">学期<span class="text-red">*</span></div><select class="form-select" id="ord_semester"><option>春季</option><option>秋季</option></select></div><div class="form-row"><div class="form-label">教辅选型</div><div class="form-input" style="border:none" id="ord_book_sel">请先选择学段、年级和类型</div></div><div class="form-row"><div class="form-label">备注</div><textarea class="form-input" id="ord_remark" rows="2"></textarea></div><div class="form-row"><div class="form-label">征订总价</div><div class="form-input" style="border:none" id="ord_total">\u00a50.0</div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal(event)">取消</button><button class="btn btn-primary" onclick="confirmNewOrder()">确认发起</button></div>');}
 function autoFillEnrollment(){var stage=document.getElementById('ord_stage').value,grade=document.getElementById('ord_grade').value;if(!stage||!grade){document.getElementById('ord_classes').value='';document.getElementById('ord_count').value='';calcOrderTotal();return;}var scope=role==='school'?'school':'district';var name=role==='school'?'XX区第一小学':'XX区';var data=D.enrollmentData.find(function(e){return e.scope===scope&&e.name===name&&e.stage===stage&&e.grade===grade});if(data){document.getElementById('ord_classes').value=data.classes;document.getElementById('ord_count').value=data.students;}else{document.getElementById('ord_classes').value='';document.getElementById('ord_count').value='';}calcOrderTotal();}
@@ -439,6 +629,15 @@ function filterSatRanking(){document.getElementById('satRanking').innerHTML=rend
 function filterSat(){document.getElementById('satTable').innerHTML=renderSatTable();filterSatRanking();}
 
 render();
+document.querySelectorAll('.lang-opt').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if (btn.dataset.lang === currentLang) return;
+    currentLang = btn.dataset.lang;
+    try { localStorage.setItem('mh-lang', currentLang); } catch(e) {}
+    applyLang();
+  });
+});
+applyLang();
 </script>
 </body>
 </html>

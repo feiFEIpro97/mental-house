@@ -16,25 +16,80 @@ body{font-family:"Microsoft YaHei",Arial,sans-serif;background:linear-gradient(1
 .card-link .icon{font-size:48px;margin-bottom:16px}
 .card-link h2{font-size:20px;margin-bottom:8px;color:#1a3c6e}
 .card-link p{font-size:13px;color:#999;margin:0}
+/* 语言切换按钮（右下角 中/EN，与主站一致） */
+.lang-toggle{position:fixed;bottom:18px;right:18px;z-index:2000;display:flex;gap:2px;padding:3px;background:rgba(245,240,232,.88);border:1px solid rgba(255,255,255,.45);border-radius:30px;box-shadow:0 4px 14px rgba(0,0,0,.22);backdrop-filter:blur(6px)}
+.lang-opt{border:none;background:transparent;color:#3d5a80;font-size:13px;letter-spacing:1px;padding:5px 14px;border-radius:24px;cursor:pointer;transition:all .3s ease;font-family:inherit}
+.lang-opt.active{background:#1a3c6e;color:#fff}
+.lang-opt:hover:not(.active){color:#1a3c6e}
 </style>
 </head>
 <body>
+<div class="lang-toggle" id="langToggle">
+  <button class="lang-opt active" data-lang="zh">中</button>
+  <button class="lang-opt" data-lang="en">EN</button>
+</div>
 <div class="container">
-  <h1>教辅监管平台</h1>
-  <div style="font-size:12px;opacity:.55;margin-bottom:6px">demo数据均为模拟测试数据</div>
-  <p>全市基础教育教辅监管 Demo</p>
+  <h1 data-i18n="pageTitle">教辅监管平台</h1>
+  <div style="font-size:12px;opacity:.55;margin-bottom:6px" data-i18n="demoNote">demo数据均为模拟测试数据</div>
+  <p data-i18n="pageSub">全市基础教育教辅监管 Demo</p>
   <div class="cards">
     <a class="card-link" href="管理端.html">
       <div class="icon">&#128421;</div>
-      <h2>管理端（PC）</h2>
-      <p>市/区县/学校三级管理<br>驾驶舱、教辅目录、征订管理、意见反馈、满意度</p>
+      <h2 data-i18n="cardAdminTitle">管理端（PC）</h2>
+      <p data-i18n="cardAdminDesc">市/区县/学校三级管理<br>驾驶舱、教辅目录、征订管理、意见反馈、满意度</p>
     </a>
     <a class="card-link" href="家长端.html">
       <div class="icon">&#128241;</div>
-      <h2>家长端（APP）</h2>
-      <p>教辅订购、意见反馈<br>确认收货与书籍评价</p>
+      <h2 data-i18n="cardParentTitle">家长端（APP）</h2>
+      <p data-i18n="cardParentDesc">教辅订购、意见反馈<br>确认收货与书籍评价</p>
     </a>
   </div>
 </div>
+<script>
+// ============================================
+// 语言切换（中 / EN）— 与主站共享 localStorage 'mh-lang'
+// ============================================
+var currentLang = 'zh';
+try { currentLang = localStorage.getItem('mh-lang') || 'zh'; } catch(e) {}
+var I18N = {
+  zh: {
+    pageTitle: '教辅监管平台',
+    demoNote: 'demo数据均为模拟测试数据',
+    pageSub: '全市基础教育教辅监管 Demo',
+    cardAdminTitle: '管理端（PC）',
+    cardAdminDesc: '市/区县/学校三级管理<br>驾驶舱、教辅目录、征订管理、意见反馈、满意度',
+    cardParentTitle: '家长端（APP）',
+    cardParentDesc: '教辅订购、意见反馈<br>确认收货与书籍评价'
+  },
+  en: {
+    pageTitle: 'Supervision Platform',
+    demoNote: 'All demo data is simulated test data',
+    pageSub: 'Citywide Basic Education Material Supervision Demo',
+    cardAdminTitle: 'Admin (PC)',
+    cardAdminDesc: 'Three-level management: city / district / school<br>Dashboard, catalog, ordering, feedback, satisfaction',
+    cardParentTitle: 'Parent (APP)',
+    cardParentDesc: 'Order materials & submit feedback<br>Confirm receipt and rate books'
+  }
+};
+I18N.zh.docTitle = '教辅监管平台 Demo';
+I18N.en.docTitle = 'Supervision Platform Demo';
+var t = function(k){ return (I18N[currentLang] && I18N[currentLang][k] !== undefined) ? I18N[currentLang][k] : (I18N.zh[k] !== undefined ? I18N.zh[k] : k); };
+function applyLang() {
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+  document.title = t('docTitle');
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
+  document.querySelectorAll('.lang-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.lang === currentLang); });
+}
+document.querySelectorAll('.lang-opt').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    if (btn.dataset.lang === currentLang) return;
+    currentLang = btn.dataset.lang;
+    try { localStorage.setItem('mh-lang', currentLang); } catch(e) {}
+    applyLang();
+  });
+});
+applyLang();
+</script>
 </body>
 </html>
